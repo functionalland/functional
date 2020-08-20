@@ -1,7 +1,16 @@
-import * as R from "../../ramda/source/index.js";
-import { assert, assertEquals } from "../../deno/std/testing/asserts.ts";
+import * as R from "https://x.nest.land/ramda@0.27.0/source/index.js";
+import { assert } from "https://deno.land/std@0.65.0/testing/asserts.ts";
 
 const $$value = Symbol.for("value");
+
+// isEquivalent :: Setoid a|a -> Setoid b|b -> Boolean
+const isEquivalent = (containerA, containerB) => {
+  // When the container are Setoids...
+  if (Reflect.getPrototypeOf(containerA).hasOwnProperty("equals")) return containerA.equals(containerB);
+  else return containerA[$$value] === containerB[$$value];
+};
+
+const assertIsEquivalent = (containerA, containerB) => assert(isEquivalent(containerA, containerB));
 
 // assertReflexivity :: Function -> a -> Boolean
 const assertReflexivity = R.curry(
@@ -43,40 +52,47 @@ const assertAssociativity = R.curry(
 
 // assertRightIdentity :: Function -> Monoid -> Boolean
 const assertRightIdentity = R.curry(
-  (method, container) =>
+  (container) =>
     container.concat(container.empty())[$$value] === container[$$value]
 );
 
 // assertLeftIdentity :: Function -> Monoid -> Boolean
 const assertLeftIdentity = R.curry(
-  (method, container) =>
+  (container) =>
     container.empty().concat(container)[$$value] === container[$$value]
 );
 
 // assertIdentity :: Function -> Functor -> Boolean
 const assertIdentity = R.curry(
-  (method, container) =>
+  (container) =>
     container.map(x => x)[$$value] === container[$$value]
 );
 
 // assertIdentity :: Function -> Functor -> Function -> Function -> Boolean
 const assertComposition = R.curry(
-  (method, container, f, g) =>
+  (container, f, g) =>
     container.map(f).map(g)[$$value] === container.map(x => g(f(x)))[$$value]
 );
 
 // assertContramapIdentity :: Function -> Contravariant -> [a] -> Boolean
 const assertContramapIdentity = R.curry(
-  (method, container, argumentList) =>
+  (container, argumentList) =>
     container.contramap(x => x)[$$value](...argumentList) === container[$$value](...argumentList)
 );
 
 // assertContramapComposition :: Function -> Contravariant -> Function -> Function -> [a] -> Boolean
 const assertContramapComposition = R.curry(
-  (method, container, f, g, argumentList) =>
+  (container, f, g, argumentList) =>
     container.contramap(f).contramap(g)[$$value](...argumentList)
     === container.contramap(x => f(g(x)))[$$value](...argumentList)
-)
+);
+
+// assertApplyComposition :: Function f -> Function g -> Apply a -> Apply b -> Apply c -> Boolean
+const assertApplyComposition = R.curry(
+  (containerA, containerB, containerC) =>
+    containerA.ap(containerB.ap(containerC.map(a => b => c => a(b(c)))))[$$value]
+      === containerA.ap(containerB).ap(containerC)[$$value]
+);
 
 export const Setoid = function (value) {
   this[$$value] = value;
@@ -196,7 +212,7 @@ Deno.test(
   "Monoid: #empty - Right identity",
   () =>
     assert(
-      assertRightIdentity(Ord.prototype.empty, new Monoid("hello"))
+      assertRightIdentity(new Monoid("hello"))
     )
 );
 
@@ -204,7 +220,7 @@ Deno.test(
   "Monoid: #empty - Left identity",
   () =>
     assert(
-      assertLeftIdentity(Ord.prototype.empty, new Monoid("hello"))
+      assertLeftIdentity(new Monoid("hello"))
     )
 );
 
@@ -221,7 +237,7 @@ Deno.test(
   "Functor: #map - Identity",
   () =>
     assert(
-      assertIdentity(Functor.prototype.map, new Functor(42))
+      assertIdentity(new Functor(42))
     )
 );
 
@@ -229,7 +245,7 @@ Deno.test(
   "Functor: #map - Composition",
   () =>
     assert(
-      assertComposition(Functor.prototype.map, new Functor(42), x => x + 2, x => x * 2)
+      assertComposition(new Functor(42), x => x + 2, x => x * 2)
     )
 );
 
@@ -247,7 +263,6 @@ Deno.test(
   () =>
     assert(
       assertContramapIdentity(
-        Contravariant.prototype.contramap,
         new Contravariant((x, y) => x === y),
         [ "Hello", "HELLO!" ]
       )
@@ -259,7 +274,6 @@ Deno.test(
   () =>
     assert(
       assertContramapComposition(
-        Contravariant.prototype.contramap,
         new Contravariant((x, y) => x === y),
         x => x.replace(/\W+/, ''),
         x => x.toLowerCase(),
@@ -283,16 +297,107 @@ Apply.prototype.map = function (mappingFunction) {
 Apply.prototype.ap = function (container) {
 
   return new Apply(container[$$value](this[$$value]));
-}
+};
 
 Deno.test(
   "Apply: #ap - Composition",
   () =>
     assert(
       assertApplyComposition(
-        Contravariant.prototype.contramap,
-        new Contravariant((x, y) => x === y),
-        [ "Hello", "HELLO!" ]
+        new Apply(42),
+        new Apply(x => x + 2),
+        new Apply(x => x * 2)
       )
+    )
+);
+
+// Applicative :: Apply
+export const Applicative = function (value) {
+  this[$$value] = value;
+};
+
+// map :: Applicative f => f a ~> (a -> b) -> f b
+Applicative.prototype.map = function (mappingFunction) {
+
+  return new Applicative(mappingFunction(this[$$value]));
+};
+
+// ap :: Applicative f => f a ~> f (a -> b) -> f b
+Applicative.prototype.ap = function (container) {
+
+  return new Applicative(container[$$value](this[$$value]));
+};
+
+// of :: Applicative f => a -> f a
+Applicative.of = function (value) {
+
+  return new Applicative(value);
+}
+
+Deno.test(
+  "Applicative: #of - Identity",
+  () =>
+    assertIsEquivalent(
+      new Applicative(42).ap(Applicative.of(x => x)),
+      new Applicative(42)
+    )
+);
+
+Deno.test(
+  "Applicative: #of - Homomorphism",
+  () =>
+    assertIsEquivalent(
+      Applicative.of(42).ap(Applicative.of(x => x + 2)),
+      Applicative.of((x => x + 2)(42))
+    )
+);
+
+Deno.test(
+  "Applicative: #of - Interchange",
+  () =>
+    assertIsEquivalent(
+      Applicative.of(42).ap(new Applicative(x => x + 2)),
+      new Applicative(x => x + 2).ap(Applicative.of(f => f(42)))
+    )
+);
+
+export const Pointed = function (value) {
+  this[$$value] = value;
+};
+
+// of :: Pointed f => a -> f a
+Pointed.of = function (value) {
+
+  return new Pointed(value);
+}
+
+export const Alt = function (value) {
+  this[$$value] = value;
+};
+
+// alt :: Alt f => f a ~> f a -> f a
+Alt.prototype.alt = function (mappingFunction) {
+
+  return new Applicative(mappingFunction(this[$$value]));
+};
+
+// ap :: Applicative f => f a ~> f (a -> b) -> f b
+Applicative.prototype.ap = function (container) {
+
+  return new Applicative(container[$$value](this[$$value]));
+};
+
+// of :: Applicative f => a -> f a
+Applicative.of = function (value) {
+
+  return new Applicative(value);
+}
+
+Deno.test(
+  "Applicative: #of - Identity",
+  () =>
+    assertIsEquivalent(
+      new Applicative(42).ap(Applicative.of(x => x)),
+      new Applicative(42)
     )
 );

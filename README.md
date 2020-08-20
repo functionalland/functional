@@ -1,12 +1,213 @@
-# Functional Programming Type Signature for JavaScript
+# Functional
 
-I made this repository for education purposes. I implemented most of the Functional Programming common Type Signature.
+## Type factory
+
+The Type factory can be used to build complex data structure.
+
+```js
+import { factorizeType } from "https://deno.land/x/functional/SumType.js"
+
+const Coordinates = factorizeType("Coordinates", [ "x", "y" ]);
+const vector = Coordinates(150, 200);
+// vector.x === 150
+// vector.y === 200
+```
+
+### `Type.from`
+
+```
+from :: Type ~> Object -> t
+```
+
+Create an instance of Type using an object representation.
+
+```js
+const vector = Coordinates.from({ x: 150, y: 200 });
+// vector.x === 150
+// vector.y === 200
+```
+
+### `Type.is`
+
+```
+is :: Type ~> Type t -> Boolean
+```
+
+Assert that an instance is of the same Type.
+
+```js
+Coordinates.is(vector);
+// true
+```
+
+### `Type.toString`
+
+```
+toString :: Type ~> () -> String
+```
+
+Serialize the Type Representation into a string.
+
+```js
+Coordinates.toString();
+// "Coordinates"
+```
+
+### `Type(a).toString`
+
+```
+toString :: Type t => t ~> () -> String
+```
+
+Serialize the instance into a string.
+
+```js
+vector.toString();
+// "Coordinates(150, 200)"
+```
+
+## Type Sum factory
+
+```js
+import { factorizeSumType } from "https://deno.land/x/functional/SumType.js"
+
+const Shape = factorizeSumType(
+  "Shape",
+  {
+    // Square :: (Coord, Coord) -> Shape
+    Square: [ "topLeft", "bottomRight" ],
+    // Circle :: (Coord, Number) -> Shape
+    Circle: [ "center", "radius" ]
+  }
+);
+```
+
+### `SumType.from`
+
+```
+from :: SumType ~> Object -> t
+```
+
+Create an instance of Type using an object representation.
+
+```js
+const oval = Shape.Circle.from(
+  {
+    center: Coordinates.from({ x: 150, y: 200 }),
+    radius: 200
+  }
+);
+// oval.center === Coordinates(150, 200)
+// oval.radius === 200
+```
+
+### `SumType.is`
+
+```
+is :: SumType ~> SumType t -> Boolean
+```
+
+Assert that an instance is of the same Sum Type.
+
+```js
+Shape.Circle.is(oval);
+// true
+```
+
+### `SumType.fold`
+
+```js
+Shape.prototype.translate =
+  function (x, y, z) {
+    return this.fold({
+      Square: (topleft, bottomright) =>
+        Shape.Square(
+          topLeft.translate(x, y, z),
+          bottomRight.translate(x, y, z)
+        ),
+
+      Circle: (centre, radius) =>
+        Shape.Circle(
+          centre.translate(x, y, z),
+          radius
+        )
+    })
+  };
+```
+
+### `SumType(a).toString`
+
+```
+toString :: SumType t => t ~> () -> String
+```
+
+Serialize the instance into a string.
+
+```js
+oval.toString();
+// "Shape.Circle(Coordinates(150, 200), 200)"
+```
+
+### Example of writing a binary tree with Sum Types
+
+```js
+import { factorizeSumType } from "https://deno.land/x/functional/SumType.js"
+
+const BinaryTree = factorizeSumType('BinaryTree', {
+  Node: ['left', 'x', 'right'],
+  Leaf: []
+});
+
+BinaryTree.prototype.reduce = function (f, accumulator) {
+
+  return this.fold(
+    {
+      Node: (l, x, r) => {
+        const left = l.reduce(f, accumulator);
+        const leftAndMiddle = f(left, x);
+
+        return r.reduce(f, leftAndMiddle);
+      },
+      Leaf: () => accumulator
+    }
+  );
+};
+
+const tree =
+  BinaryTree.Node(
+    BinaryTree.Node(
+      BinaryTree.Leaf,
+      1,
+      BinaryTree.Node(
+        BinaryTree.Leaf,
+        2,
+        BinaryTree.Leaf
+      )
+    ),
+    3,
+    BinaryTree.Node(
+      BinaryTree.Node(
+        BinaryTree.Leaf,
+        4,
+        BinaryTree.Leaf
+      ),
+      5,
+      BinaryTree.Leaf
+    )
+  );
+
+// tree.reduce((x, y) => x + y, 0) === 15
+```
+
+## Example of common Type Signature in JavaScript
+
+I made this repository for education purposes. I implemented most of the Functional Programming's common Type Signature.
 I followed the specs defined by [Fantasy land](https://github.com/fantasyland/fantasy-land) and leverage examples from
 an article by [Tom Harding](http://www.tomharding.me/fantasy-land/).
 
  * Setoid
  * Ord
- * Semigroupoid
+ * Semigroup
  * Category
  * Semigroup
  * Monoid

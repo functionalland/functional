@@ -1,82 +1,16 @@
-import * as R from "../../ramda/source/index.js";
-import { assert, assertEquals } from "../../deno/std/testing/asserts.ts";
+import * as R from "https://x.nest.land/ramda@0.27.0/source/index.js";
+import { assert, assertEquals } from "https://deno.land/std@0.65.0/testing/asserts.ts";
 
 const $$value = Symbol.for("value");
 
-// assertReflexivity :: Function -> a -> Boolean
-const assertReflexivity = R.curry(
-  (method, container) =>
-    method.call(container, container)
-);
+// isEquivalent :: Setoid a|a -> Setoid b|b -> Boolean
+const isEquivalent = (containerA, containerB) => {
+  // When the container are Setoids...
+  if (Reflect.getPrototypeOf(containerA).hasOwnProperty("equals")) return containerA.equals(containerB);
+  else return containerA[$$value] === containerB[$$value];
+};
 
-// assertSymmetry :: Function -> a -> b -> Boolean
-const assertSymmetry = R.curry(
-  (method, containerA, containerB) =>
-    method.call(containerA, containerB) === method.call(containerB, containerA)
-);
-
-// assertTransitivity :: Function -> a -> b -> c -> Boolean
-const assertTransitivity = R.curry(
-  (method, containerA, containerB, containerC) =>
-    method.call(containerA, containerB) === method.call(containerB, containerC) === method.call(containerA, containerC)
-);
-
-// assertTotality :: Function -> Ord a -> Ord b -> Boolean
-const assertTotality = R.curry(
-  (method, containerA, containerB) =>
-    method.call(containerA, containerB) || method.call(containerB, containerA) === true
-);
-
-// assertAntisymmetry :: Function -> Ord a -> Ord b -> Boolean
-const assertAntisymmetry = R.curry(
-  (method, containerA, containerB) =>
-    method.call(containerA, containerB) && method.call(containerB, containerA)
-      === Setoid.prototype.equals.call(containerA, containerB)
-);
-
-// assertRightIdentity :: Function -> Semigroup a -> Semigroup b -> Semigroup c -> Boolean
-const assertAssociativity = R.curry(
-  (method, containerA, containerB, containerC) =>
-    method.call(method.call(containerA, containerB), containerC)[$$value]
-    === method.call(containerA, method.call(containerB, containerC))[$$value]
-);
-
-// assertRightIdentity :: Function -> Monoid -> Boolean
-const assertRightIdentity = R.curry(
-  (method, container) =>
-    container.concat(container.empty())[$$value] === container[$$value]
-);
-
-// assertLeftIdentity :: Function -> Monoid -> Boolean
-const assertLeftIdentity = R.curry(
-  (method, container) =>
-    container.empty().concat(container)[$$value] === container[$$value]
-);
-
-// assertIdentity :: Function -> Functor -> Boolean
-const assertIdentity = R.curry(
-  (method, container) =>
-    container.map(x => x)[$$value] === container[$$value]
-);
-
-// assertIdentity :: Function -> Functor -> Function -> Function -> Boolean
-const assertComposition = R.curry(
-  (method, container, f, g) =>
-    container.map(f).map(g)[$$value] === container.map(x => g(f(x)))[$$value]
-);
-
-// assertContramapIdentity :: Function -> Contravariant -> [a] -> Boolean
-const assertContramapIdentity = R.curry(
-  (method, container, argumentList) =>
-    container.contramap(x => x)[$$value](...argumentList) === container[$$value](...argumentList)
-);
-
-// assertContramapComposition :: Function -> Contravariant -> Function -> Function -> [a] -> Boolean
-const assertContramapComposition = R.curry(
-  (method, container, f, g, argumentList) =>
-    container.contramap(f).contramap(g)[$$value](...argumentList)
-    === container.contramap(x => f(g(x)))[$$value](...argumentList)
-)
+const assertIsEquivalent = (containerA, containerB) => assert(isEquivalent(containerA, containerB));
 
 export const Setoid = function (value) {
   this[$$value] = value;
@@ -100,23 +34,34 @@ Deno.test(
 Deno.test(
   "Setoid: #equals - Reflexivity",
   () =>
-    assertReflexivity(Setoid.prototype.equals, new Setoid(42))
+    assert(
+      new Setoid(42).equals(new Setoid(42))
+    )
 );
 
 Deno.test(
   "Setoid: #equals - Symmetry",
-  () =>
-    assert(
-      assertSymmetry(Setoid.prototype.equals, new Setoid(42), new Setoid(42))
-    )
+  () => {
+    const containerA = new Setoid(42);
+    const containerB = new Setoid(42);
+
+    assert(containerA.equals(containerB) === containerB.equals(containerA));
+  }
 );
 
 Deno.test(
   "Setoid: #equals - Transitivity",
-  () =>
+  () => {
+    const containerA = new Setoid(42);
+    const containerB = new Setoid(42);
+    const containerC = new Setoid(42);
+
     assert(
-      assertTransitivity(Setoid.prototype.equals, new Setoid(42), new Setoid(42), 42)
+      containerA.equals(containerB)
+      === containerB.equals(containerC)
+      === containerA.equals(containerC)
     )
+  }
 );
 
 // Ord :: Setoid
@@ -135,26 +80,42 @@ Ord.prototype.lte = function (container) {
 
 Deno.test(
   "Ord: #lte - Totality",
-  () =>
+  () => {
+    const containerA = new Ord(24);
+    const containerB = new Ord(42);
+
     assert(
-      assertTotality(Ord.prototype.lte, new Ord(24), new Ord(42))
-    )
+      containerA.lte(containerB)
+      || containerB.lte(containerA) === true
+    );
+  }
 );
 
 Deno.test(
   "Ord: #lte - Antisymmetry",
-  () =>
+  () => {
+    const containerA = new Ord(24);
+    const containerB = new Ord(42);
+
     assert(
-      assertAntisymmetry(Ord.prototype.lte, new Ord(24), new Ord(42))
-    )
+      containerA.lte(containerB)
+      && containerB.lte(containerA) === containerA.equals(containerB)
+    );
+  }
 );
 
 Deno.test(
   "Ord: #lte - Transitivity",
-  () =>
+  () => {
+    const containerA = new Ord(2);
+    const containerB = new Ord(24);
+    const value = 42;
+
     assert(
-      assertTransitivity(Ord.prototype.lte, new Ord(2), new Ord(24), 42)
-    )
+      containerA.lte(containerB)
+      && containerB.lte(value) === containerA.lte(value)
+    );
+  }
 );
 
 export const Semigroup = function (value) {
@@ -169,15 +130,16 @@ Semigroup.prototype.concat = function (container) {
 
 Deno.test(
   "Semigroup: #concat - Associativity",
-  () =>
-    assert(
-      assertAssociativity(
-        Semigroup.prototype.concat,
-        new Semigroup("hello"),
-        new Semigroup(" "),
-        new Semigroup("world")
-      )
-    )
+  () => {
+    const containerA = new Semigroup("hello");
+    const containerB = new Semigroup(" ");
+    const containerC = new Semigroup("world");
+
+    assertIsEquivalent(
+      containerA.concat(containerB).concat(containerC),
+      containerA.concat(containerB.concat(containerC))
+    );
+  }
 );
 
 // Monoid :: Semigroup
@@ -194,18 +156,26 @@ Monoid.prototype.empty = function (container) {
 
 Deno.test(
   "Monoid: #empty - Right identity",
-  () =>
-    assert(
-      assertRightIdentity(Ord.prototype.empty, new Monoid("hello"))
-    )
+  () => {
+    const container = new Monoid("hello");
+
+    assertIsEquivalent(
+      container.concat(container.empty()),
+      container
+    );
+  }
 );
 
 Deno.test(
   "Monoid: #empty - Left identity",
-  () =>
-    assert(
-      assertLeftIdentity(Ord.prototype.empty, new Monoid("hello"))
-    )
+  () => {
+    const container = new Monoid("hello");
+
+    assertIsEquivalent(
+      container.empty().concat(container),
+      container
+    );
+  }
 );
 
 export const Functor = function (value) {
@@ -219,53 +189,65 @@ Functor.prototype.map = function (mappingFunction) {
 
 Deno.test(
   "Functor: #map - Identity",
-  () =>
-    assert(
-      assertIdentity(Functor.prototype.map, new Functor(42))
-    )
+  () => {
+    const container = new Functor(42);
+
+    assertIsEquivalent(
+      container.map(x => x),
+      container
+    );
+  }
 );
 
 Deno.test(
   "Functor: #map - Composition",
-  () =>
-    assert(
-      assertComposition(Functor.prototype.map, new Functor(42), x => x + 2, x => x * 2)
-    )
+  () => {
+    const container = new Functor(42);
+    const f = x => x + 2;
+    const g = x => x * 2;
+
+    assertIsEquivalent(
+      container.map(f).map(g),
+      container.map(x => g(f(x)))
+    );
+  }
 );
 
 export const Contravariant = function (predicate) {
-  this[$$value] = predicate;
+  this.predicate = predicate;
 };
 
 // contramap :: Contravariant => f a ~> (b -> a) -> f b
 Contravariant.prototype.contramap = function (f) {
-  return new Contravariant((x, y) => this[$$value](f(x), f(y)));
+  return new Contravariant((x, y) => this.predicate(f(x), f(y)));
 }
 
 Deno.test(
   "Contravariant: #contramap - Identity",
-  () =>
-    assert(
-      assertContramapIdentity(
-        Contravariant.prototype.contramap,
-        new Contravariant((x, y) => x === y),
-        [ "Hello", "HELLO!" ]
-      )
+  () => {
+    const container = new Contravariant((x, y) => x === y);
+    const argumentList = [ "Hello", "HELLO!" ];
+
+    assertEquals(
+      container.contramap(x => x).predicate(...argumentList),
+      container.predicate(...argumentList)
     )
+  }
 );
 
 Deno.test(
   "Contravariant: #contramap - Composition",
-  () =>
-    assert(
-      assertContramapComposition(
-        Contravariant.prototype.contramap,
-        new Contravariant((x, y) => x === y),
-        x => x.replace(/\W+/, ''),
-        x => x.toLowerCase(),
-        [ "Hello", "HELLO!" ]
-      )
-    )
+  () => {
+    const container = new Contravariant((x, y) => x === y);
+    const f = x => x.replace(/\W+/, '');
+    const g = x => x.toLowerCase();
+    const argumentList = [ "Hello", "HELLO!" ];
+
+    assertEquals(
+      container.contramap(f).contramap(g).predicate(...argumentList),
+      container.contramap(x => f(g(x))).predicate(...argumentList)
+    );
+  }
 );
 
 // Apply :: Functor
@@ -283,16 +265,81 @@ Apply.prototype.map = function (mappingFunction) {
 Apply.prototype.ap = function (container) {
 
   return new Apply(container[$$value](this[$$value]));
-}
+};
 
 Deno.test(
   "Apply: #ap - Composition",
+  () => {
+    const containerA = new Apply(42);
+    const containerB = new Apply(x => x + 2);
+    const containerC = new Apply(x => x * 2);
+
+    assertIsEquivalent(
+      containerA.ap(containerB.ap(containerC.map(a => b => c => a(b(c))))),
+      containerA.ap(containerB).ap(containerC)
+    );
+  }
+);
+
+// Applicative :: Apply
+export const Applicative = function (value) {
+  this[$$value] = value;
+};
+
+// map :: Applicative f => f a ~> (a -> b) -> f b
+Applicative.prototype.map = function (mappingFunction) {
+
+  return new Applicative(mappingFunction(this[$$value]));
+};
+
+// ap :: Applicative f => f a ~> f (a -> b) -> f b
+Applicative.prototype.ap = function (container) {
+
+  return new Applicative(container[$$value](this[$$value]));
+};
+
+// of :: Applicative f => a -> f a
+Applicative.of = function (value) {
+
+  return new Applicative(value);
+}
+
+Deno.test(
+  "Applicative: #of - Identity",
+  () => {
+    const container = new Applicative(42);
+
+    assertIsEquivalent(
+      container.ap(Applicative.of(x => x)),
+      container
+    );
+  }
+);
+
+Deno.test(
+  "Applicative: #of - Homomorphism",
   () =>
-    assert(
-      assertApplyComposition(
-        Contravariant.prototype.contramap,
-        new Contravariant((x, y) => x === y),
-        [ "Hello", "HELLO!" ]
-      )
+    assertIsEquivalent(
+      Applicative.of(42).ap(Applicative.of(x => x + 2)),
+      Applicative.of((x => x + 2)(42))
     )
 );
+
+Deno.test(
+  "Applicative: #of - Interchange",
+  () =>
+    assertIsEquivalent(
+      Applicative.of(42).ap(new Applicative(x => x + 2)),
+      new Applicative(x => x + 2).ap(Applicative.of(f => f(42)))
+    )
+);
+
+export const Pointed = function (value) {
+  this[$$value] = value;
+};
+
+// of :: Pointed f => a -> f a
+Pointed.of = function (value) {
+
+  return new Pointed(value);
+};

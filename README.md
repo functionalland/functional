@@ -206,12 +206,15 @@ const tree =
 The `Maybe` type represents potentially `Just` a value or `Nothing`.
 
 ```js
+import Maybe from "https://deno.land/x/functional/Maybe.js"
+
+const container = Maybe.Just(42);
+
 const serialize = (container) =>
   container.fold({
     Nothing: () => "There is no value.",
     Just: (value) => `The value is ${value}.`
   });
-const container = Maybe.Just(42);
 
 // serialize(container) === "The value is 42."
 ```

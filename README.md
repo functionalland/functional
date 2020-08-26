@@ -1,5 +1,7 @@
 # Functional
 
+[![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/functional/SumType.js)
+
 ## Type factory
 
 The Type factory can be used to build complex data structure.
@@ -199,36 +201,20 @@ const tree =
 // tree.reduce((x, y) => x + y, 0) === 15
 ```
 
-## Example of common Type Signature in JavaScript
+## `Maybe` type
 
-I made this repository for education purposes. I implemented most of the Functional Programming's common Type Signature.
-I followed the specs defined by [Fantasy land](https://github.com/fantasyland/fantasy-land) and leverage examples from
-an article by [Tom Harding](http://www.tomharding.me/fantasy-land/).
+The `Maybe` type represents potentially `Just` a value or `Nothing`.
 
- * Setoid
- * Ord
- * Semigroup
- * Category
- * Semigroup
- * Monoid
- * Group
- * Filterable
- * Functor
- * Contravariant
- * Apply
- * Applicative
- * Alt
- * Plus
- * Alternative
- * Foldable
- * Traversable
- * Chain
- * ChainRec
- * Monad
- * Extend
- * Comonad
- * Bifunctor
- * Profunctor
+```js
+const serialize = (container) =>
+  container.fold({
+    Nothing: () => "There is no value.",
+    Just: (value) => `The value is ${value}.`
+  });
+const container = Maybe.Just(42);
+
+// serialize(container) === "The value is 42."
+```
  
 ## Deno
 

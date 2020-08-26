@@ -14,8 +14,8 @@ const $$valueList = Symbol.for("ValueList");
 const $$type = Symbol.for("Type");
 const $$returnType = Symbol.for("ReturnType");
 
-// assertIsInstance :: TypeSumInstance -> TypeSumInstance -> Boolean
-const assertIsInstance = R.curry(
+// assertIsUnit :: TypeSumInstance -> TypeSumInstance -> Boolean
+const assertIsUnit = R.curry(
   (instance, value) =>
     instance === value
     || !!value
@@ -84,13 +84,30 @@ const factorizeFold = (functionByTag, instanceTag, constructorTagList) => {
     }
   }
 
-  return R.apply(functionByTag[instanceTag])
+  return R.apply(functionByTag[instanceTag]);
 };
 
 const factorizeFoldBound = function (functionByTag) {
 
   return factorizeFold(functionByTag, this[$$tag], this.constructor[$$tagList])(this[$$valueList]);
 };
+
+/**
+ * @function
+ * @name factorizeType
+ * @module functional/SumType
+ *
+ * @description Factorize a Type Representation.
+ * @param {String} typeName
+ * @param {String[]} propertyNameList
+ * @return {Function}
+ *
+ * @example
+ * const Coordinates = factorizeType("Coordinates", [ "x", "y" ]);
+ * const vector = Coordinates(150, 200);
+ * // vector.x === 150
+ * // vector.y === 200
+ */
 
 // factorizeType :: (String, [String]) -> Function
 export const factorizeType = (typeName, propertyNameList) => {
@@ -139,6 +156,31 @@ Deno.test(
   }
 );
 
+/**
+ * @function
+ * @name factorizeSumType
+ * @module functional/SumType
+ *
+ * @description Factorize a Sum Type Representation.
+ * @param {String} typeName
+ * @param {{ tag: String[] }} propertyNameListByTag
+ * @return {Function}
+ *
+ * @example
+ * const Shape = factorizeSumType(
+ *   "Shape",
+ *   {
+ *     // Square :: (Coord, Coord) -> Shape
+ *     Square: [ "topLeft", "bottomRight" ],
+ *     // Circle :: (Coord, Number) -> Shape
+ *     Circle: [ "center", "radius" ]
+ *   }
+ * );
+ * const square = Shape.Square(Coordinates(100, 100), Coordinates(200, 200));
+ * // square.topLeft === Coordinates(100, 100)
+ * // square.bottomRight === Coordinates(200, 200)
+ */
+
 // factorizeSumType :: String -> { String: [String]] } -> Function
 export const factorizeSumType = (typeName, propertyNameListByTag) => {
   let prototypeAccumulator = { toString: serializeTypeInstanceBound, fold: factorizeFoldBound };
@@ -157,16 +199,16 @@ export const factorizeSumType = (typeName, propertyNameListByTag) => {
 
     if (propertyNameList.length === 0) {
       typeRepresentation[tag] = factorizeValue(propertyNameList, tagPrototypeAccumulator, [], 0);
-      typeRepresentation[tag].is = assertIsInstance(typeRepresentation[tag]);
+      typeRepresentation[tag].is = assertIsUnit(typeRepresentation[tag]);
       continue;
     }
 
     typeRepresentation[tag] = factorizeConstructor(propertyNameList, tagPrototypeAccumulator);
     typeRepresentation[tag].from = factorizeConstructorFromObject(propertyNameList, tagPrototypeAccumulator);
-    typeRepresentation[tag].is = assertIsVariant(typeRepresentation[tag]);
     typeRepresentation[tag].toString = serializeConstructorTypeBound;
     typeRepresentation[tag][$$returnType] = typeName;
     typeRepresentation[tag][$$tag] = tag;
+    typeRepresentation[tag].is = assertIsVariant(typeRepresentation[tag]);
   }
 
   return typeRepresentation
@@ -182,6 +224,9 @@ Deno.test(
         Nil: []
       }
     );
+
+    List.prototype.iterate = "Dummy";
+
     const instanceCollection = [
       [
         "Constructor",
@@ -196,7 +241,7 @@ Deno.test(
     assertEquals(List.toString(), `List`,/* `${instanceName}: A Type factory can be serialized.`*/);
     assertEquals(List.Cons.toString(), `List.Cons`,/* `${instanceName}: A Type factory can be serialized.`*/);
     assertEquals(List.Nil.toString(), `List.Nil`,/* `${instanceName}: A Type factory can be serialized.`*/);
-    assert(!List.is({}));
+    assert(!List.is({}))
 
     for (const [ instanceName, $$instance ] of instanceCollection) {
       assertEquals($$instance.toString(), `List.Cons(42, List.Nil)`, `${instanceName}: An instance can be serialized.`);
@@ -216,6 +261,7 @@ Deno.test(
       assert(List.Nil.is($$instance.xs));
       assert(!List.Nil.is($$instance));
       assert(List.prototype.isPrototypeOf($$instance));
+      assert(!!$$instance.iterate);
     }
   }
 );

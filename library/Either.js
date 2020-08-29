@@ -1,5 +1,6 @@
 import { assertIsDefined, assertIsEquivalent, assertIsNone } from "./asserts.js";
 import { factorizeSumType } from "./SumType.js";
+import Maybe from "./Maybe";
 
 const $$value = Symbol.for("TypeValue");
 
@@ -27,7 +28,7 @@ Either.prototype.alt = Either.prototype["fantasy-land/alt"] = function (containe
 };
 
 // ap :: Either a b ~> Either a (b -> c) -> Either a c
-Either.prototype.ap = function (container) {
+Either.prototype.ap = Either.prototype["fantasy-land/ap"] = function (container) {
   if (Either.Left.is(this)) return (Either.Left.is(container)) ? container : this;
 
   return container.fold({
@@ -37,7 +38,7 @@ Either.prototype.ap = function (container) {
 };
 
 // map :: Either a b ~> (b -> c) -> Either a c
-Either.prototype.map = function (composedFunction) {
+Either.prototype.map = Either.prototype["fantasy-land/map"] = function (composedFunction) {
 
   return this.fold({
     Left: _ => this,
@@ -46,7 +47,7 @@ Either.prototype.map = function (composedFunction) {
 };
 
 // chain :: Either a b ~> (b -> Either a c) -> Either a c
-Either.prototype.chain = function (composedFunction) {
+Either.prototype.chain = Either.prototype["fantasy-land/chain"] = function (composedFunction) {
 
   return this.fold({
     Left: _ => this,

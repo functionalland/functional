@@ -156,31 +156,6 @@ Deno.test(
   }
 );
 
-/**
- * @function
- * @name factorizeSumType
- * @module functional/SumType
- *
- * @description Factorize a Sum Type Representation.
- * @param {String} typeName
- * @param {{ tag: String[] }} propertyNameListByTag
- * @return {Function}
- *
- * @example
- * const Shape = factorizeSumType(
- *   "Shape",
- *   {
- *     // Square :: (Coord, Coord) -> Shape
- *     Square: [ "topLeft", "bottomRight" ],
- *     // Circle :: (Coord, Number) -> Shape
- *     Circle: [ "center", "radius" ]
- *   }
- * );
- * const square = Shape.Square(Coordinates(100, 100), Coordinates(200, 200));
- * // square.topLeft === Coordinates(100, 100)
- * // square.bottomRight === Coordinates(200, 200)
- */
-
 // factorizeSumType :: String -> { String: [String]] } -> Function
 export const factorizeSumType = (typeName, propertyNameListByTag) => {
   let prototypeAccumulator = { toString: serializeTypeInstanceBound, fold: factorizeFoldBound };

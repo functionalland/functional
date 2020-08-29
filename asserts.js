@@ -4,6 +4,7 @@ const $$value = Symbol.for("TypeValue");
 const $$tag = Symbol.for("Tag");
 
 export const assertIsDefined = value => typeof value  !== "undefined";
+// NOTE: assertIsEquivalent has a different signature than the other assert* which could lead into confusion
 export const assertIsEquivalent = (containerA, containerB) => assert(isEquivalent(containerA, containerB));
 export const assertIsNone = value => !value && typeof value === "object";
 

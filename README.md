@@ -2,6 +2,11 @@
 
 [![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/functional/SumType.js)
 
+  * [Type factory](#type-factory)
+  * [Maybe](#maybe-type)
+  * [Either](#either-type)
+  * [TypeScript](#typescript)
+
 ## Type factory
 
 The Type factory can be used to build complex data structure.
@@ -213,10 +218,50 @@ const container = Maybe.Just(42);
 const serialize = (container) =>
   container.fold({
     Nothing: () => "There is no value.",
-    Just: (value) => `The value is ${value}.`
+    Just: value => `The value is ${value}.`
   });
 
 // serialize(container) === "The value is 42."
+```
+
+This implementation of Maybe is a valid [`Filterable`](https://github.com/fantasyland/fantasy-land#filterable), 
+[`Functor`](https://github.com/fantasyland/fantasy-land#functor), 
+[`Applicative`](https://github.com/fantasyland/fantasy-land#applicative), 
+[`Alternative`](https://github.com/fantasyland/fantasy-land#alternative), 
+[`Traversable`](https://github.com/fantasyland/fantasy-land#traversable) and
+[`Monad`](https://github.com/fantasyland/fantasy-land#monad).
+
+## `Either` type
+
+The `Either` type represents the possibility of two values; either an `a` or a `b`.
+
+```js
+import Either from "https://deno.land/x/functional/Either.js"
+
+const container = Either.Right(42);
+
+const serialize = (container) =>
+  container.fold({
+    Left: value => `An error occured: ${value}.`,
+    Right: value => `The value is ${value}.`
+  });
+
+// serialize(container) === "The value is 42."
+```
+
+This implementation of Maybe is a valid [`Functor`](https://github.com/fantasyland/fantasy-land#functor), 
+[`Applicative`](https://github.com/fantasyland/fantasy-land#applicative), 
+[`Alternative`](https://github.com/fantasyland/fantasy-land#alternative) and 
+[`Monad`](https://github.com/fantasyland/fantasy-land#monad).
+
+## TypeScript
+
+I will try to publish TypeScript type hint files for those who needs it.  
+So far, I've only implemented the Type factory functions.
+
+```ts
+// @deno-types="https://deno.land/x/functional/SumType.d.ts"
+import { factorizeType, factorizeSumType } from "https://deno.land/x/functional/SumType.js";
 ```
  
 ## Deno

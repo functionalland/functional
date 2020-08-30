@@ -5,6 +5,7 @@
   * [Type factory](#type-factory)
   * [Maybe](#maybe-type)
   * [Either](#either-type)
+  * [IO](#io-type)
   * [TypeScript](#typescript)
 
 ## Type factory
@@ -252,6 +253,33 @@ const serialize = (container) =>
 This implementation of Maybe is a valid [`Functor`](https://github.com/fantasyland/fantasy-land#functor), 
 [`Applicative`](https://github.com/fantasyland/fantasy-land#applicative), 
 [`Alternative`](https://github.com/fantasyland/fantasy-land#alternative) and 
+[`Monad`](https://github.com/fantasyland/fantasy-land#monad).
+
+## `IO` type
+
+The `IO` type represents a function that access IO. It will be lazily executed when the `#run` method is called.
+
+```js
+import IO from "https://deno.land/x/functional/IO.js"
+
+// Eventually 42
+const container = IO(_ => Promise.resolve(42));
+
+const multiply = container.map(promise => promise.then(x => x * x));
+const add = container.map(promise => promise.then(x => x + x));
+
+// multiply === IO(Function)
+// add === IO(Function)
+
+const multiplyThenAdd = multiply.map(promise => promise.then(x => x + x));
+
+// multiply.run() === Promise(1764)
+// add.run() === Promise(84)
+// multiplyThenAdd.run() === Promise(3528)
+```
+
+This implementation of IO is a valid [`Functor`](https://github.com/fantasyland/fantasy-land#functor), 
+[`Applicative`](https://github.com/fantasyland/fantasy-land#applicative) and 
 [`Monad`](https://github.com/fantasyland/fantasy-land#monad).
 
 ## TypeScript

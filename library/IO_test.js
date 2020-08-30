@@ -6,7 +6,7 @@ Deno.test(
   () => {
     const containerA = IO(_ => 42);
     const containerB = IO(_ => x => x + 2);
-    const containerC = IO(_ => x => console.debug("!!!!") || x * 2);
+    const containerC = IO(_ => x => x * 2);
 
     assertEquals(
       containerA.ap(containerB.ap(containerC.map(a => b => c => a(b(c))))).run(),
@@ -28,7 +28,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #map - Composition",
+  "IO: #map - Composition",
   () => {
     const container = IO(_ => 42);
     const f = x => x + 2;

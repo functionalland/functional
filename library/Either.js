@@ -1,6 +1,5 @@
 import { assertIsDefined, assertIsEquivalent, assertIsNone } from "./asserts.js";
 import { factorizeSumType } from "./SumType.js";
-import Maybe from "./Maybe";
 
 const $$value = Symbol.for("TypeValue");
 

@@ -125,7 +125,8 @@ const factorizeFoldBound = function (functionByTag) {
 // factorizeType :: (String, [String]) -> Function
 export const factorizeType = (typeName, propertyNameList) => {
   let prototypeAccumulator = {
-    toString: serializeTypeInstanceBound
+    toString: serializeTypeInstanceBound,
+    [$$type]: typeName
   };
 
   const typeRepresentationConstructor = factorizeConstructor(propertyNameList, prototypeAccumulator);

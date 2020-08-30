@@ -31,27 +31,24 @@ Either.prototype.alt = Either.prototype["fantasy-land/alt"] = function (containe
 Either.prototype.ap = Either.prototype["fantasy-land/ap"] = function (container) {
   if (Either.Left.is(this)) return (Either.Left.is(container)) ? container : this;
 
-  return container.fold({
-    Left: _ => container,
-    Right: _ => Either.of(container[$$value](this[$$value]))
-  });
+  return Either.Right.is(container) ? Either.of(container[$$value](this[$$value])) : container;
 };
 
 // map :: Either a b ~> (b -> c) -> Either a c
-Either.prototype.map = Either.prototype["fantasy-land/map"] = function (composedFunction) {
+Either.prototype.map = Either.prototype["fantasy-land/map"] = function (unaryFunction) {
 
   return this.fold({
     Left: _ => this,
-    Right: _ => Either.of(composedFunction(this[$$value]))
+    Right: _ => Either.of(unaryFunction(this[$$value]))
   });
 };
 
 // chain :: Either a b ~> (b -> Either a c) -> Either a c
-Either.prototype.chain = Either.prototype["fantasy-land/chain"] = function (composedFunction) {
+Either.prototype.chain = Either.prototype["fantasy-land/chain"] = function (unaryFunction) {
 
   return this.fold({
     Left: _ => this,
-    Right: _ => composedFunction(this[$$value])
+    Right: _ => unaryFunction(this[$$value])
   });
 };
 

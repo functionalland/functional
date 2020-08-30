@@ -25,21 +25,18 @@ Maybe.prototype.alt = Maybe.prototype["fantasy-land/alt"] = function (container)
   });
 };
 
-// ap :: Maybe a ~> m (a -> b) -> Maybe b
+// ap :: Maybe a ~> Maybe (a -> b) -> Maybe b
 Maybe.prototype.ap = Maybe.prototype["fantasy-land/ap"] = function (container) {
   if (Maybe.Nothing.is(this)) return this;
 
-  return container.fold({
-    Just: _ => Maybe.of(container[$$value](this[$$value])),
-    Nothing: _ => container
-  });
+  return Maybe.Just.is(container) ? Maybe.of(container[$$value](this[$$value])) : container;
 };
 
 // chain :: Maybe a ~> (a -> Maybe b) -> Maybe b
-Maybe.prototype.chain = Maybe.prototype["fantasy-land/chain"] = function (composedFunction) {
+Maybe.prototype.chain = Maybe.prototype["fantasy-land/chain"] = function (unaryFunction) {
 
   return this.fold({
-    Just: value => composedFunction(value),
+    Just: value => unaryFunction(value),
     Nothing: _ => Maybe.Nothing
   });
 };
@@ -54,20 +51,19 @@ Maybe.prototype.filter = Maybe.prototype["fantasy-land/filter"] = function (pred
 };
 
 // map :: Maybe a ~> (a -> b) -> Maybe b
-Maybe.prototype.map = Maybe.prototype["fantasy-land/map"] = function (composedFunction) {
+Maybe.prototype.map = Maybe.prototype["fantasy-land/map"] = function (unaryFunction) {
 
-  // return this.chain(container => Maybe.of(composedFunction(container)));
   return this.fold({
-    Just: _ => Maybe.of(composedFunction(this[$$value])),
+    Just: _ => Maybe.of(unaryFunction(this[$$value])),
     Nothing: _ => this
   });
 };
 
 // reduce :: Maybe a ~> ((b, a) -> b, b) -> b
-Maybe.prototype.reduce = Maybe.prototype["fantasy-land/reduce"] = function (composedFunction, accumulator) {
+Maybe.prototype.reduce = Maybe.prototype["fantasy-land/reduce"] = function (binaryFunction, accumulator) {
 
   return this.fold({
-    Just: _ => composedFunction(accumulator, this[$$value]),
+    Just: _ => binaryFunction(accumulator, this[$$value]),
     Nothing: _ => accumulator
   });
 };
@@ -78,10 +74,10 @@ Maybe.prototype.sequence = Maybe.prototype["fantasy-land/sequence"] = function (
 };
 
 // traverse :: Applicative f, Traversable t => t a ~> (TypeRep f, a -> f b) -> f (t b)
-Maybe.prototype.traverse = function (TypeRep, composedFunction) {
+Maybe.prototype.traverse = function (TypeRep, unaryFunction) {
 
   return this.fold({
-    Just: _ => composedFunction(this[$$value]).map(Maybe.of),
+    Just: _ => unaryFunction(this[$$value]).map(Maybe.of),
     Nothing: _ => TypeRep.of(this)
   });
 };

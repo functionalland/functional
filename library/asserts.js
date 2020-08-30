@@ -2,6 +2,7 @@ import { assert, assertEquals } from "https://deno.land/std@0.65.0/testing/asser
 
 const $$value = Symbol.for("TypeValue");
 const $$tag = Symbol.for("Tag");
+const $$type = Symbol.for("Type");
 
 export const assertIsDefined = value => typeof value  !== "undefined";
 // NOTE: assertIsEquivalent has a different signature than the other assert* which could lead into confusion
@@ -14,11 +15,20 @@ export const isEquivalent = (containerA, containerB) => {
   if (Reflect.getPrototypeOf(containerA).hasOwnProperty("equals")) return containerA.equals(containerB);
   else if (
     Reflect.has(containerA, $$value) && Reflect.has(containerB, $$value)
-    && containerA[$$tag] === containerB[$$tag]
+    && (
+      containerA[$$tag] === containerB[$$tag]
+      || containerA[$$type] === containerB[$$type]
+    )
   ) {
     return !assertEquals(containerA[$$value], containerB[$$value]);
-  } else if (Reflect.has(containerA, $$tag) && Reflect.has(containerB, $$tag)) {
+  } else if (
+    Reflect.has(containerA, $$tag) && Reflect.has(containerB, $$tag)
+    || Reflect.has(containerA, $$type) && Reflect.has(containerB, $$type)
+  ) {
 
-    return containerA[$$tag] === containerB[$$tag];
+    return (
+      containerA[$$tag] === containerB[$$tag]
+      || containerA[$$type] === containerB[$$type]
+    );
   } else return false;
 };

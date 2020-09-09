@@ -29,8 +29,8 @@ Deno.test(
   "Task: #ap - Composition",
   async () => {
     const containerA = Task.of(42);
-    const containerB = Task.of(x => x + 2);
-    const containerC = Task.of(x => x * 2);
+    const containerB = Task.of(add);
+    const containerC = Task.of(multiply);
     assert(Task.is(containerA));
     assert(Task.is(containerB));
     assert(Task.is(containerC));

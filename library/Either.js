@@ -15,7 +15,7 @@ Either.fromNullable = value =>
   !assertIsDefined(value) || assertIsNone(value) ? Either.Left(value) : Either.Right(value);
 Either.left = value => Either.Left(value);
 Either.right = value => Either.Right(value);
-Either.of = value => Either.Right(value);
+Either.of = Either.prototype.of = Either.prototype["fantasy-land/of"] = value => Either.Right(value);
 
 // alt :: Either a b ~> Either a b -> Either a b
 Either.prototype.alt = Either.prototype["fantasy-land/alt"] = function (container) {

@@ -1,6 +1,9 @@
 # Functional
 
 [![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/functional/SumType.js)
+[![deno land](http://img.shields.io/badge/available%20on-deno.land/x-lightgrey.svg?logo=deno&labelColor=black)](https://deno.land/x/cli_badges)
+[![deno version](https://img.shields.io/badge/deno-^1.3.2-lightgrey?logo=deno)](https://github.com/denoland/deno)
+[![GitHub release](https://img.shields.io/github/release/sebastienfilion/functional.svg)](https://github.com/sebastienfilion/functional/releases)
 
   * [Type factory](#type-factory)
   * [Maybe](#maybe-type)

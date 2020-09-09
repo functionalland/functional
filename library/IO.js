@@ -7,19 +7,19 @@ IO.from = (composedFunction) => IO(composedFunction);
 IO.of = value => IO(_ => value);
 
 // ap :: IO a ~> IO (a -> b) -> IO b
-IO.prototype.ap = function (container) {
+IO.prototype.ap = IO.prototype["fantasy-land/ap"] = function (container) {
 
   return container.map(unaryFunction => unaryFunction(this.asyncFunction()));
 };
 
 // chain :: IO a ~> (a -> IO b) -> IO b
-IO.prototype.chain = function (unaryFunction) {
+IO.prototype.chain = IO.prototype["fantasy-land/chain"] = function (unaryFunction) {
 
   return IO(_ => unaryFunction(this.asyncFunction())).run();
 };
 
 // map :: IO a ~> (a -> b) -> IO b
-IO.prototype.map = function (unaryFunction) {
+IO.prototype.map = IO.prototype["fantasy-land/map"] = function (unaryFunction) {
 
   return IO(_ => unaryFunction(this.asyncFunction()));
 };

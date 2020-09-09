@@ -1,14 +1,12 @@
 import { factorizeType } from "./SumType.js";
 import Either from "./Either.js";
 
-const $$value = Symbol.for("TypeValue");
-
 export const Task = factorizeType("Task", [ "asyncFunction" ]);
 
-Task.empty = _ => Task(_ => null);
+// from :: Task => f -> T f
 Task.from = (composedFunction) => Task(composedFunction);
-Task.of = value => Task(_ => value);
-// wrap :: Task => (* -> Promise a) -> Task e Promise a
+
+// wrap :: Task t => (* -> Promise a) -> t e Promise a
 Task.wrap = asyncFunction => {
   let promise;
   const proxyFunction = function (...argumentList) {
@@ -29,29 +27,41 @@ Task.wrap = asyncFunction => {
   );
 };
 
-Task.prototype.alt = Task.prototype["fantasy-land/alt"] = function (container) {
+// empty :: Task t => () => t
+Task.empty = Task.prototype.empty = Task.prototype["fantasy-land/empty"] = _ => Task(_ => function () {});
 
-  return Task(_ => {
-
-    return thatContainer.fold({
-      Left: _ => container,
-      Right: _ => this
-    });
-  });
-};
+// of :: Task t => a -> t a
+Task.of = Task.prototype.of = Task.prototype["fantasy-land/of"] = unaryFunction =>
+  Task(_ => Promise.resolve(Either.Right(unaryFunction)));
 
 // ap :: Task a ~> Task (a -> b) -> Task b
 Task.prototype.ap = Task.prototype["fantasy-land/ap"] = function (container) {
 
-  return container.chain(unaryFunction => this.map(unaryFunction));
+  return Task(_ => {
+    const maybePromiseUnaryFunction = this.asyncFunction();
+    const maybePromiseValue = container.asyncFunction();
 
-  // return container.map(unaryFunction => {
-  //   const promise = this.asyncFunction();
-  //
-  //   return (promise instanceof Promise)
-  //     ? promise.then(value => Either.Right(unaryFunction(value)), Either.Left)
-  //     : unaryFunction(promise);
-  // });
+    return Promise.all([
+      (maybePromiseUnaryFunction instanceof Promise)
+        ? maybePromiseUnaryFunction
+        : Promise.resolve(maybePromiseUnaryFunction),
+      (maybePromiseValue instanceof Promise)
+        ? maybePromiseValue
+        : Promise.resolve(maybePromiseValue)
+    ])
+      .then(([ maybeApplicativeUnaryFunction, maybeContainerValue ]) => {
+
+        return (
+          (Reflect.getPrototypeOf(maybeApplicativeUnaryFunction).ap)
+            ? maybeApplicativeUnaryFunction
+            : Either.Right(maybeApplicativeUnaryFunction)
+        ).ap(
+          (Reflect.getPrototypeOf(maybeContainerValue).ap)
+            ? maybeContainerValue
+            : Either.Right(maybeContainerValue)
+        );
+      });
+  });
 };
 
 // chain :: Task e a ~> (a -> Task b) -> Task e b

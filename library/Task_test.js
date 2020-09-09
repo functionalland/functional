@@ -7,6 +7,63 @@ const add = x => x + 2;
 const multiply = x => x * 2;
 
 Deno.test(
+  "Task: #ap (promise)",
+  () => {
+    const containerA = Task.of(42);
+    const containerB = Task.of(x => x * x);
+    assert(Task.is(containerA));
+    assert(Task.is(containerB));
+
+    const containerC = containerA.ap(containerB);
+    assert(Task.is(containerC));
+
+    const promise = containerC.run();
+    assert(promise instanceof Promise);
+
+    return promise
+      .then(container => assertIsEquivalent(container, Either.Right(1764)));
+  }
+);
+
+Deno.test(
+  "Task: #ap - Composition",
+  async () => {
+    const containerA = Task.of(42);
+    const containerB = Task.of(x => x + 2);
+    const containerC = Task.of(x => x * 2);
+    assert(Task.is(containerA));
+    assert(Task.is(containerB));
+    assert(Task.is(containerC));
+
+    const containerD = await containerA.ap(containerB.ap(containerC.map(a => b => c => a(b(c))))).run();
+    const containerE = await containerA.ap(containerB).ap(containerC).run();
+    assert(Either.is(containerD));
+    assert(Either.is(containerE));
+
+    assertIsEquivalent(containerD, containerE);
+  }
+);
+
+Deno.test(
+  "Task: #ap with lift",
+  async () => {
+    const lift2 = (f, a, b) => b.ap(a.map(f));
+
+    const containerA = Task.of(42);
+    const containerB = Task.of(32);
+    const containerC = Task.of(x => y => x * y);
+    assert(Task.is(containerA));
+    assert(Task.is(containerB));
+    assert(Task.is(containerC));
+
+    const containerD = await lift2(x => y => x * y, containerA, containerB).run();
+    assert(Either.is(containerD));
+
+    assertIsEquivalent(containerD, Either.Right(1344));
+  }
+);
+
+Deno.test(
   "Task: #map (promise)",
   () => {
     let count = 0;

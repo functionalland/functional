@@ -21,8 +21,8 @@ the [Fantasy-land specifications](https://github.com/fantasyland/fantasy-land).
 
 ```js
 import { compose, converge, lift, map, prop } from "https://x.nest.land/ramda@0.27.0/source/index.js";
-import Either from "https://deno.land/x/functional@v0.5.0/Either.js"
-import Task from "https://deno.land/x/functional@v0.5.0/Task.js"
+import Either from "https://deno.land/x/functional@v0.5.0/Either.js";
+import Task from "https://deno.land/x/functional@v0.5.0/Task.js";
 
 const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
 
@@ -49,7 +49,7 @@ sayHello(userID).run()
     assert(container.toString(), `Either.Right("Hello johndoe (johndoe@gmail.com)!")`);
   });
 
-// sayHello(userID).run() === Either.Right("Hello johndoe (johndoe@gmail.com)!")
+// await sayHello(userID).run() === Either.Right(String)
 ```
 
 ## Type factory
@@ -57,7 +57,7 @@ sayHello(userID).run()
 The Type factory can be used to build complex data structure.
 
 ```js
-import { factorizeType } from "https://deno.land/x/functional@v0.5.0/SumType.js"
+import { factorizeType } from "https://deno.land/x/functional@v0.5.0/SumType.js";
 
 const Coordinates = factorizeType("Coordinates", [ "x", "y" ]);
 const vector = Coordinates(150, 200);
@@ -121,7 +121,7 @@ vector.toString();
 ## Type Sum factory
 
 ```js
-import { factorizeSumType } from "https://deno.land/x/functional@v0.5.0/SumType.js"
+import { factorizeSumType } from "https://deno.land/x/functional@v0.5.0/SumType.js";
 
 const Shape = factorizeSumType(
   "Shape",
@@ -203,7 +203,7 @@ oval.toString();
 ### Example of writing a binary tree with Sum Types
 
 ```js
-import { factorizeSumType } from "https://deno.land/x/functional@v0.5.0/SumType.js"
+import { factorizeSumType } from "https://deno.land/x/functional@v0.5.0/SumType.js";
 
 const BinaryTree = factorizeSumType('BinaryTree', {
   Node: ['left', 'x', 'right'],
@@ -256,7 +256,7 @@ const tree =
 The `Maybe` type represents potentially `Just` a value or `Nothing`.
 
 ```js
-import Maybe from "https://deno.land/x/functional@v0.5.0/Maybe.js"
+import Maybe from "https://deno.land/x/functional@v0.5.0/Maybe.js";
 
 const container = Maybe.Just(42);
 
@@ -281,7 +281,7 @@ This implementation of Maybe is a valid [`Filterable`](https://github.com/fantas
 The `Either` type represents the possibility of two values; either an `a` or a `b`.
 
 ```js
-import Either from "https://deno.land/x/functional@v0.5.0/Either.js"
+import Either from "https://deno.land/x/functional@v0.5.0/Either.js";
 
 const container = Either.Right(42);
 
@@ -304,7 +304,7 @@ This implementation of Either is a valid [`Functor`](https://github.com/fantasyl
 The `IO` type represents a function that access IO. It will be lazily executed when the `#run` method is called.
 
 ```js
-import IO from "https://deno.land/x/functional@v0.5.0/IO.js"
+import IO from "https://deno.land/x/functional@v0.5.0/IO.js";
 
 // Eventually 42
 const container = IO(_ => Promise.resolve(42));
@@ -337,7 +337,7 @@ If the runtime throws an error, the final value will be `Either.Left(error)`.
 
 ```js
 import Either from "https://deno.land/x/functional@v0.5.0/Either.js";
-import Task from "https://deno.land/x/functional@v0.5.0/Task.js"
+import Task from "https://deno.land/x/functional@v0.5.0/Task.js";
 
 // Eventually 42
 const container = Task(_ => Promise.resolve(Either.Right(42)));
@@ -363,7 +363,7 @@ Create a wrapped instance of Task. An instance of `Task` made using the `wrap` m
   2. If the function call was successful, the value will automatically be an instance of `Either.Right`;
   
 ```js
-import Task from "https://deno.land/x/functional@v0.5.0/Task.js"
+import Task from "https://deno.land/x/functional@v0.5.0/Task.js";
 
 let count = 0;
 const fetchUser = userID => Task.wrap(

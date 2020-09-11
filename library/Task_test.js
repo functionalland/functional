@@ -1,4 +1,4 @@
-import { assert } from "https://deno.land/std@0.65.0/testing/asserts.ts";
+import { assert, assertEquals } from "https://deno.land/std@0.65.0/testing/asserts.ts";
 import { assertIsEquivalent } from "./asserts.js";
 import Either from "./Either.js";
 import Task from "./Task.js";
@@ -231,5 +231,43 @@ Deno.test(
       promiseC
         .then(container => assertIsEquivalent(container, Either.Right(88)))
     ]);
+  }
+);
+
+Deno.test(
+  "Task: debug",
+  () => {
+    const containerA = Task.wrap(_ => Promise.resolve(42));
+    assertEquals(
+      containerA.toString(),
+      "Task(_ => Promise.resolve(42))"
+    );
+
+    const containerB = Task.wrap(_ => Promise.resolve(2 * 2 * 2 * 2 * 2));
+    assertEquals(
+      containerB.toString(),
+      "Task(_ => Promise.resolve(2 * [...])"
+    );
+
+    const containerC = Task.wrap(_ => Promise.resolve(42))
+      .map(x => x * 2);
+    assertEquals(
+      containerC.toString(),
+      "Task(_ => Promise.resolve(42)).map(x => x * 2)"
+    );
+
+    const containerD = Task.wrap(_ => Promise.resolve(42))
+      .chain(x => Task.of(x * 2));
+    assertEquals(
+      containerD.toString(),
+      "Task(_ => Promise.resolve(42)).chain(x => Task.of(x * 2))"
+    );
+
+    const containerE = Task.wrap(_ => Promise.resolve(42))
+      .ap(Task.of(x => x * 2));
+    assertEquals(
+      containerE.toString(),
+      "Task(_ => Promise.resolve(42)).ap(Task(x => x * 2))"
+    );
   }
 );

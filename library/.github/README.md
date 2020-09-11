@@ -45,4 +45,4 @@ sayHello(userID).run()
 // await sayHello(userID).run() === Either.Right(String)
 ```
 
-### Readmore on [Github →](https://github.com/sebastienfilion/functional)
+### Read more on [Github →](https://github.com/sebastienfilion/functional)

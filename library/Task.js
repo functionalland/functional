@@ -1,7 +1,21 @@
 import { factorizeType } from "./SumType.js";
 import Either from "./Either.js";
 
+const $$debug = Symbol.for("TaskDebug");
+
 export const Task = factorizeType("Task", [ "asyncFunction" ]);
+
+const serializeFunctionForDebug = asyncFunction =>
+  (asyncFunction.name && asyncFunction.name !== "")
+    ? asyncFunction.name
+    : asyncFunction.toString().length > 25
+      ? asyncFunction.toString()
+        .slice(0, 25)
+        .replace(/[\n\r]/g, "")
+        .replace(/\s\s*/g, " ") + "[...]"
+      : asyncFunction.toString()
+        .replace(/[\n\r]/g, "")
+        .replace(/\s\s*/g, " ")
 
 // from :: Task => f -> T f
 Task.from = (composedFunction) => Task(composedFunction);
@@ -18,12 +32,19 @@ Task.wrap = asyncFunction => {
     );
   };
 
-  return Task(
-    Object.defineProperty(
-      proxyFunction,
-      'length',
-      { value: asyncFunction.length }
-    )
+  return Object.defineProperty(
+    Task(
+      Object.defineProperty(
+        proxyFunction,
+        'length',
+        { value: asyncFunction.length }
+      )
+    ),
+    $$debug,
+    {
+      writable: false,
+      value: `Task(${serializeFunctionForDebug(asyncFunction)})`
+    }
   );
 };
 
@@ -31,84 +52,112 @@ Task.wrap = asyncFunction => {
 Task.empty = Task.prototype.empty = Task.prototype["fantasy-land/empty"] = _ => Task(_ => function () {});
 
 // of :: Task t => a -> t a
-Task.of = Task.prototype.of = Task.prototype["fantasy-land/of"] = unaryFunction =>
-  Task(_ => Promise.resolve(Either.Right(unaryFunction)));
+Task.of = Task.prototype.of = Task.prototype["fantasy-land/of"] = value =>
+  Object.defineProperty(
+    Task(_ => Promise.resolve(Either.Right(value))),
+    $$debug,
+    {
+      writable: false,
+      value: `Task(${serializeFunctionForDebug(value)})`
+    }
+  );
 
 // ap :: Task a ~> Task (a -> b) -> Task b
 Task.prototype.ap = Task.prototype["fantasy-land/ap"] = function (container) {
 
-  return Task(_ => {
-    const maybePromiseUnaryFunction = this.asyncFunction();
-    const maybePromiseValue = container.asyncFunction();
+  return Object.defineProperty(
+    Task(_ => {
+      const maybePromiseUnaryFunction = this.asyncFunction();
+      const maybePromiseValue = container.asyncFunction();
 
-    return Promise.all([
-      (maybePromiseUnaryFunction instanceof Promise)
-        ? maybePromiseUnaryFunction
-        : Promise.resolve(maybePromiseUnaryFunction),
-      (maybePromiseValue instanceof Promise)
-        ? maybePromiseValue
-        : Promise.resolve(maybePromiseValue)
-    ])
-      .then(([ maybeApplicativeUnaryFunction, maybeContainerValue ]) => {
+      return Promise.all([
+        (maybePromiseUnaryFunction instanceof Promise)
+          ? maybePromiseUnaryFunction
+          : Promise.resolve(maybePromiseUnaryFunction),
+        (maybePromiseValue instanceof Promise)
+          ? maybePromiseValue
+          : Promise.resolve(maybePromiseValue)
+      ])
+        .then(([ maybeApplicativeUnaryFunction, maybeContainerValue ]) => {
 
-        return (
-          (Reflect.getPrototypeOf(maybeApplicativeUnaryFunction).ap)
-            ? maybeApplicativeUnaryFunction
-            : Either.Right(maybeApplicativeUnaryFunction)
-        ).ap(
-          (Reflect.getPrototypeOf(maybeContainerValue).ap)
-            ? maybeContainerValue
-            : Either.Right(maybeContainerValue)
-        );
-      });
-  });
+          return (
+            (Reflect.getPrototypeOf(maybeApplicativeUnaryFunction).ap)
+              ? maybeApplicativeUnaryFunction
+              : Either.Right(maybeApplicativeUnaryFunction)
+          ).ap(
+            (Reflect.getPrototypeOf(maybeContainerValue).ap)
+              ? maybeContainerValue
+              : Either.Right(maybeContainerValue)
+          );
+        });
+    }),
+    $$debug,
+    {
+      writable: false,
+      value: `${this[$$debug]}.ap(${container})`
+    }
+  );
 };
 
 // chain :: Task e a ~> (a -> Task b) -> Task e b
 Task.prototype.chain = Task.prototype["fantasy-land/chain"] = function (unaryFunction) {
 
-  return Task(_ => {
-    const maybePromise = this.asyncFunction();
+  return Object.defineProperty(
+    Task(_ => {
+      const maybePromise = this.asyncFunction();
 
-    return (
-      (maybePromise instanceof Promise) ? maybePromise : Promise.resolve(maybePromise)
-    )
-      .then(maybeContainer =>
-        (Either.is(maybeContainer) ? maybeContainer : Either.Right(maybeContainer))
-          .chain(
-            value => {
-              const maybePromise = unaryFunction(value).run();
-
-              return (
-                (maybePromise instanceof Promise) ? maybePromise : Promise.resolve(maybePromise)
-              )
-                .then(
-                  maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Right(maybeContainer),
-                  maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Left(maybeContainer),
-                )
-            })
+      return (
+        (maybePromise instanceof Promise) ? maybePromise : Promise.resolve(maybePromise)
       )
-      .catch(Either.Left);
-  });
+        .then(maybeContainer =>
+          (Either.is(maybeContainer) ? maybeContainer : Either.Right(maybeContainer))
+            .chain(
+              value => {
+                const maybePromise = unaryFunction(value).run();
+
+                return (
+                  (maybePromise instanceof Promise) ? maybePromise : Promise.resolve(maybePromise)
+                )
+                  .then(
+                    maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Right(maybeContainer),
+                    maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Left(maybeContainer),
+                  )
+              })
+        )
+        .catch(Either.Left);
+    }),
+    $$debug,
+    {
+      writable: false,
+      value: `${this[$$debug]}.chain(${serializeFunctionForDebug(unaryFunction)})`
+    }
+  );
 };
 
 // map :: Task e a ~> (a -> b) -> Task e b
 Task.prototype.map = Task.prototype["fantasy-land/map"] = function (unaryFunction) {
 
-  return Task(_ => {
-    const promise = this.asyncFunction();
+  return Object.defineProperty(
+    Task(_ => {
+      const promise = this.asyncFunction();
 
-    return promise.then(
-      container => container.chain(
-        value => {
-          const maybeContainer = unaryFunction(value);
+      return promise.then(
+        container => container.chain(
+          value => {
+            const maybeContainer = unaryFunction(value);
 
-          return (Either.is(maybeContainer)) ? maybeContainer : Either.Right(maybeContainer);
-        }
-      ),
-      Either.Left
-    );
-  });
+            return (Either.is(maybeContainer)) ? maybeContainer : Either.Right(maybeContainer);
+          }
+        ),
+        Either.Left
+      );
+    }),
+    $$debug,
+    {
+      writable: false,
+      value: `${this[$$debug]}.map(${serializeFunctionForDebug(unaryFunction)})`
+    }
+  );
 };
 
 Task.prototype.then = function (unaryFunction) {
@@ -157,6 +206,11 @@ Task.prototype.run = async function () {
       maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Right(maybeContainer),
       maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Left(maybeContainer)
     );
+};
+
+Task.prototype.toString = Task.prototype[Deno.customInspect] = function () {
+
+  return this[$$debug] || `Task("unknown")`
 };
 
 export default Task;

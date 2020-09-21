@@ -166,7 +166,7 @@ Shape.Circle.is(oval);
 // true
 ```
 
-### `SumType.fold`
+### `SumType#fold`
 
 ```js
 Shape.prototype.translate =
@@ -273,6 +273,7 @@ This implementation of Maybe is a valid [`Filterable`](https://github.com/fantas
 [`Functor`](https://github.com/fantasyland/fantasy-land#functor), 
 [`Applicative`](https://github.com/fantasyland/fantasy-land#applicative), 
 [`Alternative`](https://github.com/fantasyland/fantasy-land#alternative), 
+[`Foldable`](https://github.com/fantasyland/fantasy-land#foldable),
 [`Traversable`](https://github.com/fantasyland/fantasy-land#traversable) and
 [`Monad`](https://github.com/fantasyland/fantasy-land#monad).
 
@@ -296,7 +297,9 @@ const serialize = (container) =>
 
 This implementation of Either is a valid [`Functor`](https://github.com/fantasyland/fantasy-land#functor), 
 [`Applicative`](https://github.com/fantasyland/fantasy-land#applicative), 
-[`Alternative`](https://github.com/fantasyland/fantasy-land#alternative) and 
+[`Alternative`](https://github.com/fantasyland/fantasy-land#alternative), 
+[`Foldable`](https://github.com/fantasyland/fantasy-land#foldable),
+[`Traversable`](https://github.com/fantasyland/fantasy-land#traversable) and
 [`Monad`](https://github.com/fantasyland/fantasy-land#monad).
 
 ## `IO` type

@@ -17,10 +17,8 @@ const serializeFunctionForDebug = asyncFunction =>
         .replace(/[\n\r]/g, "")
         .replace(/\s\s*/g, " ")
 
-// from :: Task => f -> T f
 Task.from = (composedFunction) => Task(composedFunction);
 
-// wrap :: Task t => (* -> Promise a) -> t e Promise a
 Task.wrap = asyncFunction => {
   let promise;
   const proxyFunction = function (...argumentList) {
@@ -48,10 +46,8 @@ Task.wrap = asyncFunction => {
   );
 };
 
-// empty :: Task t => () => t
 Task.empty = Task.prototype.empty = Task.prototype["fantasy-land/empty"] = _ => Task(_ => function () {});
 
-// of :: Task t => a -> t a
 Task.of = Task.prototype.of = Task.prototype["fantasy-land/of"] = value =>
   Object.defineProperty(
     Task(_ => Promise.resolve(Either.Right(value))),
@@ -62,7 +58,6 @@ Task.of = Task.prototype.of = Task.prototype["fantasy-land/of"] = value =>
     }
   );
 
-// ap :: Task a ~> Task (a -> b) -> Task b
 Task.prototype.ap = Task.prototype["fantasy-land/ap"] = function (container) {
 
   return Object.defineProperty(
@@ -99,7 +94,6 @@ Task.prototype.ap = Task.prototype["fantasy-land/ap"] = function (container) {
   );
 };
 
-// chain :: Task e a ~> (a -> Task b) -> Task e b
 Task.prototype.chain = Task.prototype["fantasy-land/chain"] = function (unaryFunction) {
 
   return Object.defineProperty(
@@ -134,7 +128,6 @@ Task.prototype.chain = Task.prototype["fantasy-land/chain"] = function (unaryFun
   );
 };
 
-// map :: Task e a ~> (a -> b) -> Task e b
 Task.prototype.map = Task.prototype["fantasy-land/map"] = function (unaryFunction) {
 
   return Object.defineProperty(

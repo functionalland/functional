@@ -1,4 +1,5 @@
 import { assertIsEquivalent } from "./asserts.js";
+import { factorizeType } from "./SumType.js";
 import Maybe from "./Maybe.js";
 
 Deno.test(
@@ -187,6 +188,47 @@ Deno.test(
     assertIsEquivalent(
       container.map(f).map(g),
       container.map(x => g(f(x)))
+    );
+  }
+);
+
+Deno.test(
+  "Maybe.Just: #traverse - Identity",
+  () => {
+    const Dummy = factorizeType("Dummy", [ "x" ]);
+    Dummy.of = x => Dummy(x);
+    Dummy.prototype.map = function (unaryFunction) {
+
+      return Dummy(unaryFunction(this.x));
+    };
+    const container = Maybe.Just([ 42, 32, 23 ]);
+
+    assertIsEquivalent(
+      container.traverse(Dummy, Dummy.of),
+      Dummy.of(container)
+    );
+  }
+);
+
+Deno.test(
+  "Maybe.Just: #traverse - Naturality",
+  () => {
+    const Dummy = factorizeType("Dummy", [ "x" ]);
+    Dummy.of = x => Dummy(x);
+    Dummy.prototype.chain = function (unaryFunction) {
+
+      return unaryFunction(this.x);
+    };
+    Dummy.prototype.map = function (unaryFunction) {
+
+      return Dummy(unaryFunction(this.x));
+    };
+    const container = Maybe.Just([ 42, 32, 23 ]);
+    const f = x => Dummy.of(x);
+
+    assertIsEquivalent(
+      f(container.sequence(Dummy)),
+      container.traverse(Maybe, f)
     );
   }
 );

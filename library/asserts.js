@@ -1,6 +1,6 @@
 import { assert, assertEquals } from "https://deno.land/std@0.65.0/testing/asserts.ts";
 
-const $$value = Symbol.for("TypeValue");
+const $$value = Symbol.for("Value");
 const $$tag = Symbol.for("Tag");
 const $$type = Symbol.for("Type");
 

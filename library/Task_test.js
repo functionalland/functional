@@ -235,6 +235,32 @@ Deno.test(
 );
 
 Deno.test(
+  "Task: Parallel",
+  async () => {
+    let count = 0;
+    const append = x => accumulator => [ ...accumulator, x ];
+    const lift2 = (f, a, b) => b.ap(a.map(f));
+    const insideOut = (T, list) => list.reduce(
+      (accumulator, x) => lift2(append, x, accumulator),
+      T.of([])
+    );
+    const f = x => Task(_ => ++count && Promise.resolve(Either.Right(x * 2)));
+
+    const containerA = insideOut(Task, [ 42, 32, 23 ].map(f));
+
+    assert(Task.is(containerA));
+
+    const promise = containerA.run();
+
+    assert(promise instanceof Promise);
+
+    const containerB = await promise;
+
+    assertIsEquivalent(containerB, Either.Right([ 84, 64, 46 ]))
+  }
+);
+
+Deno.test(
   "Task: debug",
   () => {
     const containerA = Task.wrap(_ => Promise.resolve(42));

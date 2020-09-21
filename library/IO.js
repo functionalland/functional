@@ -3,28 +3,25 @@ import { factorizeType } from "./SumType.js";
 export const IO = factorizeType("IO", [ "asyncFunction" ]);
 
 IO.empty = _ => IO(_ => null);
-IO.from = (composedFunction) => IO(composedFunction);
-IO.of = value => IO(_ => value);
 
-// ap :: IO a ~> IO (a -> b) -> IO b
+IO.of = IO.prototype.of = IO.prototype["fantasy-land/of"] = value => IO(_ => value);
+
 IO.prototype.ap = IO.prototype["fantasy-land/ap"] = function (container) {
 
+  //   return IO.is(container) ? IO(_ => container.asyncFunction(this.asyncFunction())) : container
   return container.map(unaryFunction => unaryFunction(this.asyncFunction()));
 };
 
-// chain :: IO a ~> (a -> IO b) -> IO b
 IO.prototype.chain = IO.prototype["fantasy-land/chain"] = function (unaryFunction) {
 
   return IO(_ => unaryFunction(this.asyncFunction())).run();
 };
 
-// map :: IO a ~> (a -> b) -> IO b
 IO.prototype.map = IO.prototype["fantasy-land/map"] = function (unaryFunction) {
 
   return IO(_ => unaryFunction(this.asyncFunction()));
 };
 
-// run :: IO a ~> () -> b
 IO.prototype.run = function () {
 
   return this.asyncFunction();

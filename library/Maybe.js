@@ -1,7 +1,8 @@
-import { assertIsDefined, assertIsNone } from "./asserts.js";
 import { factorizeSumType } from "./SumType.js";
 
-const $$value = Symbol.for("Value");
+import { $$value } from "./Symbols.js";
+
+// NOTE: Fix broken tests of IO
 
 export const Maybe = factorizeSumType(
   "Maybe",
@@ -11,7 +12,9 @@ export const Maybe = factorizeSumType(
   }
 );
 
-Maybe.fromNullable = value => !assertIsDefined(value) || assertIsNone(value) ? Maybe.nothing() : Maybe.just(value);
+Maybe.fromNullable = value => !(typeof value  !== "undefined") || !value && typeof value === "object"
+  ? Maybe.nothing()
+  : Maybe.just(value);
 Maybe.just = value => Maybe.Just(value);
 Maybe.nothing = () => Maybe.Nothing;
 

@@ -237,14 +237,13 @@ Deno.test(
 Deno.test(
   "Task: Parallel",
   async () => {
-    let count = 0;
     const append = x => accumulator => [ ...accumulator, x ];
     const lift2 = (f, a, b) => b.ap(a.map(f));
     const insideOut = (T, list) => list.reduce(
       (accumulator, x) => lift2(append, x, accumulator),
       T.of([])
     );
-    const f = x => Task(_ => ++count && Promise.resolve(Either.Right(x * 2)));
+    const f = x => Task(_ => Promise.resolve(Either.Right(x * 2)));
 
     const containerA = insideOut(Task, [ 42, 32, 23 ].map(f));
 

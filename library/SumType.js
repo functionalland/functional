@@ -17,15 +17,11 @@ import {
   zipObj
 } from "https://x.nest.land/ramda@0.27.0/source/index.js";
 
+import { $$inspect, $$returnType, $$tag, $$tagList, $$type, $$valueList } from "./Symbols.js";
+
 // Prototype :: Object
 // TypeRepresentation :: Object
 // TypeSumInstance :: Object
-
-const $$tag = Symbol.for("Tag");
-const $$tagList = Symbol.for("TagList");
-const $$valueList = Symbol.for("ValueList");
-const $$type = Symbol.for("Type");
-const $$returnType = Symbol.for("ReturnType");
 
 // assertIsUnit :: TypeSumInstance -> TypeSumInstance -> Boolean
 const assertIsUnit = curry(
@@ -126,7 +122,7 @@ const factorizeFoldBound = function (functionByTag) {
 export const factorizeType = (typeName, propertyNameList) => {
   let prototypeAccumulator = {
     toString: serializeTypeInstanceBound,
-    [Deno.customInspect]: serializeTypeInstanceBound,
+    [$$inspect]: serializeTypeInstanceBound,
     [$$type]: typeName
   };
 
@@ -135,7 +131,7 @@ export const factorizeType = (typeName, propertyNameList) => {
   typeRepresentationConstructor.is = assertIsTypeRepresentation(typeName);
   typeRepresentationConstructor.prototype = prototypeAccumulator;
   typeRepresentationConstructor.toString = serializeTypeRepresentationBound;
-  typeRepresentationConstructor[Deno.customInspect] = serializeTypeRepresentationBound;
+  typeRepresentationConstructor[$$inspect] = serializeTypeRepresentationBound;
   typeRepresentationConstructor[$$type] = typeName;
 
   prototypeAccumulator.constructor = typeRepresentationConstructor;
@@ -148,7 +144,7 @@ export const factorizeSumType = (typeName, propertyNameListByTag) => {
   let prototypeAccumulator = {
     fold: factorizeFoldBound,
     toString: serializeTypeInstanceBound,
-    [Deno.customInspect]: serializeTypeInstanceBound
+    [$$inspect]: serializeTypeInstanceBound
   };
   const tagList = Object.keys(propertyNameListByTag);
 
@@ -156,7 +152,7 @@ export const factorizeSumType = (typeName, propertyNameListByTag) => {
     is: assertIsTypeRepresentation(typeName),
     prototype: prototypeAccumulator,
     toString: serializeTypeRepresentationBound,
-    [Deno.customInspect]: serializeTypeRepresentationBound,
+    [$$inspect]: serializeTypeRepresentationBound,
     [$$tagList]: tagList,
     [$$type]: typeName
   };
@@ -173,7 +169,7 @@ export const factorizeSumType = (typeName, propertyNameListByTag) => {
     typeRepresentation[tag] = factorizeConstructor(propertyNameList, tagPrototypeAccumulator);
     typeRepresentation[tag].from = factorizeConstructorFromObject(propertyNameList, tagPrototypeAccumulator);
     typeRepresentation[tag].toString = serializeConstructorTypeBound;
-    typeRepresentation[tag][Deno.customInspect] = serializeConstructorTypeBound;
+    typeRepresentation[tag][$$inspect] = serializeConstructorTypeBound;
     typeRepresentation[tag][$$returnType] = typeName;
     typeRepresentation[tag][$$tag] = tag;
     typeRepresentation[tag].is = assertIsVariant(typeRepresentation[tag]);

@@ -1,7 +1,7 @@
 import { factorizeType } from "./SumType.js";
 import Either from "./Either.js";
 
-const $$debug = Symbol.for("TaskDebug");
+import { $$debug, $$inspect } from "./Symbols.js";
 
 export const Task = factorizeType("Task", [ "asyncFunction" ]);
 
@@ -201,7 +201,7 @@ Task.prototype.run = async function () {
     );
 };
 
-Task.prototype.toString = Task.prototype[Deno.customInspect] = function () {
+Task.prototype.toString = Task.prototype[$$inspect] = function () {
 
   return this[$$debug] || `Task("unknown")`
 };

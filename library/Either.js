@@ -1,7 +1,6 @@
-import { assertIsDefined, assertIsNone } from "./asserts.js";
 import { factorizeSumType } from "./SumType.js";
 
-const $$value = Symbol.for("Value");
+import { $$value } from "./Symbols.js";
 
 export const Either = factorizeSumType(
   "Either",
@@ -11,8 +10,9 @@ export const Either = factorizeSumType(
   }
 );
 
-Either.fromNullable = value =>
-  !assertIsDefined(value) || assertIsNone(value) ? Either.Left(value) : Either.Right(value);
+Either.fromNullable = value => !(typeof value  !== "undefined") || !value && typeof value === "object"
+    ? Either.Left(value)
+  : Either.Right(value);
 Either.left = value => Either.Left(value);
 Either.right = value => Either.Right(value);
 

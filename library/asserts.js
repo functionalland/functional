@@ -1,13 +1,7 @@
 import { assert, assertEquals } from "https://deno.land/std@0.65.0/testing/asserts.ts";
+import { $$tag, $$type, $$value } from "./Symbols.js";
 
-const $$value = Symbol.for("Value");
-const $$tag = Symbol.for("Tag");
-const $$type = Symbol.for("Type");
-
-export const assertIsDefined = value => typeof value  !== "undefined";
-// NOTE: assertIsEquivalent has a different signature than the other assert* which could lead into confusion
 export const assertIsEquivalent = (containerA, containerB) => assert(isEquivalent(containerA, containerB));
-export const assertIsNone = value => !value && typeof value === "object";
 
 // isEquivalent :: Setoid a|a -> Setoid b|b -> Boolean
 export const isEquivalent = (containerA, containerB) => {

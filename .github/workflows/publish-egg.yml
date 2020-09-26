@@ -1,0 +1,30 @@
+name: Publish Egg
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version"
+        required: true
+  release:
+    types: [published]
+
+jobs:
+  publish-egg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: denolib/setup-deno@master
+        with:
+          deno-version: 1.4.2
+      - run: deno install -A -f --unstable -n eggs https://x.nest.land/eggs@0.2.3/mod.ts
+      - run: >
+          export PATH="/home/runner/.deno/bin:$PATH"
+          && cd library/
+          && eggs link ${{ secrets.NESTAPIKEY }}
+          && eggs publish functional
+          --description "Common Functional Programming Algebraic data types for JavaScript that is compatible with most modern browsers and Deno."
+          --version v0.5.4
+          --entry ./mod.js
+          --files ./*
+          --no-check-all

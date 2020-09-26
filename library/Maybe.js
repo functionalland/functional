@@ -42,6 +42,22 @@ Maybe.prototype.chain = Maybe.prototype["fantasy-land/chain"] = function (unaryF
   });
 };
 
+Maybe.prototype.extend = Maybe.prototype["fantasy-land/extend"] = function (unaryFunction) {
+
+  return this.fold({
+    Nothing: _ => Maybe.Nothing,
+    Just: _ => Maybe.of(unaryFunction(this))
+  });
+};
+
+Maybe.prototype.extract = Maybe.prototype["fantasy-land/extract"] = function () {
+
+  return this.fold({
+    Nothing: _ => Maybe.Nothing,
+    Just: value => value
+  });
+};
+
 Maybe.prototype.filter = Maybe.prototype["fantasy-land/filter"] = function (predicate) {
 
   return this.fold({

@@ -190,7 +190,6 @@ Task.prototype.catch = function (unaryFunction) {
   });
 };
 
-// run :: Task a ~> () -> Promise b
 Task.prototype.run = async function () {
   const maybePromise = this.asyncFunction();
 

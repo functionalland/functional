@@ -42,6 +42,22 @@ Either.prototype.chain = Either.prototype["fantasy-land/chain"] = function (unar
   });
 };
 
+Either.prototype.extend = Either.prototype["fantasy-land/extend"] = function (unaryFunction) {
+
+  return this.fold({
+    Left: _ => this,
+    Right: _ => Either.of(unaryFunction(this))
+  });
+};
+
+Either.prototype.extract = Either.prototype["fantasy-land/extract"] = function () {
+
+  return this.fold({
+    Left: _ => this,
+    Right: value => value
+  });
+};
+
 Either.prototype.map = Either.prototype["fantasy-land/map"] = function (unaryFunction) {
 
   return this.fold({

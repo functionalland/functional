@@ -10492,6 +10492,18 @@ System.register("file:///Users/sebastienfilion/Developer/Darkmatter/functional/l
                     Right: value => unaryFunction(value)
                 });
             };
+            Either.prototype.extend = Either.prototype["fantasy-land/extend"] = function (unaryFunction) {
+                return this.fold({
+                    Left: _ => this,
+                    Right: _ => Either.of(unaryFunction(this))
+                });
+            };
+            Either.prototype.extract = Either.prototype["fantasy-land/extract"] = function () {
+                return this.fold({
+                    Left: _ => this,
+                    Right: value => value
+                });
+            };
             Either.prototype.map = Either.prototype["fantasy-land/map"] = function (unaryFunction) {
                 return this.fold({
                     Left: _ => this,
@@ -10513,6 +10525,7 @@ System.register("file:///Users/sebastienfilion/Developer/Darkmatter/functional/l
                     Right: value => unaryFunction(value).map(x => Either.Right(x))
                 });
             };
+            Either.zero = Either.prototype.zero = Either.prototype["fantasy-land/zero"] = () => Either.Left(null);
             exports_337("default", Either);
         }
     };
@@ -10570,7 +10583,7 @@ System.register("file:///Users/sebastienfilion/Developer/Darkmatter/functional/l
                 : Maybe.just(value);
             Maybe.just = value => Maybe.Just(value);
             Maybe.nothing = () => Maybe.Nothing;
-            Maybe.of = value => Maybe.Just(value);
+            Maybe.of = Maybe.prototype.of = Maybe.prototype["fantasy-land/of"] = value => Maybe.Just(value);
             Maybe.prototype.alt = Maybe.prototype["fantasy-land/alt"] = function (container) {
                 return this.fold({
                     Nothing: _ => container,
@@ -10586,6 +10599,18 @@ System.register("file:///Users/sebastienfilion/Developer/Darkmatter/functional/l
                 return this.fold({
                     Nothing: _ => Maybe.Nothing,
                     Just: value => unaryFunction(value)
+                });
+            };
+            Maybe.prototype.extend = Maybe.prototype["fantasy-land/extend"] = function (unaryFunction) {
+                return this.fold({
+                    Nothing: _ => Maybe.Nothing,
+                    Just: _ => Maybe.of(unaryFunction(this))
+                });
+            };
+            Maybe.prototype.extract = Maybe.prototype["fantasy-land/extract"] = function () {
+                return this.fold({
+                    Nothing: _ => Maybe.Nothing,
+                    Just: value => value
                 });
             };
             Maybe.prototype.filter = Maybe.prototype["fantasy-land/filter"] = function (predicate) {
@@ -10615,6 +10640,7 @@ System.register("file:///Users/sebastienfilion/Developer/Darkmatter/functional/l
                     Just: value => unaryFunction(value).map(x => Maybe.Just(x))
                 });
             };
+            Maybe.zero = Maybe.prototype.zero = Maybe.prototype["fantasy-land/zero"] = () => Maybe.Nothing;
             exports_339("default", Maybe);
         }
     };
@@ -10750,7 +10776,7 @@ System.register("file:///Users/sebastienfilion/Developer/Darkmatter/functional/l
         }
     };
 });
-System.register("file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/mod", ["file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/Either", "file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/IO", "file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/Maybe", "file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/SumType", "file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/Task"], function (exports_341, context_341) {
+System.register("file:///Users/sebastienfilion/Developer/Darkmatter/functional/mod", ["file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/Either", "file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/IO", "file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/Maybe", "file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/SumType", "file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/Symbols", "file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/Task"], function (exports_341, context_341) {
     "use strict";
     var __moduleName = context_341 && context_341.id;
     function exportStar_1(m) {
@@ -10774,6 +10800,9 @@ System.register("file:///Users/sebastienfilion/Developer/Darkmatter/functional/l
             function (SumType_js_5_1) {
                 exportStar_1(SumType_js_5_1);
             },
+            function (Symbols_js_5_1) {
+                exportStar_1(Symbols_js_5_1);
+            },
             function (Task_js_1_1) {
                 exportStar_1(Task_js_1_1);
             }
@@ -10783,10 +10812,19 @@ System.register("file:///Users/sebastienfilion/Developer/Darkmatter/functional/l
     };
 });
 
-const __exp = __instantiate("file:///Users/sebastienfilion/Developer/Darkmatter/functional/library/mod", false);
+const __exp = __instantiate("file:///Users/sebastienfilion/Developer/Darkmatter/functional/mod", false);
 export const Either = __exp["Either"];
 export const IO = __exp["IO"];
 export const Maybe = __exp["Maybe"];
 export const factorizeType = __exp["factorizeType"];
 export const factorizeSumType = __exp["factorizeSumType"];
+export const $$debug = __exp["$$debug"];
+export const $$inspect = __exp["$$inspect"];
+export const $$returnType = __exp["$$returnType"];
+export const $$tag = __exp["$$tag"];
+export const $$tagList = __exp["$$tagList"];
+export const $$type = __exp["$$type"];
+export const $$value = __exp["$$value"];
+export const $$valueList = __exp["$$valueList"];
 export const Task = __exp["Task"];
+

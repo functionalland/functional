@@ -1,0 +1,19 @@
+name: Scratch
+
+on:
+  push:
+  release:
+    types: [published]
+
+jobs:
+  publish-egg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/*}
+      - run: |
+          echo $RELEASE_VERSION
+          echo ${{ env.RELEASE_VERSION }}
+          echo ${{ github.ref }}
+          echo ${{ github.event }}
+          echo ${{ INPUT_VERSION }}

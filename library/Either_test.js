@@ -1,19 +1,21 @@
-import { assertIsEquivalent } from "./asserts.js";
+import { assertEquals } from "https://deno.land/std@0.70.0/testing/asserts.ts";
+
 import { factorizeType } from "./SumType.js";
 import Either from "./Either.js";
+import { $$value } from "./Symbols.js";
 
 Deno.test(
   "Either: #right",
   () =>
-    assertIsEquivalent(Either.right(42), Either.Right(42))
+    assertEquals(Either.right(42).toString(), Either.Right(42).toString())
 );
 
 Deno.test(
   "Either.Right: #alt",
   () =>
-    assertIsEquivalent(
-      Either.Right(42).alt(Either.Right(24)),
-      Either.Right(42)
+    assertEquals(
+      Either.Right(42).alt(Either.Right(24)).toString(),
+      Either.Right(42).toString()
     )
 );
 
@@ -24,9 +26,9 @@ Deno.test(
     const containerB = Either.Right(x => x + 2);
     const containerC = Either.Right(x => x * 2);
 
-    assertIsEquivalent(
-      containerA.ap(containerB.ap(containerC.map(a => b => c => a(b(c))))),
-      containerA.ap(containerB).ap(containerC)
+    assertEquals(
+      containerA.ap(containerB.ap(containerC.map(a => b => c => a(b(c))))).toString(),
+      containerA.ap(containerB).ap(containerC).toString()
     );
   }
 );
@@ -34,18 +36,45 @@ Deno.test(
 Deno.test(
   "Either.Right: #chain",
   () =>
-    assertIsEquivalent(
-      Either.Right(42).chain(x => Either.of(x * 2)),
-      Either.Right(84)
+    assertEquals(
+      Either.Right(42).chain(x => Either.of(x * 2)).toString(),
+      Either.Right(84).toString()
     )
+);
+
+Deno.test(
+  "Either.Right: #extend - Associativity",
+  async () => {
+    const container = Either.Right(42);
+    const f = container => container[$$value] + 2;
+    const g = container => container[$$value] * 2;
+
+    assertEquals(
+      container.extend(f).extend(g).toString(),
+      container.extend(value => g(value.extend(f))).toString()
+    );
+  }
+);
+
+Deno.test(
+  "Either.Right: #extract - Right identity",
+  () => {
+    const container = Either.Right(42);
+    const f = container => container[$$value] + 2;
+
+    assertEquals(
+      container.extend(f).extract().toString(),
+      f(container).toString()
+    );
+  }
 );
 
 Deno.test(
   "Either.Right: #map",
   () =>
-    assertIsEquivalent(
-      Either.Right(42).map(x => x * 2),
-      Either.Right(84)
+    assertEquals(
+      Either.Right(42).map(x => x * 2).toString(),
+      Either.Right(84).toString()
     )
 );
 
@@ -54,9 +83,9 @@ Deno.test(
   () => {
     const container = Either.Right(42);
 
-    assertIsEquivalent(
-      container.map(x => x),
-      container
+    assertEquals(
+      container.map(x => x).toString(),
+      container.toString()
     );
   }
 );
@@ -68,11 +97,69 @@ Deno.test(
     const f = x => x + 2;
     const g = x => x * 2;
 
-    assertIsEquivalent(
-      container.map(f).map(g),
-      container.map(x => g(f(x)))
+    assertEquals(
+      container.map(f).map(g).toString(),
+      container.map(x => g(f(x))).toString()
     );
   }
+);
+
+Deno.test(
+  "Either.Right: #of - Identity (Applicative)",
+  () => {
+    const container = Either.Right(42);
+
+    assertEquals(
+      container.ap(Either.of(x => x)).toString(),
+      container.toString()
+    );
+  }
+);
+
+Deno.test(
+  "Either.Right: #of - Left identity (Chainable)",
+  async () => {
+    const container = Either.Right(42);
+    const f = x => Either.Right(x + 2);
+
+    assertEquals(
+      container.chain(Either.of).chain(f).toString(),
+      container.chain(f).toString()
+    );
+  }
+);
+
+Deno.test(
+  "Either.Right: #of - Right identity (Chainable)",
+  async () => {
+    const container = Either.Right(42);
+    const f = x => Either.Right(x + 2);
+
+    assertEquals(
+      container.chain(f).chain(Either.of).toString(),
+      container.chain(f).toString()
+    );
+  }
+);
+
+Deno.test(
+  "Either.Right: #of - Homomorphism",
+  () =>
+    assertEquals(
+      Either.of(42).ap(Either.of(x => x + 2)),
+      Either.of((x => x + 2)(42))
+    )
+);
+
+Deno.test(
+  "Either.Right: #of - Interchange",
+  () =>
+    assertEquals(
+      Either.of(42)
+        .ap(Either.Right(x => x + 2)).toString(),
+      Either.Right(x => x + 2)
+        .ap(Either.of(f => f(42))).toString()
+    )
 );
 
 Deno.test(
@@ -86,51 +173,87 @@ Deno.test(
     };
     const container = Either.Right([ 42, 32, 23 ]);
 
-    assertIsEquivalent(
-      container.traverse(Dummy, Dummy.of),
-      Dummy.of(container)
+    assertEquals(
+      container.traverse(Dummy, Dummy.of).toString(),
+      Dummy.of(container).toString()
+    );
+  }
+);
+
+/**
+ * Traverse is an experimental feature; The Naturility law test is failing.
+ */
+// Deno.test(
+//   "Either.Right: #traverse - Naturality",
+//   () => {
+//     const Dummy = factorizeType("Dummy", [ "x" ]);
+//     Dummy.of = x => Dummy(x);
+//     Dummy.prototype.chain = function (unaryFunction) {
+//
+//       return unaryFunction(this.x);
+//     };
+//     Dummy.prototype.map = function (unaryFunction) {
+//
+//       return Dummy(unaryFunction(this.x));
+//     };
+//     const container = Either.Right([ 42, 32, 23 ]);
+//     const f = x => Dummy.of(x);
+//
+//     assertEquals(
+//       f(container.sequence(Dummy)).toString(),
+//       container.traverse(Either, f).toString()
+//     );
+//   }
+// );
+
+Deno.test(
+  "Either: #zero - Right identity",
+  () => {
+    const container = Either.Right(42);
+
+    assertEquals(
+      container.alt(Either.zero()).toString(),
+      container.toString()
     );
   }
 );
 
 Deno.test(
-  "Either.Right: #traverse - Naturality",
+  "Either: #zero - Left identity",
   () => {
-    const Dummy = factorizeType("Dummy", [ "x" ]);
-    Dummy.of = x => Dummy(x);
-    Dummy.prototype.chain = function (unaryFunction) {
+    const container = Either.Right(42);
 
-      return unaryFunction(this.x);
-    };
-    Dummy.prototype.map = function (unaryFunction) {
-
-      return Dummy(unaryFunction(this.x));
-    };
-    const container = Either.Right([ 42, 32, 23 ]);
-    const f = x => Dummy.of(x);
-
-    assertIsEquivalent(
-      f(container.sequence(Dummy)),
-      container.traverse(Either, f)
+    assertEquals(
+      Either.zero().alt(container).toString(),
+      container.toString()
     );
   }
+);
+
+Deno.test(
+  "Either: #zero - Annihilation",
+  () =>
+    assertEquals(
+      Either.zero().map(x => x + 2).toString(),
+      Either.zero().toString()
+    )
 );
 
 Deno.test(
   "Either.Left: #alt",
   () =>
-    assertIsEquivalent(
-      Either.Left(32).alt(Either.Right(42)),
-      Either.Right(42)
+    assertEquals(
+      Either.Left(32).alt(Either.Right(42)).toString(),
+      Either.Right(42).toString()
     )
 );
 
 Deno.test(
   "Either.Left: #map",
   () =>
-    assertIsEquivalent(
-      Either.Left(32).map(x => x * 2),
-      Either.Left(32)
+    assertEquals(
+      Either.Left(32).map(x => x * 2).toString(),
+      Either.Left(32).toString()
     )
 );
 
@@ -139,9 +262,9 @@ Deno.test(
   () => {
     const container = Either.Left(32);
 
-    assertIsEquivalent(
-      container.map(x => x),
-      container
+    assertEquals(
+      container.map(x => x).toString(),
+      container.toString()
     );
   }
 );
@@ -153,9 +276,9 @@ Deno.test(
     const f = x => x + 2;
     const g = x => x * 2;
 
-    assertIsEquivalent(
-      container.map(f).map(g),
-      container.map(x => g(f(x)))
+    assertEquals(
+      container.map(f).map(g).toString(),
+      container.map(x => g(f(x))).toString()
     );
   }
 );

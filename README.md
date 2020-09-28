@@ -22,8 +22,8 @@ the [Fantasy-land specifications](https://github.com/fantasyland/fantasy-land).
 
 ```js
 import { compose, converge, lift, map, prop } from "https://x.nest.land/ramda@0.27.0/source/index.js";
-import Either from "https://deno.land/x/functional@v0.5.4/Either.js";
-import Task from "https://deno.land/x/functional@v0.5.4/Task.js";
+import Either from "https://deno.land/x/functional@v0.5.4/library/Either.js";
+import Task from "https://deno.land/x/functional@v0.5.4/library/Task.js";
 
 const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
 
@@ -80,7 +80,7 @@ const sayHello = compose(
 The Type factory can be used to build complex data structure.
 
 ```js
-import { factorizeType } from "https://deno.land/x/functional@v0.5.4/SumType.js";
+import { factorizeType } from "https://deno.land/x/functional@v0.5.4/library/SumType.js";
 
 const Coordinates = factorizeType("Coordinates", [ "x", "y" ]);
 const vector = Coordinates(150, 200);
@@ -144,7 +144,7 @@ vector.toString();
 ## Type Sum factory
 
 ```js
-import { factorizeSumType } from "https://deno.land/x/functional@v0.5.4/SumType.js";
+import { factorizeSumType } from "https://deno.land/x/functional@v0.5.4/library/SumType.js";
 
 const Shape = factorizeSumType(
   "Shape",
@@ -226,7 +226,7 @@ oval.toString();
 ### Example of writing a binary tree with Sum Types
 
 ```js
-import { factorizeSumType } from "https://deno.land/x/functional@v0.5.4/SumType.js";
+import { factorizeSumType } from "https://deno.land/x/functional@v0.5.4/library/SumType.js";
 
 const BinaryTree = factorizeSumType('BinaryTree', {
   Node: ['left', 'x', 'right'],
@@ -279,7 +279,7 @@ const tree =
 The `Maybe` type represents potentially `Just` a value or `Nothing`.
 
 ```js
-import Maybe from "https://deno.land/x/functional@v0.5.4/Maybe.js";
+import Maybe from "https://deno.land/x/functional@v0.5.4/library/Maybe.js";
 
 const container = Maybe.Just(42);
 
@@ -305,7 +305,7 @@ This implementation of Maybe is a valid [`Filterable`](https://github.com/fantas
 The `Either` type represents the possibility of two values; either an `a` or a `b`.
 
 ```js
-import Either from "https://deno.land/x/functional@v0.5.4/Either.js";
+import Either from "https://deno.land/x/functional@v0.5.4/library/Either.js";
 
 const container = Either.Right(42);
 
@@ -330,7 +330,7 @@ This implementation of Either is a valid [`Functor`](https://github.com/fantasyl
 The `IO` type represents a function that access IO. It will be lazily executed when the `#run` method is called.
 
 ```js
-import IO from "https://deno.land/x/functional@v0.5.4/IO.js";
+import IO from "https://deno.land/x/functional@v0.5.4/library/IO.js";
 
 // Eventually 42
 const container = IO(_ => Promise.resolve(42));
@@ -362,8 +362,8 @@ Note that the function must return an instance of [`Either`](#either-type); `Eit
 If the runtime throws an error, the final value will be `Either.Left(error)`.
 
 ```js
-import Either from "https://deno.land/x/functional@v0.5.4/Either.js";
-import Task from "https://deno.land/x/functional@v0.5.4/Task.js";
+import Either from "https://deno.land/x/functional@v0.5.4/library/Either.js";
+import Task from "https://deno.land/x/functional@v0.5.4/library/Task.js";
 
 // Eventually 42
 const container = Task(_ => Promise.resolve(Either.Right(42)));
@@ -389,7 +389,7 @@ Create a wrapped instance of Task. An instance of `Task` made using the `wrap` m
   2. If the function call was successful, the value will automatically be an instance of `Either.Right`;
   
 ```js
-import Task from "https://deno.land/x/functional@v0.5.4/Task.js";
+import Task from "https://deno.land/x/functional@v0.5.4/library/Task.js";
 
 let count = 0;
 const fetchUser = userID => Task.wrap(
@@ -417,8 +417,8 @@ I will try to publish TypeScript type hint files for those who needs it.
 So far, I've only implemented the Type factory functions.
 
 ```ts
-// @deno-types="https://deno.land/x/functional@v0.5.4/SumType.d.ts"
-import { factorizeType, factorizeSumType } from "https://deno.land/x/functional@v0.5.4/SumType.js";
+// @deno-types="https://deno.land/x/functional@v0.5.4/library/SumType.d.ts"
+import { factorizeType, factorizeSumType } from "https://deno.land/x/functional@v0.5.4/library/SumType.js";
 ```
  
 ## Deno

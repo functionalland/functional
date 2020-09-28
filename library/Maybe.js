@@ -2,7 +2,25 @@ import { factorizeSumType } from "./SumType.js";
 
 import { $$value } from "./Symbols.js";
 
-// NOTE: Fix broken tests of IO
+/**
+ * The `Maybe` is the most common sum type; it represents the possibility of a value being `null` or `undefined`.
+ *
+ * The `Maybe` type implements the following algebras:
+ * - [x] Alternative
+ * - [x] Comonad
+ * - [x] Monad
+ *
+ * ## Example
+ *
+ * ```js
+ * const containerA = Maybe.Just(42).map(x => x + 2);
+ * const containerB = Maybe.Nothing.map(x => x + 2);
+ *
+ * assert(Maybe.Just.is(containerA));
+ * assert(containerA.extract() === 44);
+ * assert(Maybe.Nothing.is(containerB));
+ * ```
+ */
 
 export const Maybe = factorizeSumType(
   "Maybe",
@@ -18,7 +36,7 @@ Maybe.fromNullable = value => !(typeof value  !== "undefined") || !value && type
 Maybe.just = value => Maybe.Just(value);
 Maybe.nothing = () => Maybe.Nothing;
 
-Maybe.of = value => Maybe.Just(value);
+Maybe.of = Maybe.prototype.of = Maybe.prototype["fantasy-land/of"] = value => Maybe.Just(value);
 
 Maybe.prototype.alt = Maybe.prototype["fantasy-land/alt"] = function (container) {
 
@@ -95,5 +113,7 @@ Maybe.prototype.traverse = Maybe.prototype["fantasy-land/traverse"] = function (
       unaryFunction(value).map(x => Maybe.Just(x))
   });
 };
+
+Maybe.zero = Maybe.prototype.zero = Maybe.prototype["fantasy-land/zero"] = () => Maybe.Nothing;
 
 export default Maybe;

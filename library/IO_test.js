@@ -1,5 +1,5 @@
-import IO from "./IO.js";
 import { assertEquals } from "https://deno.land/std@0.65.0/testing/asserts.ts";
+import IO from "./IO.js";
 
 Deno.test(
   "IO: #ap - Composition",

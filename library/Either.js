@@ -2,6 +2,29 @@ import { factorizeSumType } from "./SumType.js";
 
 import { $$value } from "./Symbols.js";
 
+/**
+ * The `Either` is a sum type similar to `Maybe`, but it differs in that a value can be of two possible types
+ * (Left or Right). Commonly the Left type is used to handle errors.
+ *
+ * The `Maybe` type implements the following algebras:
+ * - [x] Alternative
+ * - [x] Comonad
+ * - [x] Monad
+ *
+ * ## Example
+ *
+ * ```js
+ * const containerA = Either.Right(42).map(x => x + 2);
+ * const containerB = Either.Left(new Error("The value is not 42.")).map(x => x + 2);
+ * const containerC = containerB.alt(containerA);
+ *
+ * assert(Either.Right.is(containerA));
+ * assert(containerA.extract() === 44);
+ * assert(Either.Left.is(containerB));
+ * assert(Either.Right(containerC));
+ * ```
+ */
+
 export const Either = factorizeSumType(
   "Either",
   {
@@ -86,5 +109,7 @@ Either.prototype.traverse = Either.prototype["fantasy-land/traverse"] = function
     Right: value => unaryFunction(value).map(x => Either.Right(x))
   });
 };
+
+Either.zero = Either.prototype.zero = Either.prototype["fantasy-land/zero"] = () => Either.Left(null);
 
 export default Either;

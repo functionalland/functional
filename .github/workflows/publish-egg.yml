@@ -1,15 +1,24 @@
-name: Publish Egg
+name: Publish
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Version"
-        required: true
   release:
     types: [published]
 
 jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/tags/*}
+      - run: |
+          cat ./README.md | sed -e "s/https\:\/\/deno.land\/x\/functional\@[v0-9\.]*/https\:\/\/deno.land\/x\/functional\@${RELEASE_VERSION}/" | tee ./README.md > /dev/null
+          cat ./README.md | sed -e "s/https\:\/\/x.nest.land\/functional\@[v0-9\.]*/https\:\/\/x.nest.land\/functional\@${RELEASE_VERSION}/" | tee ./README.md > /dev/null
+      - run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit --amend --no-edit
+          git push https://${{ env.GITHUB_ACTOR }}:${{ secrets.GITHUB_TOKEN }}@github.com/sebastienfilion/functional.git HEAD:master --force
   publish-egg:
     runs-on: ubuntu-latest
     steps:
@@ -17,13 +26,14 @@ jobs:
       - uses: denolib/setup-deno@master
         with:
           deno-version: 1.4.2
+      - run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/tags/*}
       - run: deno install -A -f --unstable -n eggs https://x.nest.land/eggs@0.2.3/mod.ts
       - run: >
           export PATH="/home/runner/.deno/bin:$PATH"
           && eggs link ${{ secrets.NESTAPIKEY }}
           && eggs publish functional
           --description "Common Functional Programming Algebraic data types for JavaScript that is compatible with most modern browsers and Deno."
-          --version {{ INPUT_VERSION }}
+          --version ${{ env.RELEASE_VERSION }}
           --entry ./mod.js
-          --files ./* ./.github/README.md
+          --files ./README.md ./mod.js ./mod.ts ./library/**/*
           --no-check-all

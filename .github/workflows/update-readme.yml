@@ -1,0 +1,24 @@
+name: Update Readme
+
+on:
+  create:
+    tags:
+      - v*
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/tags/*}
+      - run: |
+          cat ./README.md | sed -e "s/https\:\/\/deno.land\/x\/functional\@[v0-9\.]*/https\:\/\/deno.land\/x\/functional\@${RELEASE_VERSION}/" | tee ./README.md
+          cat ./README.md | sed -e "s/https\:\/\/x.nest.land\/functional\@[v0-9\.]*/https\:\/\/x.nest.land\/functional\@${RELEASE_VERSION}/" | tee ./README.md
+      - name: Push changes
+        if: ${{ success() }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit --amend --no-edit
+          git push https://${{ env.GITHUB_ACTOR }}:${{ secrets.GITHUB_TOKEN }}@github.com/sebastienfilion/functional.git HEAD:master --force

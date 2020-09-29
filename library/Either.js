@@ -1,12 +1,12 @@
-import { factorizeSumType } from "./SumType.js";
+import { factorizeSumType } from "./factories.js";
 
 import { $$value } from "./Symbols.js";
 
 /**
  * The `Either` is a sum type similar to `Maybe`, but it differs in that a value can be of two possible types
- * (Left or Right). Commonly the Left type is used to handle errors.
+ * (Left or Right). Commonly the Left type represents an error.
  *
- * The `Maybe` type implements the following algebras:
+ * The `Either` type implements the following algebras:
  * - [x] Alternative
  * - [x] Comonad
  * - [x] Monad

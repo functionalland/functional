@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.70.0/testing/asserts.ts";
 
-import { factorizeType } from "./SumType.js";
+import { factorizeType } from "./factories.js";
 import Either from "./Either.js";
 import { $$value } from "./Symbols.js";
 

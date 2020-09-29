@@ -4,6 +4,10 @@ import type { MaybePrototype } from "./Maybe.d.ts";
 // @deno-types="./Either.d.ts"
 import Either from "./Either.js";
 import type { EitherRightPrototype } from "./Either.d.ts";
+// @deno-types="./IO.d.ts"
+import IO from "./IO.js";
+// @deno-types="./Task.d.ts"
+import Task from "./Task.js";
 
 Deno.test(
   "Maybe type check",
@@ -65,5 +69,46 @@ Deno.test(
 
     const containerN = containerM.alt(containerG);
     Either.Right.is(containerN);
+  }
+);
+
+Deno.test(
+  "IO type check",
+  () => {
+    const containerA = IO(() => 42);
+    const containerB = IO(() => (value: number) => value + 2);
+    const f = (value: number) => IO(() => value + 2);
+    const g = (value: number) => value + 2;
+
+    const containerC = containerA.ap(containerB);
+    const containerD = containerC.chain(f);
+    const containerE = containerD.map(g);
+    IO.is(containerE);
+    containerE.run();
+  }
+);
+
+Deno.test(
+  "Task type check",
+  () => {
+    const containerA = Task(() => Promise.resolve(42));
+    const containerB = Task.wrap(() => Promise.resolve(42));
+    const containerC = Task.of(42);
+    const containerD = Task.of((value: number) => value + 2);
+    const f = (value: number) => Task(() => value + 2);
+    const g = (value: number) => value + 2;
+
+    const containerE = containerA.ap(containerD);
+    const containerF = containerE.chain(f)
+    const containerG = containerF.map(g);
+    const containerH = containerB.map(g);
+    const containerI = containerC.map(g);
+    Task.is(containerG);
+    Task.is(containerH);
+    Task.is(containerI);
+
+    containerG.run();
+    containerH.run();
+    containerI.run();
   }
 );

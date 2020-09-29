@@ -1,10 +1,30 @@
-import { factorizeType } from "./SumType.js";
+import { factorizeType } from "./factories.js";
+
+/**
+ * The `IO` type represents a call to IO. Any Functional Programming purist would tell you that your functions has
+ * to be pure... But in the real world, this is not very useful. Wrapping your call to IO with `IO` will enable you
+ * to postpone the side-effect and keep your program (somewhat) pure.
+ *
+ * The `IO` type implements the following algebras:
+ * - [x] Monad
+ *
+ * ## Example
+ *
+ * ```js
+ * const container = IO(_ => readFile(`${Deno.cwd()}/dump/hoge`))
+ *   .map(promise => promise.then(text => text.split("\n")));
+ * // File isn't being read yet. Still pure.
+ *
+ * assert(IO.is(containerA));
+ *
+ * const promise = container.run();
+ * // Now, the file is being read.
+ *
+ * const lines = await promise;
+ * ```
+ */
 
 export const IO = factorizeType("IO", [ "asyncFunction" ]);
-
-IO.empty = _ => IO(_ => null);
-
-IO.of = IO.prototype.of = IO.prototype["fantasy-land/of"] = value => IO(_ => value);
 
 IO.prototype.ap = IO.prototype["fantasy-land/ap"] = function (container) {
 
@@ -26,5 +46,7 @@ IO.prototype.run = function () {
 
   return this.asyncFunction();
 };
+
+IO.of = IO.prototype.of = IO.prototype["fantasy-land/of"] = value => IO(_ => value);
 
 export default IO;

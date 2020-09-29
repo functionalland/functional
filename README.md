@@ -2,17 +2,18 @@
 
 Common Functional Programming Algebraic data types for JavaScript that is compatible with most modern browsers and Deno.
 
-[![deno land](http://img.shields.io/badge/available%20on-deno.land/x-lightgrey.svg?logo=deno&labelColor=black)](https://deno.land/x/functional@v0.5.4)
+[![deno land](http://img.shields.io/badge/available%20on-deno.land/x-lightgrey.svg?logo=deno&labelColor=black)](https://deno.land/x/functional@v1.0.0)
 [![deno version](https://img.shields.io/badge/deno-^1.3.2-lightgrey?logo=deno)](https://github.com/denoland/deno)
 [![GitHub release](https://img.shields.io/github/v/release/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/releases)
 [![GitHub licence](https://img.shields.io/github/license/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/blob/v0.5.0/LICENSE)
 [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/functional)
 
-  * [Type factory](#type-factory)
   * [Maybe](#maybe-type)
   * [Either](#either-type)
   * [IO](#io-type)
   * [Task](#task-type)
+  * [Type factory](#type-factory)
+  * [Sum Type factory](#sum-type-factory)
   * [TypeScript](#typescript)
   
 # Usage
@@ -22,8 +23,8 @@ the [Fantasy-land specifications](https://github.com/fantasyland/fantasy-land).
 
 ```js
 import { compose, converge, lift, map, prop } from "https://x.nest.land/ramda@0.27.0/source/index.js";
-import Either from "https://deno.land/x/functional@v0.5.4/library/Either.js";
-import Task from "https://deno.land/x/functional@v0.5.4/library/Task.js";
+import Either from "https://deno.land/x/functional@v1.0.0/library/Either.js";
+import Task from "https://deno.land/x/functional@v1.0.0/library/Task.js";
 
 const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
 
@@ -59,7 +60,7 @@ As a convenience, when using Functional in the browser, you can use the **unmini
 
 ```js
 import { compose, converge, lift, map, prop } from "https://x.nest.land/ramda@0.27.0/source/index.js";
-import { Either, Task } from "https://deno.land/x/functional@v0.5.4/functional.js";
+import { Either, Task } from "https://deno.land/x/functional@v1.0.0/functional.js";
 
 const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
 
@@ -75,12 +76,134 @@ const sayHello = compose(
 );
 ```
 
+## `Maybe` type
+
+The `Maybe` is the most common sum type; it represents the possibility of a value being `null` or `undefined`.
+
+The `Maybe` type implements the following algebras:
+  - [x] Alternative
+  - [x] Comonad
+  - [x] Monad
+
+### Example
+
+```js
+const containerA = Maybe.Just(42).map(x => x + 2);
+const containerB = Maybe.Nothing.map(x => x + 2);
+
+assert(Maybe.Just.is(containerA));
+assert(containerA.extract() === 44);
+assert(Maybe.Nothing.is(containerB));
+```
+
+## `Either` type
+
+The `Either` is a sum type similar to `Maybe`, but it differs in that a value can be of two possible types
+(Left or Right). Commonly the Left type represents an error.
+
+The `Either` type implements the following algebras:
+  - [x] Alternative
+  - [x] Comonad
+  - [x] Monad
+
+### Example
+
+```js
+const containerA = Either.Right(42).map(x => x + 2);
+const containerB = Either.Left(new Error("The value is not 42.")).map(x => x + 2);
+const containerC = containerB.alt(containerA);
+
+assert(Either.Right.is(containerA));
+assert(containerA.extract() === 44);
+assert(Either.Left.is(containerB));
+assert(Either.Right(containerC));
+```
+
+## `IO` type
+
+The `IO` type represents a call to IO. Any Functional Programming purist would tell you that your functions has
+to be pure... But in the real world, this is not very useful. Wrapping your call to IO with `IO` will enable you
+to postpone the side-effect and keep your program (somewhat) pure.
+
+The `IO` type implements the following algebras:
+  - [x] Monad
+
+### Example
+
+```js
+const container = IO(_ => readFile(`${Deno.cwd()}/dump/hoge`))
+  .map(promise => promise.then(text => text.split("\n")));
+// File isn't being read yet. Still pure.
+
+assert(IO.is(containerA));
+
+const promise = container.run();
+// Now, the file is being read.
+
+const lines = await promise;
+```
+
+## `Task` type
+
+The `Task` type is similar in concept to `IO`; it helps keep your function pure when you are working with `IO`.
+The biggest difference with `IO` is that this type considers Promise as first-class citizen. Also, it always resolves
+to an instance of `Either`; `Either.Right` for a success, `Either.Left` for a failure.
+
+The `IO` type implements the following algebras:
+  - [x] Monad
+
+### Example
+
+```js
+const containerA = Task(_ => readFile(`${Deno.cwd()}/dump/hoge`))
+  .map(text => text.split("\n"));
+// File isn't being read yet. Still pure.
+
+assert(Task.is(containerA));
+
+const containerB = await container.run();
+// Now, the file is being read.
+
+assert(Either.Right.is(containerB));
+// The call was successful!
+
+const lines = containerB.extract();
+```
+
+The `Task` factory comes with a special utility method called `wrap`. The result of any function called with `wrap`
+will be memoized allowing for safe "logic-forks".
+
+Take the following example; `containerD` contains the raw text, `containerE` contains the text into lines and
+`containerF` contains the lines in inverted order. Because `run` was called thrice, the file was read thrice. 😐
+
+```js
+let count = 0;
+const containerA = Task(_ => ++count && readFile(`${Deno.cwd()}/dump/hoge`));
+const containerB = containerA.map(text => text.split("\n"));
+const containerC = containerB.map(lines => text.reverse());
+
+assert(Task.is(containerA));
+assert(Task.is(containerB));
+assert(Task.is(containerC));
+
+const containerD = await containerA.run();
+const containerE = await containerB.run();
+const containerF = await containerC.run();
+
+assert(count === 3);
+```
+
+Definitely not what we want... Simply wrap the function and bim bam boom - memoization magic! (The file will only be
+read once) 🤩
+
+Please check-out [Functional IO](https://github.com/sebastienfilion/functional-deno-io) for more practical examples.
+
 ## Type factory
 
 The Type factory can be used to build complex data structure.
 
 ```js
-import { factorizeType } from "https://deno.land/x/functional@v0.5.4/library/SumType.js";
+import { factorizeType } from "https://deno.land/x/functional@v1.0.0/library/factories.js";
 
 const Coordinates = factorizeType("Coordinates", [ "x", "y" ]);
 const vector = Coordinates(150, 200);
@@ -141,10 +264,10 @@ vector.toString();
 // "Coordinates(150, 200)"
 ```
 
-## Type Sum factory
+## Sum Type factory
 
 ```js
-import { factorizeSumType } from "https://deno.land/x/functional@v0.5.4/library/SumType.js";
+import { factorizeSumType } from "https://deno.land/x/functional@v1.0.0/library/factories.js";
 
 const Shape = factorizeSumType(
   "Shape",
@@ -223,10 +346,10 @@ oval.toString();
 // "Shape.Circle(Coordinates(150, 200), 200)"
 ```
 
-### Example of writing a binary tree with Sum Types
+#### Example of writing a binary tree with Sum Types
 
 ```js
-import { factorizeSumType } from "https://deno.land/x/functional@v0.5.4/library/SumType.js";
+import { factorizeSumType } from "https://deno.land/x/functional@v1.0.0/library/factories.js";
 
 const BinaryTree = factorizeSumType('BinaryTree', {
   Node: ['left', 'x', 'right'],
@@ -274,151 +397,19 @@ const tree =
 // tree.reduce((x, y) => x + y, 0) === 15
 ```
 
-## `Maybe` type
-
-The `Maybe` type represents potentially `Just` a value or `Nothing`.
-
-```js
-import Maybe from "https://deno.land/x/functional@v0.5.4/library/Maybe.js";
-
-const container = Maybe.Just(42);
-
-const serialize = (container) =>
-  container.fold({
-    Nothing: () => "There is no value.",
-    Just: value => `The value is ${value}.`
-  });
-
-// serialize(container) === "The value is 42."
-```
-
-This implementation of Maybe is a valid [`Filterable`](https://github.com/fantasyland/fantasy-land#filterable), 
-[`Functor`](https://github.com/fantasyland/fantasy-land#functor), 
-[`Applicative`](https://github.com/fantasyland/fantasy-land#applicative), 
-[`Alternative`](https://github.com/fantasyland/fantasy-land#alternative), 
-[`Foldable`](https://github.com/fantasyland/fantasy-land#foldable),
-[`Traversable`](https://github.com/fantasyland/fantasy-land#traversable) and
-[`Monad`](https://github.com/fantasyland/fantasy-land#monad).
-
-## `Either` type
-
-The `Either` type represents the possibility of two values; either an `a` or a `b`.
-
-```js
-import Either from "https://deno.land/x/functional@v0.5.4/library/Either.js";
-
-const container = Either.Right(42);
-
-const serialize = (container) =>
-  container.fold({
-    Left: value => `An error occured: ${value}.`,
-    Right: value => `The value is ${value}.`
-  });
-
-// serialize(container) === "The value is 42."
-```
-
-This implementation of Either is a valid [`Functor`](https://github.com/fantasyland/fantasy-land#functor), 
-[`Applicative`](https://github.com/fantasyland/fantasy-land#applicative), 
-[`Alternative`](https://github.com/fantasyland/fantasy-land#alternative), 
-[`Foldable`](https://github.com/fantasyland/fantasy-land#foldable),
-[`Traversable`](https://github.com/fantasyland/fantasy-land#traversable) and
-[`Monad`](https://github.com/fantasyland/fantasy-land#monad).
-
-## `IO` type
-
-The `IO` type represents a function that access IO. It will be lazily executed when the `#run` method is called.
-
-```js
-import IO from "https://deno.land/x/functional@v0.5.4/library/IO.js";
-
-// Eventually 42
-const container = IO(_ => Promise.resolve(42));
-
-const multiply = container.map(promise => promise.then(x => x * x));
-const add = container.map(promise => promise.then(x => x + x));
-
-// multiply === IO(Function)
-// add === IO(Function)
-
-const multiplyThenAdd = multiply.map(promise => promise.then(x => x + x));
-
-// multiply.run() === Promise(1764)
-// add.run() === Promise(84)
-// multiplyThenAdd.run() === Promise(3528)
-```
-
-This implementation of IO is a valid [`Functor`](https://github.com/fantasyland/fantasy-land#functor), 
-[`Applicative`](https://github.com/fantasyland/fantasy-land#applicative) and 
-[`Monad`](https://github.com/fantasyland/fantasy-land#monad).
-
-## `Task` type
-
-The `Task` type represents a function that access IO. It will be lazily executed when the `#run` method is called. 
-Unlike IO, the Task type also abstract away the promise making for a more intuitive experience.  
-Note that the function must return an instance of [`Either`](#either-type); `Either.Right` to represent a success and
-`Either.Left` to represent a failure. Also check-out the [`Task.wrap`](#task-wrap) method.  
-
-If the runtime throws an error, the final value will be `Either.Left(error)`.
-
-```js
-import Either from "https://deno.land/x/functional@v0.5.4/library/Either.js";
-import Task from "https://deno.land/x/functional@v0.5.4/library/Task.js";
-
-// Eventually 42
-const container = Task(_ => Promise.resolve(Either.Right(42)));
-
-const multiply = container.map(x => x * x);
-const add = container.map(x => x + x);
-
-// multiply === Task(Function)
-// add === Task(Function)
-
-const multiplyThenAdd = multiply.map(x => x + x);
-
-// await multiply.run() === Either.Right(1764)
-// await add.run() === Either.Right(84)
-// await multiplyThenAdd.run() === Either.Right(3528)
-```
-
-### `Task.wrap`
-
-Create a wrapped instance of Task. An instance of `Task` made using the `wrap` method is different in two ways:
-
-  1. The result of the function call is memoized;
-  2. If the function call was successful, the value will automatically be an instance of `Either.Right`;
-  
-```js
-import Task from "https://deno.land/x/functional@v0.5.4/library/Task.js";
-
-let count = 0;
-const fetchUser = userID => Task.wrap(
-  _ => ++count && fetch(`${URL}/users/${userID}`).then(response => response.json())
-);
-
-const user = fetchUser(userID);
-const username = user.map(({ username }) => username);
-const email = user.map(({ email }) => email);
-
-// await user.run() === Either.Right({ email: "johndoe@gmail.com", username: "johndoe" })
-// await username.run() === Either.Right("johndoe")
-// await email.run() === Either.Right("johndoe@gmail.com")
-// count === 1
-```
-
-This implementation of Task is a valid [`Functor`](https://github.com/fantasyland/fantasy-land#functor), 
-[`Applicative`](https://github.com/fantasyland/fantasy-land#applicative), 
-[`Alternative`](https://github.com/fantasyland/fantasy-land#alternative) and 
-[`Monad`](https://github.com/fantasyland/fantasy-land#monad).
-
 ## TypeScript
 
-I will try to publish TypeScript type hint files for those who needs it.  
-So far, I've only implemented the Type factory functions.
+You can import any types or the factories through `mod.ts`.
 
 ```ts
-// @deno-types="https://deno.land/x/functional@v0.5.4/library/SumType.d.ts"
-import { factorizeType, factorizeSumType } from "https://deno.land/x/functional@v0.5.4/library/SumType.js";
+import { Either, IO, Maybe, Task, factorizeType, factorySumType } from "https://deno.land/x/functional@v1.0.0/mod.ts";
+```
+
+Or, you can import individual sub-module with the appropriate TypeScript hint in Deno.
+
+```ts
+// @deno-types="https://deno.land/x/functional@v1.0.0/library/Either.d.ts"
+import Either from "https://deno.land/x/functional@v1.0.0/library/Either.js";
 ```
  
 ## Deno

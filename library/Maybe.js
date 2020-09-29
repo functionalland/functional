@@ -1,4 +1,4 @@
-import { factorizeSumType } from "./SumType.js";
+import { factorizeSumType } from "./factories.js";
 
 import { $$value } from "./Symbols.js";
 

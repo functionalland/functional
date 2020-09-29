@@ -1,6 +1,6 @@
 import { assert, assertEquals } from "https://deno.land/std@0.65.0/testing/asserts.ts";
 
-import { factorizeSumType, factorizeType } from "./SumType.js";
+import { factorizeSumType, factorizeType } from "./factories.js";
 
 Deno.test(
   "SumType #factorizeType: Tuple",

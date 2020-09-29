@@ -1,9 +1,6 @@
 name: Update Readme
 
-on:
-  create:
-    tags:
-      - v*
+on: [workflow_dispatch]
 
 jobs:
   update-readme:

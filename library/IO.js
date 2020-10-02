@@ -8,7 +8,7 @@ import { factorizeType } from "./factories.js";
  * The `IO` type implements the following algebras:
  * - [x] Monad
  *
- * ## Example
+ * ### Example
  *
  * ```js
  * const container = IO(_ => readFile(`${Deno.cwd()}/dump/hoge`))

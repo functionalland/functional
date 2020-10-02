@@ -11,7 +11,7 @@ import { $$debug, $$inspect } from "./Symbols.js";
  * The `IO` type implements the following algebras:
  * - [x] Monad
  *
- * ## Example
+ * ### Example
  *
  * ```js
  * const containerA = Task(_ => readFile(`${Deno.cwd()}/dump/hoge`))

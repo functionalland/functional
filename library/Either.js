@@ -11,7 +11,7 @@ import { $$value } from "./Symbols.js";
  * - [x] Comonad
  * - [x] Monad
  *
- * ## Example
+ * ### Example
  *
  * ```js
  * const containerA = Either.Right(42).map(x => x + 2);

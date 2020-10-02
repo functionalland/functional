@@ -10,7 +10,7 @@ import { $$value } from "./Symbols.js";
  * - [x] Comonad
  * - [x] Monad
  *
- * ## Example
+ * ### Example
  *
  * ```js
  * const containerA = Maybe.Just(42).map(x => x + 2);

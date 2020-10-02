@@ -1,5 +1,5 @@
 export interface EitherRightPrototype<Z> {
-  alt<T extends EitherRightPrototype<Z>>(container: T): this;
+  alt<Y>(container: Y): this;
   ap<T extends EitherRightPrototype<K>, K>(container: T): this;
   chain<T extends EitherRightPrototype<K>, K>(unaryFunction: (value: Z) => T): this;
   extend<T extends EitherRightPrototype<Z>, K>(unaryFunction: (container: T) => K): this;
@@ -11,7 +11,7 @@ export interface EitherRightPrototype<Z> {
 }
 
 export interface EitherLeftPrototype<Z> {
-  alt<T extends EitherRightPrototype<K>, K>(container: T): T;
+  alt<T extends EitherRightPrototype<K>, K, Y>(container: Y): T;
   ap<T extends EitherRightPrototype<K>, K>(container: T): this;
   chain<T extends EitherRightPrototype<Y>, K, Y>(unaryFunction: (value: K) => T): this;
   extend<T extends EitherRightPrototype<Y>, K, Y>(unaryFunction: (container: T) => K): this;

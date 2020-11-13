@@ -193,7 +193,7 @@ const containerF = await containerC.run();
 assert(count === 3);
 ```
 
-Definitely not what we want... Simply wrap the function and bim bam boom - memoization magic! (The file will only be
+Definitely not what we want... Simply use `Task.wrap` instead and, bim bam boom - memoization magic! (The file will only be
 read once) 🤩
 
 Please check-out [Functional IO](https://github.com/sebastienfilion/functional-deno-io) for more practical examples.

@@ -1,7 +1,11 @@
 import { factorizeType } from "./factories.js";
 import Either from "./Either.js";
+import Pair from "./Pair.js";
+import { Done, Loop } from "./Step.js";
 
 import { $$debug, $$inspect } from "./Symbols.js";
+
+const concat = x => y => x.concat(y);
 
 /**
  * The `Task` type is similar in concept to `IO`; it helps keep your function pure when you are working with `IO`.
@@ -103,8 +107,8 @@ Task.prototype.ap = Task.prototype["fantasy-land/ap"] = function (container) {
 
   return Object.defineProperty(
     Task(_ => {
-      const maybePromiseUnaryFunction = this.asyncFunction();
-      const maybePromiseValue = container.asyncFunction();
+      const maybePromiseValue = this.asyncFunction();
+      const maybePromiseUnaryFunction = container.asyncFunction();
 
       return Promise.all([
         (maybePromiseUnaryFunction instanceof Promise)
@@ -117,13 +121,13 @@ Task.prototype.ap = Task.prototype["fantasy-land/ap"] = function (container) {
         .then(([ maybeApplicativeUnaryFunction, maybeContainerValue ]) => {
 
           return (
-            (Reflect.getPrototypeOf(maybeApplicativeUnaryFunction).ap)
-              ? maybeApplicativeUnaryFunction
-              : Either.Right(maybeApplicativeUnaryFunction)
-          ).ap(
             (Reflect.getPrototypeOf(maybeContainerValue).ap)
               ? maybeContainerValue
               : Either.Right(maybeContainerValue)
+          ).ap(
+            (Reflect.getPrototypeOf(maybeApplicativeUnaryFunction).ap)
+              ? maybeApplicativeUnaryFunction
+              : Either.Right(maybeApplicativeUnaryFunction)
           );
         });
     }),
@@ -157,9 +161,9 @@ Task.prototype.chain = Task.prototype["fantasy-land/chain"] = function (unaryFun
                     maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Right(maybeContainer),
                     maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Left(maybeContainer),
                   )
-              })
-        )
-        .catch(Either.Left);
+              }),
+          Either.Left
+        );
     }),
     $$debug,
     {
@@ -167,6 +171,27 @@ Task.prototype.chain = Task.prototype["fantasy-land/chain"] = function (unaryFun
       value: `${this[$$debug]}.chain(${serializeFunctionForDebug(unaryFunction)})`
     }
   );
+};
+
+// chainLift :: Task a -> Task b -> (a -> b -> c) -> Task c
+const chainLift = (chainableFunctor, functor, binaryFunction) => {
+
+  return chainableFunctor.chain(x => functor.map(binaryFunction(x)));
+}
+
+Task.prototype.chainRec = Task.prototype["fantasy-land/chainRec"] = function (ternaryFunction, initialCursor) {
+  let accumulator = this;
+  let result = Loop(Pair(initialCursor, null));
+
+  while (!Done.is(result)) {
+    result = ternaryFunction(Loop, Done, result.value.first);
+
+    if (Loop.is(result)) {
+      accumulator = chainLift(accumulator, result.value.second, concat);
+    }
+  }
+
+  return accumulator;
 };
 
 Task.prototype.map = Task.prototype["fantasy-land/map"] = function (unaryFunction) {
@@ -192,43 +217,6 @@ Task.prototype.map = Task.prototype["fantasy-land/map"] = function (unaryFunctio
       value: `${this[$$debug]}.map(${serializeFunctionForDebug(unaryFunction)})`
     }
   );
-};
-
-Task.prototype.then = function (unaryFunction) {
-
-  return Task(_ => {
-    const promise = this.asyncFunction();
-
-    return (promise instanceof Promise)
-      ? promise.then(
-        container => Either.Right(container.fold({
-          Right: unaryFunction,
-          Left: _ => container
-        })),
-        Either.Left.of
-      )
-      : unaryFunction(promise);
-  });
-};
-
-Task.prototype.catch = function (unaryFunction) {
-
-  return Task(_ => {
-    const value = this.asyncFunction();
-
-    return (value instanceof Promise)
-      ? value.then(
-        Either.Right.of,
-        container => (
-          Either.Left.is(container) ? container : Either.Left(container)
-        ).fold({
-          Right: _ => container,
-          Left: unaryFunction
-        }),
-
-      )
-      : unaryFunction(value);
-  });
 };
 
 Task.of = Task.prototype.of = Task.prototype["fantasy-land/of"] = value =>

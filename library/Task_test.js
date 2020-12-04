@@ -1,7 +1,9 @@
 import { assert, assertEquals } from "https://deno.land/std@0.65.0/testing/asserts.ts";
 import { assertIsEquivalent } from "./asserts.js";
 import Either from "./Either.js";
+import Pair from "./Pair.js";
 import Task from "./Task.js";
+import { safeExtract } from "./utilities.js";
 
 const add = x => x + 2;
 const multiply = x => x * 2;
@@ -165,6 +167,23 @@ Deno.test(
     const containerC = await containerA.chain(value => chainAdd(value).chain(chainMultiply)).run()
 
     assertIsEquivalent(containerB, containerC);
+  }
+);
+
+Deno.test(
+  "Task: #chainRec",
+  async () => {
+    const container = Task.of([ 0, ]).chainRec(
+      (Loop, Done, cursor) =>
+        cursor === 10 ? Done(Pair(cursor, null)) : Loop(Pair(cursor + 1, Task.of([ 42 * (cursor + 1) ]))),
+      0
+    );
+
+    assert(Task.is(container));
+
+    const value = safeExtract("Failed.", await container.run());
+
+    assertEquals(value, [ 0, 42, 84, 126, 168, 210, 252, 294, 336, 378, 420 ]);
   }
 );
 

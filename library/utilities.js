@@ -1,14 +1,24 @@
 import { blue, gray, red } from "https://deno.land/std@0.76.0/fmt/colors.ts";
-import { append, compose, curry, map, lift } from "https://x.nest.land/ramda@0.27.0/source/index.js";
+
+import { append, curry, lift, reduce } from "https://x.nest.land/ramda@0.27.0/source/index.js";
 
 const $$decoder = new TextDecoder();
 const $$encoder = new TextEncoder();
 
-export const assertIsRegex = pattern => pattern instanceof RegExp;
+export const assertIsArray = value => value instanceof Array;
+export const assertIsBoolean = value => value === true || value === false;
+export const assertIsInstance = curry((T, value) => value instanceof T);
+export const assertIsNull = value => value === null;
+export const assertIsNumber = value => typeof value === "number";
+export const assertIsObject = value => typeof value === "object" && !(value instanceof Array);
+export const assertIsRegex = value => value instanceof RegExp;
+export const assertIsString = value => typeof value === "string";
+export const assertIsUndefined = value => value === undefined;
 
 export const decodeRaw = $$decoder.decode.bind($$decoder);
 export const encodeText = $$encoder.encode.bind($$encoder);
 
+// insideOut :: Applicative a => a -> a[] -> a
 export const insideOut = curry(
   (T, list) => list.reduce(
     (accumulator, x) => lift(append)(x, accumulator),
@@ -19,7 +29,12 @@ export const insideOut = curry(
 // log :: String -> a -> a
 export const log = message => x => console.debug(blue(message), x) || x;
 
-export const mapBuffer = unaryFunction => map(compose(encodeText, unaryFunction, decodeRaw));
+// runSequentially :: (...Task) -> Task
+export const runSequentially = (initialTask, ...taskList) => reduce(
+  (accumulator, task) => accumulator.chain(_ => task),
+  initialTask,
+  taskList
+);
 
 // safeExtract :: String -> Either a -> a
 export const safeExtract = curry(

@@ -2,7 +2,7 @@
 
 Common Functional Programming Algebraic data types for JavaScript that is compatible with most modern browsers and Deno.
 
-[![deno land](http://img.shields.io/badge/available%20on-deno.land/x-lightgrey.svg?logo=deno&labelColor=black)](https://deno.land/x/functional@v1.2.0)
+[![deno land](http://img.shields.io/badge/available%20on-deno.land/x-lightgrey.svg?logo=deno&labelColor=black)](https://deno.land/x/functional@v1.2.1)
 [![deno version](https://img.shields.io/badge/deno-^1.5.4-lightgrey?logo=deno)](https://github.com/denoland/deno)
 [![GitHub release](https://img.shields.io/github/v/release/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/releases)
 [![GitHub licence](https://img.shields.io/github/license/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/blob/v0.5.0/LICENSE)
@@ -25,8 +25,8 @@ the [Fantasy-land specifications](https://github.com/fantasyland/fantasy-land).
 
 ```js
 import { compose, converge, lift, map, prop } from "https://x.nest.land/ramda@0.27.0/source/index.js";
-import Either from "https://deno.land/x/functional@v1.2.0/library/Either.js";
-import Task from "https://deno.land/x/functional@v1.2.0/library/Task.js";
+import Either from "https://deno.land/x/functional@v1.2.1/library/Either.js";
+import Task from "https://deno.land/x/functional@v1.2.1/library/Task.js";
 
 const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
 
@@ -62,7 +62,7 @@ As a convenience, when using Functional in the browser, you can use the **unmini
 
 ```js
 import { compose, converge, lift, map, prop } from "https://x.nest.land/ramda@0.27.0/source/index.js";
-import { Either, Task } from "https://deno.land/x/functional@v1.2.0/functional.js";
+import { Either, Task } from "https://deno.land/x/functional@v1.2.1/functional.js";
 
 const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
 
@@ -228,7 +228,7 @@ assert(pair.first === 44);
 The Type factory can be used to build complex data structure.
 
 ```js
-import { factorizeType } from "https://deno.land/x/functional@v1.2.0/library/factories.js";
+import { factorizeType } from "https://deno.land/x/functional@v1.2.1/library/factories.js";
 
 const Coordinates = factorizeType("Coordinates", [ "x", "y" ]);
 const vector = Coordinates(150, 200);
@@ -292,7 +292,7 @@ vector.toString();
 ## Sum Type factory
 
 ```js
-import { factorizeSumType } from "https://deno.land/x/functional@v1.2.0/library/factories.js";
+import { factorizeSumType } from "https://deno.land/x/functional@v1.2.1/library/factories.js";
 
 const Shape = factorizeSumType(
   "Shape",
@@ -374,7 +374,7 @@ oval.toString();
 #### Example of writing a binary tree with Sum Types
 
 ```js
-import { factorizeSumType } from "https://deno.land/x/functional@v1.2.0/library/factories.js";
+import { factorizeSumType } from "https://deno.land/x/functional@v1.2.1/library/factories.js";
 
 const BinaryTree = factorizeSumType('BinaryTree', {
   Node: ['left', 'x', 'right'],
@@ -427,14 +427,14 @@ const tree =
 You can import any types or the factories through `mod.ts`.
 
 ```ts
-import { Either, IO, Maybe, Task, factorizeType, factorySumType } from "https://deno.land/x/functional@v1.2.0/mod.ts";
+import { Either, IO, Maybe, Task, factorizeType, factorySumType } from "https://deno.land/x/functional@v1.2.1/mod.ts";
 ```
 
 Or, you can import individual sub-module with the appropriate TypeScript hint in Deno.
 
 ```ts
-// @deno-types="https://deno.land/x/functional@v1.2.0/library/Either.d.ts"
-import Either from "https://deno.land/x/functional@v1.2.0/library/Either.js";
+// @deno-types="https://deno.land/x/functional@v1.2.1/library/Either.d.ts"
+import Either from "https://deno.land/x/functional@v1.2.1/library/Either.js";
 ```
  
 ## Deno

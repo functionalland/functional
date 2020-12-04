@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.70.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.79.0/testing/asserts.ts";
 import { factorizeType } from "./factories.js";
 import Maybe from "./Maybe.js";
 import { $$value } from "./Symbols.js";

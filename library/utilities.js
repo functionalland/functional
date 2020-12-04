@@ -1,4 +1,4 @@
-import { blue, gray, red } from "https://deno.land/std@0.76.0/fmt/colors.ts";
+import { blue, gray, red } from "https://deno.land/std@0.79.0/fmt/colors.ts";
 
 import { append, curry, lift, reduce } from "https://x.nest.land/ramda@0.27.0/source/index.js";
 

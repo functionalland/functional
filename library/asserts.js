@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "https://deno.land/std@0.65.0/testing/asserts.ts";
+import { assert, assertEquals } from "https://deno.land/std@0.79.0/testing/asserts.ts";
 import { $$tag, $$type, $$value } from "./Symbols.js";
 
 export const assertIsEquivalent = (containerA, containerB) => assert(isEquivalent(containerA, containerB));

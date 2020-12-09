@@ -4,6 +4,7 @@ import Pair from "./Pair.js";
 import { Done, Loop } from "./Step.js";
 
 import { $$debug, $$inspect } from "./Symbols.js";
+import { chainLift } from "./utilities.js";
 
 const concat = x => y => x.concat(y);
 
@@ -173,12 +174,6 @@ Task.prototype.chain = Task.prototype["fantasy-land/chain"] = function (unaryFun
   );
 };
 
-// chainLift :: Task a -> Task b -> (a -> b -> c) -> Task c
-const chainLift = (chainableFunctor, functor, binaryFunction) => {
-
-  return chainableFunctor.chain(x => functor.map(binaryFunction(x)));
-}
-
 Task.prototype.chainRec = Task.prototype["fantasy-land/chainRec"] = function (ternaryFunction, initialCursor) {
   let accumulator = this;
   let result = Loop(Pair(initialCursor, null));
@@ -187,7 +182,7 @@ Task.prototype.chainRec = Task.prototype["fantasy-land/chainRec"] = function (te
     result = ternaryFunction(Loop, Done, result.value.first);
 
     if (Loop.is(result)) {
-      accumulator = chainLift(accumulator, result.value.second, concat);
+      accumulator = chainLift(concat, accumulator, result.value.second);
     }
   }
 

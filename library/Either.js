@@ -52,7 +52,7 @@ Either.prototype.alt = Either.prototype["fantasy-land/alt"] = function (containe
 Either.prototype.ap = Either.prototype["fantasy-land/ap"] = function (container) {
 
   return this.fold({
-    Left: _ => container,
+    Left: _ => this,
     Right: value => Either.Right.is(container) ? Either.Right(container[$$value](value)) : container
   });
 };

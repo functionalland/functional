@@ -1,3 +1,5 @@
+import { curry } from "https://x.nest.land/ramda@0.27.0/source/index.js";
+
 import { factorizeType } from "./factories.js";
 
 /**
@@ -33,5 +35,7 @@ Pair.prototype.map = Pair.prototype["fantasy-land/map"] = function (unaryFunctio
 
   return Pair(unaryFunction(this.first), this.second);
 };
+
+export const factorizePair = curry(Pair);
 
 export default Pair;

@@ -18,6 +18,16 @@ export const assertIsUndefined = value => value === undefined;
 export const decodeRaw = $$decoder.decode.bind($$decoder);
 export const encodeText = $$encoder.encode.bind($$encoder);
 
+// chainLift :: (a -> b -> c) -> Task a -> Task b -> Task c
+export const chainLift = curry(
+  (binaryFunction, chainableFunctor, functor) => chainableFunctor.chain(x => functor.map(binaryFunction(x)))
+);
+
+// chainRec :: (a -> c, b -> c, a) -> a -> Task b -> Task c
+export const chainRec = curry(
+  (ternaryFunction, initiator, task) => task.chainRec(ternaryFunction, initiator)
+);
+
 // insideOut :: Applicative a => a -> a[] -> a
 export const insideOut = curry(
   (T, list) => list.reduce(

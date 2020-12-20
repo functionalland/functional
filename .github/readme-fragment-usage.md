@@ -40,7 +40,7 @@ sayHello(userID).run()
 
 ### Using the bundle
 
-As a convenience, when using Functional in the browser, you can use the **unminified** bundled copy.
+As a convenience, when using Functional in the browser, you can use the **unminified** bundled copy (18KB gzipped).
 
 ```js
 import { compose, converge, lift, map, prop } from "https://deno.land/x/ramda@v0.27.2/mod.ts";

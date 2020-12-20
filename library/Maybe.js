@@ -3,6 +3,8 @@ import { factorizeSumType } from "./factories.js";
 import { $$value } from "./Symbols.js";
 
 /**
+ * ## Maybe
+ *
  * The `Maybe` is the most common sum type; it represents the possibility of a value being `null` or `undefined`.
  *
  * The `Maybe` type implements the following algebras:
@@ -13,6 +15,8 @@ import { $$value } from "./Symbols.js";
  * ### Example
  *
  * ```js
+ * import Maybe from "https://deno.land/x/functional@v1.3.0/library/Maybe.js";
+ *
  * const containerA = Maybe.Just(42).map(x => x + 2);
  * const containerB = Maybe.Nothing.map(x => x + 2);
  *

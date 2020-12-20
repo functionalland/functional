@@ -1,8 +1,10 @@
-import { curry } from "https://x.nest.land/ramda@0.27.0/source/index.js";
+import curry from "https://deno.land/x/ramda@v0.27.2/source/curry.js";
 
 import { factorizeType } from "./factories.js";
 
 /**
+ * ## Pair
+ *
  * The `Pair` type represents two values.
  *
  * The `Pair` type implements the following algebras:
@@ -12,6 +14,8 @@ import { factorizeType } from "./factories.js";
  * ### Example
  *
  * ```js
+ * import Pair from "https://deno.land/x/functional@v1.3.0/library/Pair.js";
+ *
  * const pair = Pair(42, 42)
  *   .bimap(
  *     x => x * 2,

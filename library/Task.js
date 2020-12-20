@@ -9,6 +9,8 @@ import { chainLift } from "./utilities.js";
 const concat = x => y => x.concat(y);
 
 /**
+ * ## Task
+ *
  * The `Task` type is similar in concept to `IO`; it helps keep your function pure when you are working with `IO`.
  * The biggest difference with `IO` is that this type considers Promise as first-class citizen. Also, it always resolves
  * to an instance of `Either`; `Either.Right` for a success, `Either.Left` for a failure.
@@ -19,6 +21,8 @@ const concat = x => y => x.concat(y);
  * ### Example
  *
  * ```js
+ * import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
+ *
  * const containerA = Task(_ => readFile(`${Deno.cwd()}/dump/hoge`))
  *   .map(text => text.split("\n"));
  * // File isn't being read yet. Still pure.

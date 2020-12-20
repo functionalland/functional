@@ -8,6 +8,8 @@ import type { EitherRightPrototype } from "./Either.d.ts";
 import IO from "./IO.js";
 // @deno-types="./Task.d.ts"
 import Task from "./Task.js";
+// @deno-types="./Pair.d.ts"
+import Pair from "./Pair.js";
 
 Deno.test(
   "Maybe type check",
@@ -85,6 +87,19 @@ Deno.test(
     const containerE = containerD.map(g);
     IO.is(containerE);
     containerE.run();
+  }
+);
+
+Deno.test(
+  "Pair type check",
+  () => {
+    const containerA = Pair(42, 24);
+    const f = (value: number) => value + 2;
+    const g = (value: number) => value + 2;
+
+    const containerB = containerA.map(f);
+    const containerC = containerB.bimap(f, g);
+    Pair.is(containerC);
   }
 );
 

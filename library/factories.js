@@ -1,23 +1,149 @@
 // Inspired by fantasyland/daggy
 // @see https://github.com/fantasyland/daggy/blob/master/src/daggy.js
 
-import {
-  apply,
-  complement,
-  compose,
-  converge,
-  curry,
-  has,
-  identity,
-  join,
-  map,
-  prop,
-  reduce,
-  toString,
-  zipObj
-} from "https://x.nest.land/ramda@0.27.0/source/index.js";
+import apply from "https://deno.land/x/ramda@v0.27.2/source/apply.js";
+import complement from "https://deno.land/x/ramda@v0.27.2/source/complement.js";
+import compose from "https://deno.land/x/ramda@v0.27.2/source/compose.js";
+import converge from "https://deno.land/x/ramda@v0.27.2/source/converge.js";
+import curry from "https://deno.land/x/ramda@v0.27.2/source/curry.js";
+import has from "https://deno.land/x/ramda@v0.27.2/source/has.js";
+import identity from "https://deno.land/x/ramda@v0.27.2/source/identity.js";
+import join from "https://deno.land/x/ramda@v0.27.2/source/join.js";
+import map from "https://deno.land/x/ramda@v0.27.2/source/map.js";
+import prop from "https://deno.land/x/ramda@v0.27.2/source/prop.js";
+import reduce from "https://deno.land/x/ramda@v0.27.2/source/reduce.js";
+import toString from "https://deno.land/x/ramda@v0.27.2/source/toString.js";
+import zipObj from "https://deno.land/x/ramda@v0.27.2/source/zipObj.js";
 
 import { $$inspect, $$returnType, $$tag, $$tagList, $$type, $$valueList } from "./Symbols.js";
+
+/**
+ * ## Type factory
+ *
+ * The Type factory can be used to build complex data structure.
+ *
+ * ```js
+ * import { factorizeType } from "https://deno.land/x/functional@v1.3.0/library/factories.js";
+ *
+ * const Coordinates = factorizeType("Coordinates", [ "x", "y" ]);
+ * const vector = Coordinates(150, 200);
+ * // vector.x === 150
+ * // vector.y === 200
+ * ```
+ *
+ * ### Type`.from`
+ * `Type ~> Object -> t`
+ *
+ * Create an instance of Type using an object representation.
+ *
+ * ```js
+ * const vector = Coordinates.from({ x: 150, y: 200 });
+ * // vector.x === 150
+ * // vector.y === 200
+ * ```
+ *
+ * ### Type`.is`
+ * `Type ~> Type t -> Boolean`
+ *
+ * Assert that an instance is of the same Type.
+ *
+ * ```js
+ * Coordinates.is(vector);
+ * // true
+ * ```
+ *
+ * ### Type`.toString`
+ * `Type ~> () -> String`
+ *
+ * Serialize the Type Representation into a string.
+ *
+ * ```js
+ * Coordinates.toString();
+ * // "Coordinates"
+ * ```
+ *
+ * ### Type(a)`.toString`
+ * `Type t => t ~> () -> String`
+ *
+ * Serialize the instance into a string.
+ *
+ * ```js
+ * vector.toString();
+ * // "Coordinates(150, 200)"
+ * ```
+ *
+ * ## Sum Type factory
+ *
+ * ```js
+ * import { factorizeSumType } from "https://deno.land/x/functional@v1.3.0/library/factories.js";
+ *
+ * const Shape = factorizeSumType(
+ *   "Shape",
+ *   {
+ *     // Square :: (Coord, Coord) -> Shape
+ *     Square: [ "topLeft", "bottomRight" ],
+ *     // Circle :: (Coord, Number) -> Shape
+ *     Circle: [ "center", "radius" ]
+ *   }
+ * );
+ * ```
+ *
+ * ### SumType`.from`
+ * `SumType ~> Object -> t`
+ *
+ * Create an instance of Type using an object representation.
+ *
+ * ```js
+ * const oval = Shape.Circle.from(
+ *   {
+ *     center: Coordinates.from({ x: 150, y: 200 }),
+ *     radius: 200
+ *   }
+ * );
+ * // oval.center === Coordinates(150, 200)
+ * // oval.radius === 200
+ * ```
+ *
+ * ### SumType`.is`
+ * `SumType ~> SumType t -> Boolean`
+ *
+ * Assert that an instance is of the same Sum Type.
+ *
+ * ```js
+ * Shape.Circle.is(oval);
+ * // true
+ * ```
+ *
+ * ### SumType`#fold`
+ *
+ * ```js
+ * Shape.prototype.translate = function (x, y, z) {
+ *   return this.fold({
+ *     Square: (topleft, bottomright) =>
+ *       Shape.Square(
+ *         topLeft.translate(x, y, z),
+ *         bottomRight.translate(x, y, z)
+ *       ),
+ *
+ *     Circle: (centre, radius) =>
+ *       Shape.Circle(
+ *         centre.translate(x, y, z),
+ *         radius
+ *       )
+ *   })
+ * };
+ * ```
+ *
+ * ### SumType(a)`.toString`
+ * ` SumType t => t ~> () -> String`
+ *
+ * Serialize the instance into a string.
+ *
+ * ```js
+ * oval.toString();
+ * // "Shape.Circle(Coordinates(150, 200), 200)"
+ * ```
+ */
 
 // Prototype :: Object
 // TypeRepresentation :: Object

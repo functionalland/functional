@@ -4,8 +4,10 @@ export * from "./library/Either.js";
 export * from "./library/IO.js";
 // @deno-types="./library/Maybe.d.ts"
 export * from "./library/Maybe.js";
+export * from "./library/Pair.js";
 // @deno-types="./library/factories.d.ts"
 export * from "./library/factories.js";
 export * from "./library/Symbols.js";
 // @deno-types="./library/Task.d.ts"
 export * from "./library/Task.js";
+export * from "./library/utilities.js";

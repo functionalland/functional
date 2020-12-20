@@ -1,6 +1,8 @@
 import { factorizeType } from "./factories.js";
 
 /**
+ * ## IO
+ *
  * The `IO` type represents a call to IO. Any Functional Programming purist would tell you that your functions has
  * to be pure... But in the real world, this is not very useful. Wrapping your call to IO with `IO` will enable you
  * to postpone the side-effect and keep your program (somewhat) pure.
@@ -11,6 +13,8 @@ import { factorizeType } from "./factories.js";
  * ### Example
  *
  * ```js
+ * import IO from "https://deno.land/x/functional@v1.3.0/library/IO.js";
+ *
  * const container = IO(_ => readFile(`${Deno.cwd()}/dump/hoge`))
  *   .map(promise => promise.then(text => text.split("\n")));
  * // File isn't being read yet. Still pure.

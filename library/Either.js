@@ -3,6 +3,8 @@ import { factorizeSumType } from "./factories.js";
 import { $$value } from "./Symbols.js";
 
 /**
+ * ## Either
+ *
  * The `Either` is a sum type similar to `Maybe`, but it differs in that a value can be of two possible types
  * (Left or Right). Commonly the Left type represents an error.
  *
@@ -14,6 +16,8 @@ import { $$value } from "./Symbols.js";
  * ### Example
  *
  * ```js
+ * import Either from "https://deno.land/x/functional@v1.3.0/library/Either.js";
+ *
  * const containerA = Either.Right(42).map(x => x + 2);
  * const containerB = Either.Left(new Error("The value is not 42.")).map(x => x + 2);
  * const containerC = containerB.alt(containerA);

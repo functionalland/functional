@@ -2,10 +2,10 @@
 
 Common Functional Programming Algebraic data types for JavaScript that is compatible with most modern browsers and Deno.
 
-[![deno land](http://img.shields.io/badge/available%20on-deno.land/x-lightgrey.svg?logo=deno&labelColor=black)](https://deno.land/x/functional-redis@v1.3.0)
+[![deno land](http://img.shields.io/badge/available%20on-deno.land/x-lightgrey.svg?logo=deno&labelColor=black)](https://deno.land/x/functional@v1.3.1)
 [![deno version](https://img.shields.io/badge/deno-^1.6.1-lightgrey?logo=deno)](https://github.com/denoland/deno)
-[![GitHub release](https://img.shields.io/github/v/release/sebastienfilion/functional-redis)](https://github.com/sebastienfilion/functional-redis/releases)
-[![GitHub licence](https://img.shields.io/github/license/sebastienfilion/functional-redis)](https://github.com/sebastienfilion/functional-redis/blob/v1.3.0/LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/releases)
+[![GitHub licence](https://img.shields.io/github/license/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/blob/v1.3.1/LICENSE)
 
   * [Either](#either)
   * [IO](#io)
@@ -545,7 +545,15 @@ returned. But if the container is `Either.Left`, it will throw an error with the
 You can import any types or the factories through `mod.ts`.
 
 ```ts
-import { Either, IO, Maybe, Task, factorizeType, factorySumType } from "https://deno.land/x/functional@v1.3.0/mod.ts";
+import {
+  Either,
+  IO,
+  Maybe,
+  Pair,
+  Task,
+  factorizeType,
+  factorySumType
+} from "https://deno.land/x/functional@v1.3.0/mod.ts";
 ```
 
 Or, you can import individual sub-module with the appropriate TypeScript hint in Deno.

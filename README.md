@@ -6,6 +6,7 @@ Common Functional Programming Algebraic data types for JavaScript that is compat
 [![deno version](https://img.shields.io/badge/deno-^1.6.1-lightgrey?logo=deno)](https://github.com/denoland/deno)
 [![GitHub release](https://img.shields.io/github/v/release/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/releases)
 [![GitHub licence](https://img.shields.io/github/license/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/blob/v1.3.2/LICENSE)
+[![Discord Chat](https://img.shields.io/discord/790708610023555093.svg)](https://discord.gg/)
 
   * [Either](#either)
   * [IO](#io)

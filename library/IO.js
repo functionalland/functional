@@ -13,7 +13,7 @@ import { factorizeType } from "./factories.js";
  * ### Example
  *
  * ```js
- * import IO from "https://deno.land/x/functional@v1.3.0/library/IO.js";
+ * import IO from "https://deno.land/x/functional@v1.3.2/library/IO.js";
  *
  * const container = IO(_ => readFile(`${Deno.cwd()}/dump/hoge`))
  *   .map(promise => promise.then(text => text.split("\n")));

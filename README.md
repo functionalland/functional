@@ -2,10 +2,10 @@
 
 Common Functional Programming Algebraic data types for JavaScript that is compatible with most modern browsers and Deno.
 
-[![deno land](http://img.shields.io/badge/available%20on-deno.land/x-lightgrey.svg?logo=deno&labelColor=black)](https://deno.land/x/functional@v1.3.1)
+[![deno land](http://img.shields.io/badge/available%20on-deno.land/x-lightgrey.svg?logo=deno&labelColor=black)](https://deno.land/x/functional@v1.3.2)
 [![deno version](https://img.shields.io/badge/deno-^1.6.1-lightgrey?logo=deno)](https://github.com/denoland/deno)
 [![GitHub release](https://img.shields.io/github/v/release/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/releases)
-[![GitHub licence](https://img.shields.io/github/license/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/blob/v1.3.1/LICENSE)
+[![GitHub licence](https://img.shields.io/github/license/sebastienfilion/functional)](https://github.com/sebastienfilion/functional/blob/v1.3.2/LICENSE)
 
   * [Either](#either)
   * [IO](#io)
@@ -24,8 +24,8 @@ the [Fantasy-land specifications](https://github.com/fantasyland/fantasy-land).
 
 ```js
 import { compose, converge, curry, map, prop } from "https://deno.land/x/ramda@v0.27.2/mod.ts";
-import Either from "https://deno.land/x/functional@v1.3.0/library/Either.js";
-import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
+import Either from "https://deno.land/x/functional@v1.3.2/library/Either.js";
+import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
 
 const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
 
@@ -59,11 +59,11 @@ sayHello(userID).run()
 
 ### Using the bundle
 
-As a convenience, when using Functional in the browser, you can use the **unminified** bundled copy.
+As a convenience, when using Functional in the browser, you can use the **unminified** bundled copy (18KB gzipped).
 
 ```js
 import { compose, converge, lift, map, prop } from "https://deno.land/x/ramda@v0.27.2/mod.ts";
-import { Either, Task } from "https://deno.land/x/functional@v1.3.0/functional.js";
+import { Either, Task } from "https://deno.land/x/functional@v1.3.2/functional.js";
 
 const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
 
@@ -96,7 +96,7 @@ The `Either` type implements the following algebras:
 ### Example
 
 ```js
-import Either from "https://deno.land/x/functional@v1.3.0/library/Either.js";
+import Either from "https://deno.land/x/functional@v1.3.2/library/Either.js";
 
 const containerA = Either.Right(42).map(x => x + 2);
 const containerB = Either.Left(new Error("The value is not 42.")).map(x => x + 2);
@@ -126,7 +126,7 @@ The `IO` type implements the following algebras:
 ### Example
 
 ```js
-import IO from "https://deno.land/x/functional@v1.3.0/library/IO.js";
+import IO from "https://deno.land/x/functional@v1.3.2/library/IO.js";
 
 const container = IO(_ => readFile(`${Deno.cwd()}/dump/hoge`))
   .map(promise => promise.then(text => text.split("\n")));
@@ -154,7 +154,7 @@ The `Maybe` type implements the following algebras:
 ### Example
 
 ```js
-import Maybe from "https://deno.land/x/functional@v1.3.0/library/Maybe.js";
+import Maybe from "https://deno.land/x/functional@v1.3.2/library/Maybe.js";
 
 const containerA = Maybe.Just(42).map(x => x + 2);
 const containerB = Maybe.Nothing.map(x => x + 2);
@@ -181,7 +181,7 @@ The `Pair` type implements the following algebras:
 ### Example
 
 ```js
-import Pair from "https://deno.land/x/functional@v1.3.0/library/Pair.js";
+import Pair from "https://deno.land/x/functional@v1.3.2/library/Pair.js";
 
 const pair = Pair(42, 42)
   .bimap(
@@ -208,7 +208,7 @@ The `IO` type implements the following algebras:
 ### Example
 
 ```js
-import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
+import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
 
 const containerA = Task(_ => readFile(`${Deno.cwd()}/dump/hoge`))
   .map(text => text.split("\n"));
@@ -260,7 +260,7 @@ Please check-out [Functional IO](https://github.com/sebastienfilion/functional-d
 The Type factory can be used to build complex data structure.
 
 ```js
-import { factorizeType } from "https://deno.land/x/functional@v1.3.0/library/factories.js";
+import { factorizeType } from "https://deno.land/x/functional@v1.3.2/library/factories.js";
 
 const Coordinates = factorizeType("Coordinates", [ "x", "y" ]);
 const vector = Coordinates(150, 200);
@@ -312,7 +312,7 @@ vector.toString();
 ## Sum Type factory
 
 ```js
-import { factorizeSumType } from "https://deno.land/x/functional@v1.3.0/library/factories.js";
+import { factorizeSumType } from "https://deno.land/x/functional@v1.3.2/library/factories.js";
 
 const Shape = factorizeSumType(
   "Shape",
@@ -436,14 +436,30 @@ const vector = Coordinates(150, 200);
 ### `encodeText`
 `String → Uint8Array`
 
+### `alt`
+`Alt a → Alt b → Alt a|b`
+
+This function takes a container of any type and, an Alternative functor. Then it returns either the container or the
+alternative functor.
+The function is in support of the [Alt algebra](https://github.com/fantasyland/fantasy-land#alt).
+
+```js
+import Either from "https://deno.land/x/functional@v1.3.2/library/Either.js";
+import { alt } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
+
+const container = alt(Either.Right(42), Either.Left("Not the meaning of life"));
+
+assertEquals(container.extract(), 42);
+```
+
 ### `chainLift`
 `(a → b → c) → Chainable a → Functor b → Chainable c`
 
 This function is similar to [`lift`](https://ramdajs.com/docs/#lift) but is chainable.
 
 ```js
-import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
-import { chainLift } from "https://deno.land/x/functional@v1.3.0/library/utilities.js";
+import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
+import { chainLift } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
 
 const hogeFuga = useWith(
   chainLift(curry((x, y) => Task.of(x * y))),
@@ -467,8 +483,8 @@ This function is a combinator for the [`chainRec` algebra](https://github.com/fa
 It takes a ternary function, an initial value and, a chainable recursive functor.
 
 ```js
-import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
-import { chainRec } from "https://deno.land/x/functional@v1.3.0/library/utilities.js";
+import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
+import { chainRec } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
 
 const multiplyAll = curry((x, n) => chainRec(
   (Loop, Done, cursor) =>
@@ -490,8 +506,8 @@ This function takes a type constructor and, a list of Applicative functor and ev
 functor of a list of value.
 
 ```js
-import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
-import { evert } from "https://deno.land/x/functional@v1.3.0/library/utilities.js";
+import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
+import { evert } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
 
 const container = await evert(Task, [ Task.of(42), Task.of(32), Task.of(24) ]).run();
 
@@ -511,8 +527,8 @@ This function is a composable `console.debug`. It takes a message, a value and, 
 This function takes n Chainable functor and chain them automatically.
 
 ```js
-import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
-import { runSequentially } from "https://deno.land/x/functional@v1.3.0/library/utilities.js";
+import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
+import { runSequentially } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
 
 const fuga = converge(
   runSequentially,
@@ -553,14 +569,14 @@ import {
   Task,
   factorizeType,
   factorySumType
-} from "https://deno.land/x/functional@v1.3.0/mod.ts";
+} from "https://deno.land/x/functional@v1.3.2/mod.ts";
 ```
 
 Or, you can import individual sub-module with the appropriate TypeScript hint in Deno.
 
 ```ts
-// @deno-types="https://deno.land/x/functional@v1.3.0/library/Either.d.ts"
-import Either from "https://deno.land/x/functional@v1.3.0/library/Either.js";
+// @deno-types="https://deno.land/x/functional@v1.3.2/library/Either.d.ts"
+import Either from "https://deno.land/x/functional@v1.3.2/library/Either.js";
 ```
  
 ---

@@ -5,8 +5,8 @@ the [Fantasy-land specifications](https://github.com/fantasyland/fantasy-land).
 
 ```js
 import { compose, converge, curry, map, prop } from "https://deno.land/x/ramda@v0.27.2/mod.ts";
-import Either from "https://deno.land/x/functional@v1.3.0/library/Either.js";
-import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
+import Either from "https://deno.land/x/functional@v1.3.2/library/Either.js";
+import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
 
 const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
 
@@ -44,7 +44,7 @@ As a convenience, when using Functional in the browser, you can use the **unmini
 
 ```js
 import { compose, converge, lift, map, prop } from "https://deno.land/x/ramda@v0.27.2/mod.ts";
-import { Either, Task } from "https://deno.land/x/functional@v1.3.0/functional.js";
+import { Either, Task } from "https://deno.land/x/functional@v1.3.2/functional.js";
 
 const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
 

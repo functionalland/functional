@@ -15,7 +15,7 @@ import { $$value } from "./Symbols.js";
  * ### Example
  *
  * ```js
- * import Maybe from "https://deno.land/x/functional@v1.3.0/library/Maybe.js";
+ * import Maybe from "https://deno.land/x/functional@v1.3.2/library/Maybe.js";
  *
  * const containerA = Maybe.Just(42).map(x => x + 2);
  * const containerB = Maybe.Nothing.map(x => x + 2);

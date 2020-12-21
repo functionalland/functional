@@ -14,7 +14,7 @@ import { factorizeType } from "./factories.js";
  * ### Example
  *
  * ```js
- * import Pair from "https://deno.land/x/functional@v1.3.0/library/Pair.js";
+ * import Pair from "https://deno.land/x/functional@v1.3.2/library/Pair.js";
  *
  * const pair = Pair(42, 42)
  *   .bimap(

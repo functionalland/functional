@@ -23,7 +23,7 @@ import { $$inspect, $$returnType, $$tag, $$tagList, $$type, $$valueList } from "
  * The Type factory can be used to build complex data structure.
  *
  * ```js
- * import { factorizeType } from "https://deno.land/x/functional@v1.3.0/library/factories.js";
+ * import { factorizeType } from "https://deno.land/x/functional@v1.3.2/library/factories.js";
  *
  * const Coordinates = factorizeType("Coordinates", [ "x", "y" ]);
  * const vector = Coordinates(150, 200);
@@ -75,7 +75,7 @@ import { $$inspect, $$returnType, $$tag, $$tagList, $$type, $$valueList } from "
  * ## Sum Type factory
  *
  * ```js
- * import { factorizeSumType } from "https://deno.land/x/functional@v1.3.0/library/factories.js";
+ * import { factorizeSumType } from "https://deno.land/x/functional@v1.3.2/library/factories.js";
  *
  * const Shape = factorizeSumType(
  *   "Shape",

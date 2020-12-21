@@ -62,14 +62,36 @@ export const decodeRaw = $$decoder.decode.bind($$decoder);
 export const encodeText = $$encoder.encode.bind($$encoder);
 
 /**
+ * ### `alt`
+ * `Alt a -> Alt b -> Alt a|b`
+ *
+ * This function takes a container of any type and, an Alternative functor. Then it returns either the container or the
+ * alternative functor.
+ * The function is in support of the [Alt algebra](https://github.com/fantasyland/fantasy-land#alt).
+ *
+ * ```js
+ * import Either from "https://deno.land/x/functional@v1.3.2/library/Either.js";
+ * import { alt } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
+ *
+ * const container = alt(Either.Right(42), Either.Left("Not the meaning of life"));
+ *
+ * assertEquals(container.extract(), 42);
+ * ```
+ */
+export const alt = curry(
+  (container, alternativeFunctor) =>
+    (alternativeFunctor.alt || alternativeFunctor["fantasy-land/alt"]).call(alternativeFunctor, container)
+);
+
+/**
  * ### `chainLift`
  * `(a -> b -> c) -> Chainable a -> Functor b -> Chainable c`
  *
  * This function is similar to [`lift`](https://ramdajs.com/docs/#lift) but is chainable.
  *
  * ```js
- * import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
- * import { chainLift } from "https://deno.land/x/functional@v1.3.0/library/utilities.js";
+ * import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
+ * import { chainLift } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
  *
  * const hogeFuga = useWith(
  *   chainLift(curry((x, y) => Task.of(x * y))),
@@ -98,8 +120,8 @@ export const chainLift = curry(
  * It takes a ternary function, an initial value and, a chainable recursive functor.
  *
  * ```js
- * import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
- * import { chainRec } from "https://deno.land/x/functional@v1.3.0/library/utilities.js";
+ * import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
+ * import { chainRec } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
  *
  * const multiplyAll = curry((x, n) => chainRec(
  *   (Loop, Done, cursor) =>
@@ -128,8 +150,8 @@ export const chainRec = curry(
  * functor of a list of value.
  *
  * ```js
- * import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
- * import { evert } from "https://deno.land/x/functional@v1.3.0/library/utilities.js";
+ * import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
+ * import { evert } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
  *
  * const container = await evert(Task, [ Task.of(42), Task.of(32), Task.of(24) ]).run();
  *
@@ -162,8 +184,8 @@ export const log = message => x => console.debug(blue(message), x) || x;
  * This function takes n Chainable functor and chain them automatically.
  *
  * ```js
- * import Task from "https://deno.land/x/functional@v1.3.0/library/Task.js";
- * import { runSequentially } from "https://deno.land/x/functional@v1.3.0/library/utilities.js";
+ * import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
+ * import { runSequentially } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
  *
  * const fuga = converge(
  *   runSequentially,

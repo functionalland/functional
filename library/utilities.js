@@ -1,5 +1,3 @@
-import { blue, gray, red } from "https://deno.land/std@0.79.0/fmt/colors.ts";
-
 import append from "https://deno.land/x/ramda@v0.27.2/source/append.js";
 import curry from "https://deno.land/x/ramda@v0.27.2/source/curry.js";
 import lift from "https://deno.land/x/ramda@v0.27.2/source/lift.js";
@@ -175,7 +173,7 @@ export const insideOut = evert;
  *
  * This function is a composable `console.debug`. It takes a message, a value and, return the value.
  */
-export const log = message => x => console.debug(blue(message), x) || x;
+export const log = message => x => console.debug(message, x) || x;
 
 /**
  * ### `runSequentially`
@@ -221,7 +219,7 @@ export const safeExtract = curry(
       throw new Error(`${message} Error: ${
         (error.hasOwnProperty('raw'))
           ? decodeRaw(error.raw)
-          : `${red(error.message)}\n${gray(error.stack)}`
+          : `${error.message}\n${error.stack}`
       }`)
     },
     Right: value => value

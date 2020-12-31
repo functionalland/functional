@@ -3,7 +3,7 @@ export FL_DESCRIPTION="Common Functional Programming Algebraic data types for Ja
 modern browsers and Deno."
 export FL_GITHUB_URL="https://github.com/sebastienfilion/functional"
 export FL_DENO_URL="https://deno.land/x/functional"
-export FL_VERSION="v1.3.2"
+export FL_VERSION="v1.3.3"
 
 deno run --allow-all --unstable ../@functional:generate-documentation/cli.js document \
 "$FL_TITLE" \

@@ -1,0 +1,17 @@
+{
+  "name": "functional",
+  "description": "Common Functional Programming Algebraic data types for JavaScript that is compatible with most modern browsers and Deno.",
+  "stable": true,
+  "entry": "./mod.js",
+  "files": [
+    "./README.md",
+    "./mod.ts",
+    "./library/*.js"
+  ],
+  "version": "v1.3.3",
+  "repository": "https://github.com/functionalland/functional",
+  "check": false,
+  "homepage": "https://github.com/functionalland/functional",
+  "ignore": [],
+  "unlisted": false
+}

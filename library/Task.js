@@ -3,7 +3,7 @@ import Either from "./Either.js";
 import Pair from "./Pair.js";
 import { Done, Loop } from "./Step.js";
 
-import { $$debug, $$inspect } from "./Symbols.js";
+import { $$debug, $$inspect, $$value } from "./Symbols.js";
 import { chainLift } from "./utilities.js";
 
 const concat = x => y => x.concat(y);
@@ -193,7 +193,7 @@ Task.prototype.chainRec = Task.prototype["fantasy-land/chainRec"] = function (te
   return accumulator;
 };
 
-Task.prototype.map = Task.prototype["fantasy-land/map"] = function (unaryFunction) {
+Task.prototype.map = Task.prototype["fantasy-land/map"] = Task.prototype.then = function (unaryFunction) {
 
   return Object.defineProperty(
     Task(_ => {
@@ -207,6 +207,25 @@ Task.prototype.map = Task.prototype["fantasy-land/map"] = function (unaryFunctio
             return (Either.is(maybeContainer)) ? maybeContainer : Either.Right(maybeContainer);
           }
         ),
+        Either.Left
+      );
+    }),
+    $$debug,
+    {
+      writable: false,
+      value: `${this[$$debug]}.map(${serializeFunctionForDebug(unaryFunction)})`
+    }
+  );
+};
+
+Task.prototype.catch = function (unaryFunction) {
+
+  return Object.defineProperty(
+    Task(_ => {
+      const promise = this.asyncFunction();
+
+      return promise.then(
+        container => Either.Left.is(container) ? Either.Right(unaryFunction(container[$$value])) : container,
         Either.Left
       );
     }),

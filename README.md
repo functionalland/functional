@@ -192,7 +192,7 @@ const pair = Pair(42, 42)
 
 assert(Pair.is(pair));
 assert(pair.first === 84);
-assert(pair.first === 44);
+assert(pair.second === 44);
 ```
 
 ---

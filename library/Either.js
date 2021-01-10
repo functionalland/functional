@@ -16,7 +16,7 @@ import { $$value } from "./Symbols.js";
  * ### Example
  *
  * ```js
- * import Either from "https://deno.land/x/functional@v1.3.2/library/Either.js";
+ * import Either from "https://deno.land/x/functional@v1.3.4/library/Either.js";
  *
  * const containerA = Either.Right(42).map(x => x + 2);
  * const containerB = Either.Left(new Error("The value is not 42.")).map(x => x + 2);
@@ -25,7 +25,7 @@ import { $$value } from "./Symbols.js";
  * assert(Either.Right.is(containerA));
  * assert(containerA.extract() === 44);
  * assert(Either.Left.is(containerB));
- * assert(Either.Right(containerC));
+ * assert(Either.Right.is(containerC));
  * ```
  */
 

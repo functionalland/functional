@@ -1,5 +1,8 @@
 import append from "https://deno.land/x/ramda@v0.27.2/source/append.js";
 import curry from "https://deno.land/x/ramda@v0.27.2/source/curry.js";
+import curryN from "https://deno.land/x/ramda@v0.27.2/source/curryN.js";
+import equals from "https://deno.land/x/ramda@v0.27.2/source/equals.js";
+import find from "https://deno.land/x/ramda@v0.27.2/source/find.js";
 import lift from "https://deno.land/x/ramda@v0.27.2/source/lift.js";
 import reduce from "https://deno.land/x/ramda@v0.27.2/source/reduce.js";
 
@@ -68,8 +71,8 @@ export const encodeText = $$encoder.encode.bind($$encoder);
  * The function is in support of the [Alt algebra](https://github.com/fantasyland/fantasy-land#alt).
  *
  * ```js
- * import Either from "https://deno.land/x/functional@v1.3.2/library/Either.js";
- * import { alt } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
+ * import Either from "https://deno.land/x/functional@v1.3.4/library/Either.js";
+ * import { alt } from "https://deno.land/x/functional@v1.3.4/library/utilities.js";
  *
  * const container = alt(Either.Right(42), Either.Left("Not the meaning of life"));
  *
@@ -88,8 +91,8 @@ export const alt = curry(
  * This function is similar to [`lift`](https://ramdajs.com/docs/#lift) but is chainable.
  *
  * ```js
- * import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
- * import { chainLift } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
+ * import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
+ * import { chainLift } from "https://deno.land/x/functional@v1.3.4/library/utilities.js";
  *
  * const hogeFuga = useWith(
  *   chainLift(curry((x, y) => Task.of(x * y))),
@@ -118,8 +121,8 @@ export const chainLift = curry(
  * It takes a ternary function, an initial value and, a chainable recursive functor.
  *
  * ```js
- * import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
- * import { chainRec } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
+ * import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
+ * import { chainRec } from "https://deno.land/x/functional@v1.3.4/library/utilities.js";
  *
  * const multiplyAll = curry((x, n) => chainRec(
  *   (Loop, Done, cursor) =>
@@ -148,8 +151,8 @@ export const chainRec = curry(
  * functor of a list of value.
  *
  * ```js
- * import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
- * import { evert } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
+ * import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
+ * import { evert } from "https://deno.land/x/functional@v1.3.4/library/utilities.js";
  *
  * const container = await evert(Task, [ Task.of(42), Task.of(32), Task.of(24) ]).run();
  *
@@ -182,8 +185,8 @@ export const log = message => x => console.debug(message, x) || x;
  * This function takes n Chainable functor and chain them automatically.
  *
  * ```js
- * import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
- * import { runSequentially } from "https://deno.land/x/functional@v1.3.2/library/utilities.js";
+ * import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
+ * import { runSequentially } from "https://deno.land/x/functional@v1.3.4/library/utilities.js";
  *
  * const fuga = converge(
  *   runSequentially,
@@ -231,11 +234,34 @@ export const safeExtract = curry(
  * `((a, b) -> a) -> a -> AsyncIterable b -> a`
  */
 export const stream = curry(
-  async (composedFunction, accumulator, iterator) => {
+  async (binaryFunction, accumulator, iterator) => {
     for await (const data of iterator) {
-      accumulator = composedFunction(accumulator, data);
+      accumulator = binaryFunction(accumulator, data);
     }
 
     return accumulator;
   }
 );
+
+export const factorizeSpy = () => {
+  const history = [];
+
+  return [
+    (functionArity, nAryFunction) =>
+      curryN(
+        functionArity, (...argumentList) => history.push(argumentList) && nAryFunction.call(null, ...argumentList)
+      ),
+    {
+      assertCalledWith: (...argumentList) => !!find(equals(argumentList), history),
+      assertCallCount: n => n === history.length,
+      get callCount() { return history.length },
+      get history() { return history }
+    }
+  ]
+};
+
+export const factorizeFakeInstance = instance => (
+  {
+    ["fantasy-land/equals"]: value => value instanceof instance
+  }
+)

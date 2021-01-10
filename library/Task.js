@@ -21,7 +21,7 @@ const concat = x => y => x.concat(y);
  * ### Example
  *
  * ```js
- * import Task from "https://deno.land/x/functional@v1.3.2/library/Task.js";
+ * import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
  *
  * const containerA = Task(_ => readFile(`${Deno.cwd()}/dump/hoge`))
  *   .map(text => text.split("\n"));
@@ -261,5 +261,7 @@ Task.prototype.toString = Task.prototype[$$inspect] = function () {
 
   return this[$$debug] || `Task("unknown")`
 };
+
+export const factorizeTask = x => Task.of(x);
 
 export default Task;

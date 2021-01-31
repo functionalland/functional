@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.79.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.83.0/testing/asserts.ts";
 
 import { factorizeType } from "./factories.js";
 import Either from "./Either.js";
@@ -161,50 +161,6 @@ Deno.test(
         .ap(Either.of(f => f(42))).toString()
     )
 );
-
-Deno.test(
-  "Either.Right: #traverse - Identity",
-  () => {
-    const Dummy = factorizeType("Dummy", [ "x" ]);
-    Dummy.of = x => Dummy(x);
-    Dummy.prototype.map = function (unaryFunction) {
-
-      return Dummy(unaryFunction(this.x));
-    };
-    const container = Either.Right([ 42, 32, 23 ]);
-
-    assertEquals(
-      container.traverse(Dummy, Dummy.of).toString(),
-      Dummy.of(container).toString()
-    );
-  }
-);
-
-/**
- * Traverse is an experimental feature; The Naturility law test is failing.
- */
-// Deno.test(
-//   "Either.Right: #traverse - Naturality",
-//   () => {
-//     const Dummy = factorizeType("Dummy", [ "x" ]);
-//     Dummy.of = x => Dummy(x);
-//     Dummy.prototype.chain = function (unaryFunction) {
-//
-//       return unaryFunction(this.x);
-//     };
-//     Dummy.prototype.map = function (unaryFunction) {
-//
-//       return Dummy(unaryFunction(this.x));
-//     };
-//     const container = Either.Right([ 42, 32, 23 ]);
-//     const f = x => Dummy.of(x);
-//
-//     assertEquals(
-//       f(container.sequence(Dummy)).toString(),
-//       container.traverse(Either, f).toString()
-//     );
-//   }
-// );
 
 Deno.test(
   "Either: #zero - Right identity",

@@ -1,4 +1,4 @@
-import curry from "https://deno.land/x/ramda@v0.27.2/source/curry.js";
+import { curryN } from "./curry.js";
 
 import { factorizeType } from "./factories.js";
 
@@ -40,6 +40,6 @@ Pair.prototype.map = Pair.prototype["fantasy-land/map"] = function (unaryFunctio
   return Pair(unaryFunction(this.first), this.second);
 };
 
-export const factorizePair = curry(Pair);
+export const factorizePair = curryN(2, Pair);
 
 export default Pair;

@@ -1,9 +1,8 @@
-import { assert, assertEquals } from "https://deno.land/std@0.79.0/testing/asserts.ts";
-import { assertIsEquivalent } from "./asserts.js";
 import Either from "./Either.js";
 import Pair from "./Pair.js";
 import Task from "./Task.js";
 import { safeExtract } from "./utilities.js";
+import { assert, assertEquals, assertEquivalent } from "./testing.ts";
 
 const add = x => x + 2;
 const multiply = x => x * 2;
@@ -23,7 +22,7 @@ Deno.test(
     assert(promise instanceof Promise);
 
     return promise
-      .then(container => assertIsEquivalent(container, Either.Right(1764)));
+      .then(container => assertEquivalent(container, Either.Right(1764)));
   }
 );
 
@@ -42,7 +41,7 @@ Deno.test(
     assert(Either.is(containerD));
     assert(Either.is(containerE));
 
-    assertIsEquivalent(containerD, containerE);
+    assertEquivalent(containerD, containerE);
   }
 );
 
@@ -61,7 +60,7 @@ Deno.test(
     const containerD = await lift2(x => y => x * y, containerA, containerB).run();
     assert(Either.is(containerD));
 
-    assertIsEquivalent(containerD, Either.Right(1344));
+    assertEquivalent(containerD, Either.Right(1344));
   }
 );
 
@@ -89,11 +88,11 @@ Deno.test(
 
     return Promise.all([
       promiseA
-        .then(container => assertIsEquivalent(container, Either.Right(44))),
+        .then(container => assertEquivalent(container, Either.Right(44))),
       promiseB
-        .then(container => assertIsEquivalent(container, Either.Right(88))),
+        .then(container => assertEquivalent(container, Either.Right(88))),
       promiseC
-        .then(container => assertIsEquivalent(container, Either.Right(88)))
+        .then(container => assertEquivalent(container, Either.Right(88)))
     ]);
   }
 );
@@ -106,7 +105,7 @@ Deno.test(
     const containerB = await containerA.map(value => value).run();
     const containerC = await containerA.run();
 
-    assertIsEquivalent(containerB, containerC);
+    assertEquivalent(containerB, containerC);
   }
 );
 
@@ -118,7 +117,7 @@ Deno.test(
     const containerB = await containerA.map(add).map(multiply).run();
     const containerC = await containerA.map(value => multiply(add(value))).run()
 
-    assertIsEquivalent(containerB, containerC);
+    assertEquivalent(containerB, containerC);
   }
 );
 
@@ -147,11 +146,11 @@ Deno.test(
 
     return Promise.all([
       promiseA
-        .then(container => assertIsEquivalent(container, Either.Right(44))),
+        .then(container => assertEquivalent(container, Either.Right(44))),
       promiseB
-        .then(container => assertIsEquivalent(container, Either.Right(88))),
+        .then(container => assertEquivalent(container, Either.Right(88))),
       promiseC
-        .then(container => assertIsEquivalent(container, Either.Right(88)))
+        .then(container => assertEquivalent(container, Either.Right(88)))
     ]);
   }
 );
@@ -166,14 +165,14 @@ Deno.test(
     const containerB = await containerA.chain(chainAdd).chain(chainMultiply).run();
     const containerC = await containerA.chain(value => chainAdd(value).chain(chainMultiply)).run()
 
-    assertIsEquivalent(containerB, containerC);
+    assertEquivalent(containerB, containerC);
   }
 );
 
 Deno.test(
   "Task: #chainRec",
   async () => {
-    const container = Task.of([ 0, ]).chainRec(
+    const container = Task.of([ 0 ]).chainRec(
       (Loop, Done, cursor) =>
         cursor === 10 ? Done(Pair(cursor, null)) : Loop(Pair(cursor + 1, Task.of([ 42 * (cursor + 1) ]))),
       0
@@ -211,11 +210,11 @@ Deno.test(
 
     return Promise.all([
       promiseA
-        .then(container => assertIsEquivalent(container, Either.Right(44))),
+        .then(container => assertEquivalent(container, Either.Right(44))),
       promiseB
-        .then(container => assertIsEquivalent(container, Either.Right(88))),
+        .then(container => assertEquivalent(container, Either.Right(88))),
       promiseC
-        .then(container => assertIsEquivalent(container, Either.Right(88)))
+        .then(container => assertEquivalent(container, Either.Right(88)))
     ]);
   }
 );
@@ -244,11 +243,11 @@ Deno.test(
 
     return Promise.all([
       promiseA
-        .then(container => assertIsEquivalent(container, Either.Right(44))),
+        .then(container => assertEquivalent(container, Either.Right(44))),
       promiseB
-        .then(container => assertIsEquivalent(container, Either.Right(88))),
+        .then(container => assertEquivalent(container, Either.Right(88))),
       promiseC
-        .then(container => assertIsEquivalent(container, Either.Right(88)))
+        .then(container => assertEquivalent(container, Either.Right(88)))
     ]);
   }
 );
@@ -274,7 +273,7 @@ Deno.test(
 
     const containerB = await promise;
 
-    assertIsEquivalent(containerB, Either.Right([ 84, 64, 46 ]))
+    assertEquivalent(containerB, Either.Right([ 84, 64, 46 ]))
   }
 );
 

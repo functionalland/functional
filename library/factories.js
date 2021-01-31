@@ -1,19 +1,10 @@
 // Inspired by fantasyland/daggy
 // @see https://github.com/fantasyland/daggy/blob/master/src/daggy.js
 
-import apply from "https://deno.land/x/ramda@v0.27.2/source/apply.js";
-import complement from "https://deno.land/x/ramda@v0.27.2/source/complement.js";
-import compose from "https://deno.land/x/ramda@v0.27.2/source/compose.js";
-import converge from "https://deno.land/x/ramda@v0.27.2/source/converge.js";
-import curry from "https://deno.land/x/ramda@v0.27.2/source/curry.js";
-import has from "https://deno.land/x/ramda@v0.27.2/source/has.js";
-import identity from "https://deno.land/x/ramda@v0.27.2/source/identity.js";
-import join from "https://deno.land/x/ramda@v0.27.2/source/join.js";
-import map from "https://deno.land/x/ramda@v0.27.2/source/map.js";
-import prop from "https://deno.land/x/ramda@v0.27.2/source/prop.js";
-import reduce from "https://deno.land/x/ramda@v0.27.2/source/reduce.js";
-import toString from "https://deno.land/x/ramda@v0.27.2/source/toString.js";
-import zipObj from "https://deno.land/x/ramda@v0.27.2/source/zipObj.js";
+import { map, reduce, toString } from "./algebraic.js";
+import { apBinary, apply, compose2, identity } from "./aviary.js";
+import { curry2, curry3, curryN } from "./curry.js";
+import { complement, has, join, prop, zipObj } from "./other.js";
 
 import { $$inspect, $$returnType, $$tag, $$tagList, $$type, $$valueList } from "./Symbols.js";
 
@@ -150,7 +141,7 @@ import { $$inspect, $$returnType, $$tag, $$tagList, $$type, $$valueList } from "
 // TypeSumInstance :: Object
 
 // assertIsUnit :: TypeSumInstance -> TypeSumInstance -> Boolean
-const assertIsUnit = curry(
+const assertIsUnit = curry2(
   (instance, value) =>
     instance === value
     || !!value
@@ -159,12 +150,12 @@ const assertIsUnit = curry(
 );
 
 // assertIsTypeRepresentation :: String -> TypeSumInstance -> Boolean
-const assertIsTypeRepresentation = curry(
+const assertIsTypeRepresentation = curry2(
   (typeName, value) => value !== undefined && value !== null && typeName === value.constructor[$$type]
 );
 
 // assertIsTypeRepresentation :: TypeRepresentation -> TypeSumInstance -> Boolean
-const assertIsVariant = curry(
+const assertIsVariant = curry2(
   (instance, value) =>
     !!value
     && instance[$$tag] === value[$$tag]
@@ -172,9 +163,7 @@ const assertIsVariant = curry(
 );
 
 // serializeConstructorType :: String -> String -> String
-const serializeConstructorType = curry(
-  (typeName, tag) => `${typeName}.${tag}`
-);
+const serializeConstructorType = curry2((typeName, tag) => `${typeName}.${tag}`);
 
 const serializeConstructorTypeBound = function () {
 
@@ -182,18 +171,17 @@ const serializeConstructorTypeBound = function () {
 }
 
 // serializeList :: [*] -> String
-const serializeList = compose(join(", "), map(toString));
+const serializeList = compose2(join(", "), map(toString));
 
 // serializeTypeInstance :: String -> [*] -> String
-const serializeTypeInstance = curry(
-  (typeName, valueList) => `${typeName}(${serializeList(valueList)})`
-);
+const serializeTypeInstance = curry2((typeName, valueList) => `${typeName}(${serializeList(valueList)})`);
 
 // serializeTypeInstanceWithTag :: String -> String -> [*] -> String
-const serializeTypeInstanceWithTag = curry(
-  (typeName, tagName, valueList) => (valueList.length > 0)
-    ? `${typeName}.${tagName}(${serializeList(valueList)})`
-    : `${typeName}.${tagName}`
+const serializeTypeInstanceWithTag = curry3(
+  (typeName, tagName, valueList) =>
+    (valueList.length > 0)
+      ? `${typeName}.${tagName}(${serializeList(valueList)})`
+      : `${typeName}.${tagName}`
 );
 
 const serializeTypeInstanceBound = function () {
@@ -227,85 +215,73 @@ const factorizeFoldBound = function (functionByTag) {
   return factorizeFold(functionByTag, this[$$tag], this.constructor[$$tagList])(this[$$valueList]);
 };
 
-/**
- * @function
- * @name factorizeType
- * @module functional/SumType
- *
- * @description Factorize a Type Representation.
- * @param {String} typeName
- * @param {String[]} propertyNameList
- * @return {Function}
- *
- * @example
- * const Coordinates = factorizeType("Coordinates", [ "x", "y" ]);
- * const vector = Coordinates(150, 200);
- * // vector.x === 150
- * // vector.y === 200
- */
-
 // factorizeType :: (String, [String]) -> Function
-export const factorizeType = (typeName, propertyNameList) => {
-  let prototypeAccumulator = {
-    toString: serializeTypeInstanceBound,
-    [$$inspect]: serializeTypeInstanceBound,
-    [$$type]: typeName
-  };
+export const factorizeType = curry2(
+  (typeName, propertyNameList) => {
+    let prototypeAccumulator = {
+      toString: serializeTypeInstanceBound,
+      [$$inspect]: serializeTypeInstanceBound,
+      [$$type]: typeName
+    };
 
-  const typeRepresentationConstructor = factorizeConstructor(propertyNameList, prototypeAccumulator);
-  typeRepresentationConstructor.from = factorizeConstructorFromObject(propertyNameList, prototypeAccumulator);
-  typeRepresentationConstructor.is = assertIsTypeRepresentation(typeName);
-  typeRepresentationConstructor.prototype = prototypeAccumulator;
-  typeRepresentationConstructor.toString = serializeTypeRepresentationBound;
-  typeRepresentationConstructor[$$inspect] = serializeTypeRepresentationBound;
-  typeRepresentationConstructor[$$type] = typeName;
+    const typeRepresentationConstructor = factorizeConstructor(propertyNameList, prototypeAccumulator);
+    typeRepresentationConstructor.from = factorizeConstructorFromObject(propertyNameList, prototypeAccumulator);
+    typeRepresentationConstructor.is = assertIsTypeRepresentation(typeName);
+    typeRepresentationConstructor.prototype = prototypeAccumulator;
+    typeRepresentationConstructor.toString = serializeTypeRepresentationBound;
+    typeRepresentationConstructor[$$inspect] = serializeTypeRepresentationBound;
+    typeRepresentationConstructor[$$type] = typeName;
 
-  prototypeAccumulator.constructor = typeRepresentationConstructor;
+    prototypeAccumulator.constructor = typeRepresentationConstructor;
 
-  return typeRepresentationConstructor
-};
+    return typeRepresentationConstructor
+  }
+);
 
 // factorizeSumType :: String -> { String: [String]] } -> Function
-export const factorizeSumType = (typeName, propertyNameListByTag) => {
-  let prototypeAccumulator = {
-    fold: factorizeFoldBound,
-    toString: serializeTypeInstanceBound,
-    [$$inspect]: serializeTypeInstanceBound
-  };
-  const tagList = Object.keys(propertyNameListByTag);
+export const factorizeSumType = curry2(
+  (typeName, propertyNameListByTag) => {
+    let prototypeAccumulator = {
+      fold: factorizeFoldBound,
+      toString: serializeTypeInstanceBound,
+      [$$inspect]: serializeTypeInstanceBound
+    };
+    const tagList = Object.keys(propertyNameListByTag);
 
-  const typeRepresentation = prototypeAccumulator.constructor = {
-    is: assertIsTypeRepresentation(typeName),
-    prototype: prototypeAccumulator,
-    toString: serializeTypeRepresentationBound,
-    [$$inspect]: serializeTypeRepresentationBound,
-    [$$tagList]: tagList,
-    [$$type]: typeName
-  };
+    const typeRepresentation = prototypeAccumulator.constructor = {
+      is: assertIsTypeRepresentation(typeName),
+      prototype: prototypeAccumulator,
+      toString: serializeTypeRepresentationBound,
+      [$$inspect]: serializeTypeRepresentationBound,
+      [$$tagList]: tagList,
+      [$$type]: typeName
+    };
 
-  for (const [ tag, propertyNameList ] of Object.entries(propertyNameListByTag)) {
-    const tagPrototypeAccumulator = Object.assign(Object.create(prototypeAccumulator), { [$$tag]: tag });
+    for (const [ tag, propertyNameList ] of Object.entries(propertyNameListByTag)) {
+      const tagPrototypeAccumulator = Object.assign(Object.create(prototypeAccumulator), { [$$tag]: tag });
 
-    if (propertyNameList.length === 0) {
-      typeRepresentation[tag] = factorizeValue(propertyNameList, tagPrototypeAccumulator, [], 0);
-      typeRepresentation[tag].is = assertIsUnit(typeRepresentation[tag]);
-      continue;
+      if (propertyNameList.length === 0) {
+        typeRepresentation[tag] = factorizeValue(propertyNameList, tagPrototypeAccumulator, [], 0);
+        typeRepresentation[tag].is = assertIsUnit(typeRepresentation[tag]);
+        continue;
+      }
+
+      typeRepresentation[tag] = factorizeConstructor(propertyNameList, tagPrototypeAccumulator);
+      typeRepresentation[tag].from = factorizeConstructorFromObject(propertyNameList, tagPrototypeAccumulator);
+      typeRepresentation[tag].toString = serializeConstructorTypeBound;
+      typeRepresentation[tag][$$inspect] = serializeConstructorTypeBound;
+      typeRepresentation[tag][$$returnType] = typeName;
+      typeRepresentation[tag][$$tag] = tag;
+      typeRepresentation[tag].is = assertIsVariant(typeRepresentation[tag]);
     }
 
-    typeRepresentation[tag] = factorizeConstructor(propertyNameList, tagPrototypeAccumulator);
-    typeRepresentation[tag].from = factorizeConstructorFromObject(propertyNameList, tagPrototypeAccumulator);
-    typeRepresentation[tag].toString = serializeConstructorTypeBound;
-    typeRepresentation[tag][$$inspect] = serializeConstructorTypeBound;
-    typeRepresentation[tag][$$returnType] = typeName;
-    typeRepresentation[tag][$$tag] = tag;
-    typeRepresentation[tag].is = assertIsVariant(typeRepresentation[tag]);
+    return typeRepresentation
   }
-
-  return typeRepresentation
-};
+);
 
 // factorizeValue :: [String] -> Prototype -> [*] -> Number -> Prototype
-const factorizeValue = curry(
+const factorizeValue = curryN(
+  4,
   (propertyNameList, prototype, propertyValueList, argumentCount) => {
     if (argumentCount !== propertyNameList.length) {
       throw new TypeError (`Expected ${propertyNameList.length} arguments, got ${argumentCount}.`);
@@ -350,17 +326,8 @@ const factorizeConstructor = (propertyNameList, prototype) => {
 
 // factorizeConstructorFromObject :: ([String], Prototype) -> Object -> a
 const factorizeConstructorFromObject = (propertyNameList, prototype) =>
-  compose(
-    converge(
-      factorizeValue(
-        propertyNameList,
-        prototype
-      ),
-      [
-        identity,
-        prop("length")
-      ]
-    ),
+  compose2(
+    apBinary(factorizeValue(propertyNameList, prototype), identity, prop("length")),
     (blueprintObject) => reduce(
       (accumulator, propertyName) => {
         if (complement(has)(propertyName, blueprintObject)) {

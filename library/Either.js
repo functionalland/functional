@@ -93,27 +93,6 @@ Either.prototype.map = Either.prototype["fantasy-land/map"] = function (unaryFun
   });
 };
 
-Either.prototype.reduce = Either.prototype["fantasy-land/reduce"] = function (binaryFunction, accumulator) {
-
-  return this.fold({
-    Left: _ => accumulator,
-    Right: value => binaryFunction(accumulator, value)
-  });
-};
-
-Either.prototype.sequence = function (TypeRepresentation) {
-
-  return this.traverse(TypeRepresentation, x => x);
-};
-
-Either.prototype.traverse = Either.prototype["fantasy-land/traverse"] = function (TypeRepresentation, unaryFunction) {
-
-  return this.fold({
-    Left: value => TypeRepresentation.of(Either.Left(value)),
-    Right: value => unaryFunction(value).map(x => Either.Right(x))
-  });
-};
-
 Either.zero = Either.prototype.zero = Either.prototype["fantasy-land/zero"] = () => Either.Left(null);
 
 export default Either;

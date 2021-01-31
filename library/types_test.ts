@@ -12,7 +12,7 @@ import Task from "./Task.js";
 import Pair from "./Pair.js";
 
 Deno.test(
-  "Maybe type check",
+  "Maybe: Type check",
   () => {
     const containerA = Maybe.Just(42);
     const containerB = Maybe.Just((value: number) => value + 2);
@@ -45,7 +45,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Either type check",
+  "Either: Type check",
   () => {
     const containerA = Either.Right(42);
     const containerB = Either.Right((value: number) => value + 2);
@@ -75,7 +75,7 @@ Deno.test(
 );
 
 Deno.test(
-  "IO type check",
+  "IO: Type check",
   () => {
     const containerA = IO(() => 42);
     const containerB = IO(() => (value: number) => value + 2);
@@ -91,7 +91,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Pair type check",
+  "Pair: Type check",
   () => {
     const containerA = Pair(42, 24);
     const f = (value: number) => value + 2;
@@ -104,7 +104,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Task type check",
+  "Task: Type check",
   () => {
     const containerA = Task(() => Promise.resolve(42));
     const containerB = Task.wrap(() => Promise.resolve(42));

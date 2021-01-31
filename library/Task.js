@@ -4,7 +4,7 @@ import Pair from "./Pair.js";
 import { Done, Loop } from "./Step.js";
 
 import { $$debug, $$inspect, $$value } from "./Symbols.js";
-import { chainLift } from "./utilities.js";
+import { chainLift } from "./algebraic.js";
 
 const concat = x => y => x.concat(y);
 

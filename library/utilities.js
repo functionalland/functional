@@ -1,147 +1,14 @@
-import append from "https://deno.land/x/ramda@v0.27.2/source/append.js";
-import curry from "https://deno.land/x/ramda@v0.27.2/source/curry.js";
-import curryN from "https://deno.land/x/ramda@v0.27.2/source/curryN.js";
-import equals from "https://deno.land/x/ramda@v0.27.2/source/equals.js";
-import find from "https://deno.land/x/ramda@v0.27.2/source/find.js";
 import lift from "https://deno.land/x/ramda@v0.27.2/source/lift.js";
-import reduce from "https://deno.land/x/ramda@v0.27.2/source/reduce.js";
+
+import { curry2, curry3 } from "./curry.js";
+import { reduce } from "./algebraic.js";
+import { append, find } from "./other.js";
 
 const $$decoder = new TextDecoder();
 const $$encoder = new TextEncoder();
 
-/**
- * ## Utilities
- *
- * ### `assertIsArray`
- * `* -> Boolean`
- *
- * ### `assertIsBoolean`
- * `* -> Boolean`
- *
- * ### `assertIsFunction`
- * `* -> Boolean`
- *
- * ### `assertIsInstance`
- * `* -> Boolean`
- *
- * ### `assertIsNull`
- * `* -> Boolean`
- *
- * ### `assertIsNumber`
- * `* -> Boolean`
- *
- * ### `assertIsObject`
- * `* -> Boolean`
- *
- * ### `assertIsRegex`
- * `* -> Boolean`
- *
- * ### `assertIsString`
- * `* -> Boolean`
- *
- * ### `assertIsUndefined`
- * `* -> Boolean`
- *
- * ### `decodeRaw`
- * `Uint8Array -> String`
- *
- * ### `encodeText`
- * `String -> Uint8Array`
- */
-export const assertIsArray = value => value instanceof Array;
-export const assertIsBoolean = value => value === true || value === false;
-export const assertIsFunction = value => value instanceof Function;
-export const assertIsInstance = curry((T, value) => value instanceof T);
-export const assertIsNull = value => value === null;
-export const assertIsNumber = value => typeof value === "number";
-export const assertIsObject = value => typeof value === "object" && !(value instanceof Array);
-export const assertIsRegex = value => value instanceof RegExp;
-export const assertIsString = value => typeof value === "string";
-export const assertIsUndefined = value => value === undefined;
-
 export const decodeRaw = $$decoder.decode.bind($$decoder);
 export const encodeText = $$encoder.encode.bind($$encoder);
-
-/**
- * ### `alt`
- * `Alt a -> Alt b -> Alt a|b`
- *
- * This function takes a container of any type and, an Alternative functor. Then it returns either the container or the
- * alternative functor.
- * The function is in support of the [Alt algebra](https://github.com/fantasyland/fantasy-land#alt).
- *
- * ```js
- * import Either from "https://deno.land/x/functional@v1.3.4/library/Either.js";
- * import { alt } from "https://deno.land/x/functional@v1.3.4/library/utilities.js";
- *
- * const container = alt(Either.Right(42), Either.Left("Not the meaning of life"));
- *
- * assertEquals(container.extract(), 42);
- * ```
- */
-export const alt = curry(
-  (container, alternativeFunctor) =>
-    (alternativeFunctor.alt || alternativeFunctor["fantasy-land/alt"]).call(alternativeFunctor, container)
-);
-
-/**
- * ### `chainLift`
- * `(a -> b -> c) -> Chainable a -> Functor b -> Chainable c`
- *
- * This function is similar to [`lift`](https://ramdajs.com/docs/#lift) but is chainable.
- *
- * ```js
- * import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
- * import { chainLift } from "https://deno.land/x/functional@v1.3.4/library/utilities.js";
- *
- * const hogeFuga = useWith(
- *   chainLift(curry((x, y) => Task.of(x * y))),
- *   [
- *     x => Task.of(x),
- *     x => Task.of(x)
- *   ]
- * );
- *
- * const container = await hogeFuga(42, 24).run();
- *
- * const value = safeExtract("Failed.", container);
- *
- * assertEquals(value, 1008);
- * ```
- */
-export const chainLift = curry(
-  (binaryFunction, chainableFunctor, functor) => chainableFunctor.chain(x => functor.map(binaryFunction(x)))
-);
-
-/**
- * ### `chainRec`
- * `ChainRec r => ((a -> c, b -> c, a) -> r c) -> a -> r b`
- *
- * This function is a combinator for the [`chainRec` algebra](https://github.com/fantasyland/fantasy-land#chainrec).
- * It takes a ternary function, an initial value and, a chainable recursive functor.
- *
- * ```js
- * import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
- * import { chainRec } from "https://deno.land/x/functional@v1.3.4/library/utilities.js";
- *
- * const multiplyAll = curry((x, n) => chainRec(
- *   (Loop, Done, cursor) =>
- *     cursor === n ? Done(Pair(cursor, null)) : Loop(Pair(cursor + 1, Task.of([ x * (cursor + 1) ]))),
- *   0
- * ));
- *
- * const container = await multiplyAll(42, 10)(Task.of([ 0 ])).run();
- *
- * const value = safeExtract("Failed.", container);
- *
- * assertEquals(value, [ 0, 42, 84, 126, 168, 210, 252, 294, 336, 378, 420 ]);
- * ```
- */
-export const chainRec = curry(
-  (ternaryFunction, initiator, chainableRecursiveFunctor) =>
-    (chainableRecursiveFunctor.chainRec || chainableRecursiveFunctor["fantasy-land/chainRec"])
-      .call(chainableRecursiveFunctor, ternaryFunction, initiator)
-);
 
 /**
  * ### `evert`
@@ -161,7 +28,7 @@ export const chainRec = curry(
  * assertEquals(list, [ 42, 32, 24 ]);
  * ```
  */
-export const evert = curry(
+export const evert = curry2(
   (T, list) => list.reduce(
     (accumulator, x) => lift(append)(x, accumulator),
     T.of([])
@@ -216,7 +83,7 @@ export const runSequentially = (initialChainableFunctor, ...chainableFunctorList
  * This function takes a message and an Either container; if the container is `Either.Right`, the value will be
  * returned. But if the container is `Either.Left`, it will throw an error with the message passed.
  */
-export const safeExtract = curry(
+export const safeExtract = curry2(
   (message, container) => container.fold({
     Left: error => {
       throw new Error(`${message} Error: ${
@@ -233,7 +100,7 @@ export const safeExtract = curry(
  * ### `stream`
  * `((a, b) -> a) -> a -> AsyncIterable b -> a`
  */
-export const stream = curry(
+export const stream = curry3(
   async (binaryFunction, accumulator, iterator) => {
     for await (const data of iterator) {
       accumulator = binaryFunction(accumulator, data);
@@ -243,25 +110,4 @@ export const stream = curry(
   }
 );
 
-export const factorizeSpy = () => {
-  const history = [];
 
-  return [
-    (functionArity, nAryFunction) =>
-      curryN(
-        functionArity, (...argumentList) => history.push(argumentList) && nAryFunction.call(null, ...argumentList)
-      ),
-    {
-      assertCalledWith: (...argumentList) => !!find(equals(argumentList), history),
-      assertCallCount: n => n === history.length,
-      get callCount() { return history.length },
-      get history() { return history }
-    }
-  ]
-};
-
-export const factorizeFakeInstance = instance => (
-  {
-    ["fantasy-land/equals"]: value => value instanceof instance
-  }
-)

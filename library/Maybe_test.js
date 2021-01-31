@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.79.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.83.0/testing/asserts.ts";
 import { factorizeType } from "./factories.js";
 import Maybe from "./Maybe.js";
 import { $$value } from "./Symbols.js";
@@ -10,7 +10,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #alt",
+  "Maybe: (Just) #alt",
   () =>
     assertEquals(
       Maybe.Just(42).alt(Maybe.Just(24)).toString(),
@@ -19,7 +19,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #ap - Composition",
+  "Maybe: (Just) #ap - Composition",
   () => {
     const containerA = Maybe.Just(42);
     const containerB = Maybe.Just(x => x + 2);
@@ -33,7 +33,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #ap with either",
+  "Maybe: (Just) #ap with either",
   () => {
     const lift2 = (f, a, b) => b.ap(a.map(f));
     const either = (x, y) => lift2(a => b => a || b, x, y);
@@ -49,7 +49,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #ap with lift",
+  "Maybe: (Just) #ap with lift",
   () => {
     const lift2 = (f, a, b) => b.ap(a.map(f));
 
@@ -64,7 +64,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #ap with merge",
+  "Maybe: (Just) #ap with merge",
   () => {
     const append = y => xs => xs.concat([y]);
     const lift2 = (f, a, b) => b.ap(a.map(f));
@@ -88,7 +88,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #chain - Associativity",
+  "Maybe: (Just) #chain - Associativity",
   async () => {
     const container = Maybe.Just(42);
     const f = x => Maybe.Just(x + 2);
@@ -102,7 +102,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #extend - Associativity",
+  "Maybe: (Just) #extend - Associativity",
   async () => {
     const container = Maybe.Just(42);
     const f = container => container[$$value] + 2;
@@ -116,7 +116,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #extract - Right identity",
+  "Maybe: (Just) #extract - Right identity",
   () => {
     const container = Maybe.Just(42);
     const f = container => container[$$value] + 2;
@@ -129,7 +129,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #filter (even)",
+  "Maybe: (Just) #filter (even)",
   () =>
     assertEquals(
       Maybe.Just(42).filter(x => x % 2 === 0).toString(),
@@ -138,7 +138,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #filter (odd)",
+  "Maybe: (Just) #filter (odd)",
   () =>
     assertEquals(
       Maybe.Just(23).filter(x => x % 2 === 0).toString(),
@@ -147,7 +147,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #map",
+  "Maybe: (Just) #map",
   () =>
     assertEquals(
       Maybe.Just(42).map(x => x * 2).toString(),
@@ -156,7 +156,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #map - Identity",
+  "Maybe: (Just) #map - Identity",
   () => {
     const container = Maybe.Just(42);
 
@@ -168,7 +168,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #map - Composition",
+  "Maybe: (Just) #map - Composition",
   () => {
     const container = Maybe.Just(42);
     const f = x => x + 2;
@@ -182,7 +182,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #of - Identity (Applicative)",
+  "Maybe: (Just) #of - Identity (Applicative)",
   () => {
     const container = Maybe.Just(42);
 
@@ -194,7 +194,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #of - Left identity (Chainable)",
+  "Maybe: (Just) #of - Left identity (Chainable)",
   async () => {
     const container = Maybe.Just(42);
     const f = x => Maybe.Just(x + 2);
@@ -207,7 +207,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #of - Right identity (Chainable)",
+  "Maybe: (Just) #of - Right identity (Chainable)",
   async () => {
     const container = Maybe.Just(42);
     const f = x => Maybe.Just(x + 2);
@@ -220,7 +220,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #of - Homomorphism",
+  "Maybe: (Just) #of - Homomorphism",
   () =>
     assertEquals(
       Maybe.of(42).ap(Maybe.of(x => x + 2)),
@@ -229,7 +229,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #of - Interchange",
+  "Maybe: (Just) #of - Interchange",
   () =>
     assertEquals(
       Maybe.of(42)
@@ -240,7 +240,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Just: #traverse - Identity",
+  "Maybe: (Just) #traverse - Identity",
   () => {
     const Dummy = factorizeType("Dummy", [ "x" ]);
     Dummy.of = x => Dummy(x);
@@ -257,11 +257,11 @@ Deno.test(
   }
 );
 
-/**
+/*
  * Traverse is an experimental feature; The Naturility law test is failing.
  */
 // Deno.test(
-//   "Maybe.Just: #traverse - Naturality",
+//   "Maybe: (Just) #traverse - Naturality",
 //   () => {
 //     const Dummy = factorizeType("Dummy", [ "x" ]);
 //     Dummy.of = x => Dummy(x);
@@ -317,7 +317,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Nothing: #alt",
+  "Maybe: (Nothing) #alt",
   () =>
     assertEquals(
       Maybe.Nothing.alt(Maybe.Just(42)).toString(),
@@ -326,7 +326,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Nothing: #filter",
+  "Maybe: (Nothing) #filter",
   () =>
     assertEquals(
       Maybe.Nothing.filter(x => x % 2 === 0).toString(),
@@ -335,7 +335,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Nothing: #map",
+  "Maybe: (Nothing) #map",
   () =>
     assertEquals(
       Maybe.Nothing.map(x => x * 2).toString(),
@@ -344,7 +344,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Nothing: #map - Identity",
+  "Maybe: (Nothing) #map - Identity",
   () => {
     const container = Maybe.Nothing;
 
@@ -356,7 +356,7 @@ Deno.test(
 );
 
 Deno.test(
-  "Maybe.Nothing: #map - Composition",
+  "Maybe: (Nothing) #map - Composition",
   () => {
     const container = Maybe.Nothing;
     const f = x => x + 2;

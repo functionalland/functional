@@ -1,8 +1,6 @@
-import lift from "https://deno.land/x/ramda@v0.27.2/source/lift.js";
-
 import { curry2, curry3 } from "./curry.js";
 import { reduce } from "./algebraic.js";
-import { append, find } from "./other.js";
+import { append, lift2 } from "./other.js";
 
 const $$decoder = new TextDecoder();
 const $$encoder = new TextEncoder();
@@ -28,12 +26,9 @@ export const encodeText = $$encoder.encode.bind($$encoder);
  * assertEquals(list, [ 42, 32, 24 ]);
  * ```
  */
-export const evert = curry2(
-  (T, list) => list.reduce(
-    (accumulator, x) => lift(append)(x, accumulator),
-    T.of([])
-  )
-);
+export const evert = curry2((T, xs) => xs.reduce((ys, x) => lift2(append)(x, ys), T.of([])));
+
+export const fold = curry2((o, A) => A.fold(o));
 
 export const insideOut = evert;
 
@@ -70,11 +65,7 @@ export const log = message => x => console.debug(message, x) || x;
  * assertEquals(value, 44);
  * ```
  */
-export const runSequentially = (initialChainableFunctor, ...chainableFunctorList) => reduce(
-  (accumulator, chainableFunctor) => accumulator.chain(_ => chainableFunctor),
-  initialChainableFunctor,
-  chainableFunctorList
-);
+export const runSequentially = (x, ...ys) => reduce((xs, y) => xs.chain(_ => y), x, ys);
 
 /**
  * ### `safeExtract`
@@ -84,7 +75,7 @@ export const runSequentially = (initialChainableFunctor, ...chainableFunctorList
  * returned. But if the container is `Either.Left`, it will throw an error with the message passed.
  */
 export const safeExtract = curry2(
-  (message, container) => container.fold({
+  (message, A) => fold({
     Left: error => {
       throw new Error(`${message} Error: ${
         (error.hasOwnProperty('raw'))
@@ -92,8 +83,8 @@ export const safeExtract = curry2(
           : `${error.message}\n${error.stack}`
       }`)
     },
-    Right: value => value
-  })
+    Right: x => x
+  }, A)
 );
 
 /**

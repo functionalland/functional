@@ -17,14 +17,9 @@ import { factorizeType } from "./factories.js";
  * import Pair from "https://deno.land/x/functional@v1.3.2/library/Pair.js";
  *
  * const pair = Pair(42, 42)
- *   .bimap(
- *     x => x * 2,
- *     x => x + 2
- *   );
+ *   .bimap(x => x * 2, x => x + 2);
  *
  * assert(Pair.is(pair));
- * assert(pair.first === 84);
- * assert(pair.second === 44);
  * ```
  */
 

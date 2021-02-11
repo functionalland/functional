@@ -4,9 +4,15 @@ import Pair from "./Pair.js";
 import { Done, Loop } from "./Step.js";
 
 import { $$debug, $$inspect, $$value } from "./Symbols.js";
-import { chainLift } from "./algebraic.js";
+import { chain, chainLift, concat, then } from "./algebraic.js";
+import { apply2Compose, compose2, compose3, flip } from "./aviary.js";
+import { curry2, curry3 } from "./curry.js";
+import {composeBinary} from "./aviary.js";
+import {applyBinary} from "./aviary.js";
+import {apply} from "./aviary.js";
 
-const concat = x => y => x.concat(y);
+const defineProperty = curry3((x, k, o) => Object.defineProperty(o, k, x));
+const defineDebug = curry2((x, t) => Object.defineProperty(t, $$debug, { writable: false, value: x }))
 
 /**
  * ## Task
@@ -66,195 +72,132 @@ const concat = x => y => x.concat(y);
  *
  * Please check-out [Functional IO](https://github.com/sebastienfilion/functional-deno-io) for more practical examples.
  */
-
 export const Task = factorizeType("Task", [ "asyncFunction" ]);
 
-const serializeFunctionForDebug = asyncFunction =>
-  (asyncFunction.name && asyncFunction.name !== "")
-    ? asyncFunction.name
-    : asyncFunction.toString().length > 25
-      ? asyncFunction.toString()
+const serializeFunctionForDebug = f =>
+  (f.name && f.name !== "")
+    ? f.name
+    : f.toString().length > 25
+      ? f.toString()
         .slice(0, 25)
         .replace(/[\n\r]/g, "")
         .replace(/\s\s*/g, " ") + "[...]"
-      : asyncFunction.toString()
+      : f.toString()
         .replace(/[\n\r]/g, "")
         .replace(/\s\s*/g, " ")
 
-Task.wrap = asyncFunction => {
-  let promise;
-  const proxyFunction = function (...argumentList) {
-    promise = promise || asyncFunction.call(null, ...argumentList);
+Task.wrap = f => {
+  let $p;
+  const proxyFunction = (...xs) => {
+    $p = $p || f.call(null, ...xs);
 
-    return promise.then(
-      maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Right(maybeContainer),
-      maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Left(maybeContainer)
+    return $p.then(
+      A => Either.is(A) ? A : Either.Right(A),
+      A => Either.is(A) ? A : Either.Left(A)
     );
   };
 
-  return Object.defineProperty(
-    Task(
+  return defineDebug
+    (`Task(${serializeFunctionForDebug(f)})`)
+    (Task (
       Object.defineProperty(
         proxyFunction,
         'length',
-        { value: asyncFunction.length }
+        { value: f.length }
       )
-    ),
-    $$debug,
-    {
-      writable: false,
-      value: `Task(${serializeFunctionForDebug(asyncFunction)})`
-    }
-  );
+    ));
 };
 
-Task.prototype.ap = Task.prototype["fantasy-land/ap"] = function (container) {
+Task.prototype.ap = Task.prototype["fantasy-land/ap"] = function (A) {
 
-  return Object.defineProperty(
-    Task(_ => {
-      const maybePromiseValue = this.asyncFunction();
-      const maybePromiseUnaryFunction = container.asyncFunction();
-
-      return Promise.all([
-        (maybePromiseUnaryFunction instanceof Promise)
-          ? maybePromiseUnaryFunction
-          : Promise.resolve(maybePromiseUnaryFunction),
-        (maybePromiseValue instanceof Promise)
-          ? maybePromiseValue
-          : Promise.resolve(maybePromiseValue)
-      ])
-        .then(([ maybeApplicativeUnaryFunction, maybeContainerValue ]) => {
-
-          return (
-            (Reflect.getPrototypeOf(maybeContainerValue).ap)
-              ? maybeContainerValue
-              : Either.Right(maybeContainerValue)
-          ).ap(
-            (Reflect.getPrototypeOf(maybeApplicativeUnaryFunction).ap)
-              ? maybeApplicativeUnaryFunction
-              : Either.Right(maybeApplicativeUnaryFunction)
-          );
-        });
-    }),
-    $$debug,
-    {
-      writable: false,
-      value: `${this[$$debug]}.ap(${container})`
-    }
-  );
+  return defineDebug
+    (`${this[$$debug]}.ap(${A})`)
+    (Task (_ =>
+      composeBinary
+        (then
+          (([ x, y ]) =>
+            applyBinary
+              (A => B => B.ap(A))
+              ((Reflect.getPrototypeOf(x).ap) ? x : Either.Right(x))
+              ((Reflect.getPrototypeOf(y).ap) ? y : Either.Right(y))))
+        ($p => $q => Promise.all([
+          ($q instanceof Promise) ? $q : Promise.resolve($q),
+          ($p instanceof Promise) ? $p : Promise.resolve($p)
+        ]))
+        (this.asyncFunction())
+        (A.asyncFunction())));
 };
 
-Task.prototype.chain = Task.prototype["fantasy-land/chain"] = function (unaryFunction) {
+Task.prototype.chain = Task.prototype["fantasy-land/chain"] = function (f) {
 
-  return Object.defineProperty(
-    Task(_ => {
-      const maybePromise = this.asyncFunction();
-
-      return (
-        (maybePromise instanceof Promise) ? maybePromise : Promise.resolve(maybePromise)
-      )
-        .then(maybeContainer =>
-          (Either.is(maybeContainer) ? maybeContainer : Either.Right(maybeContainer))
-            .chain(
-              value => {
-                const maybePromise = unaryFunction(value).run();
-
-                return (
-                  (maybePromise instanceof Promise) ? maybePromise : Promise.resolve(maybePromise)
-                )
-                  .then(
-                    maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Right(maybeContainer),
-                    maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Left(maybeContainer),
-                  )
-              }),
-          Either.Left
-        );
-    }),
-    $$debug,
-    {
-      writable: false,
-      value: `${this[$$debug]}.chain(${serializeFunctionForDebug(unaryFunction)})`
-    }
-  );
+  return defineDebug
+    (`${this[$$debug]}.chain(${serializeFunctionForDebug(f)})`)
+    (Task (_ =>
+      compose2
+        (then
+          (compose2
+            (chain
+              (compose3
+                (then
+                  (A => Either.is(A) ? A : Either.Right(A))
+                  (A => Either.is(A) ? A : Either.Left(A)))
+                ($q => ($q instanceof Promise) ? $q : Promise.resolve($q))
+                (x => f(x).run())))
+            (A => (Either.is(A) ? A : Either.Right(A)))))
+        ($p => ($p instanceof Promise) ? $p : Promise.resolve($p))
+        (this.asyncFunction())));
 };
 
-Task.prototype.chainRec = Task.prototype["fantasy-land/chainRec"] = function (ternaryFunction, initialCursor) {
-  let accumulator = this;
-  let result = Loop(Pair(initialCursor, null));
+Task.prototype.chainRec = Task.prototype["fantasy-land/chainRec"] = function (ternaryFunction, i) {
+  let A = this;
+  let r = Loop(Pair(i, null));
 
-  while (!Done.is(result)) {
-    result = ternaryFunction(Loop, Done, result.value.first);
+  while (!Done.is(r)) {
+    r = ternaryFunction(Loop, Done, r.value.first);
 
-    if (Loop.is(result)) {
-      accumulator = chainLift(concat, accumulator, result.value.second);
+    if (Loop.is(r)) {
+      A = chainLift(flip(concat), A, r.value.second);
     }
   }
 
-  return accumulator;
+  return A;
 };
 
-Task.prototype.map = Task.prototype["fantasy-land/map"] = Task.prototype.then = function (unaryFunction) {
+Task.prototype.map = Task.prototype["fantasy-land/map"] = Task.prototype.then = function (f) {
 
-  return Object.defineProperty(
-    Task(_ => {
-      const promise = this.asyncFunction();
-
-      return promise.then(
-        container => container.chain(
-          value => {
-            const maybeContainer = unaryFunction(value);
-
-            return (Either.is(maybeContainer)) ? maybeContainer : Either.Right(maybeContainer);
-          }
-        ),
-        Either.Left
-      );
-    }),
-    $$debug,
-    {
-      writable: false,
-      value: `${this[$$debug]}.map(${serializeFunctionForDebug(unaryFunction)})`
-    }
-  );
+  return defineDebug
+    (`${this[$$debug]}.map(${serializeFunctionForDebug(f)})`)
+    (Task(_ =>
+      apply
+        (then
+          (chain (compose2 (A => (Either.is(A)) ? A : Either.Right(A)) (f)))
+          (Either.Left))
+        (this.asyncFunction())));
 };
 
-Task.prototype.catch = function (unaryFunction) {
+Task.prototype.catch = function (f) {
 
-  return Object.defineProperty(
-    Task(_ => {
-      const promise = this.asyncFunction();
-
-      return promise.then(
-        container => Either.Left.is(container) ? Either.Right(unaryFunction(container[$$value])) : container,
-        Either.Left
-      );
-    }),
-    $$debug,
-    {
-      writable: false,
-      value: `${this[$$debug]}.map(${serializeFunctionForDebug(unaryFunction)})`
-    }
-  );
+  return defineDebug
+    (`${this[$$debug]}.map(${serializeFunctionForDebug(f)})`)
+    (Task (_ =>
+      apply
+        (then
+          (A => Either.Left.is(A) ? Either.Right(f (A[$$value])) : A)
+          (Either.Left))
+        (this.asyncFunction())));
 };
 
-Task.of = Task.prototype.of = Task.prototype["fantasy-land/of"] = value =>
-  Object.defineProperty(
-    Task(_ => Promise.resolve(Either.Right(value))),
-    $$debug,
-    {
-      writable: false,
-      value: `Task(${serializeFunctionForDebug(value)})`
-    }
-  );
+Task.of = Task.prototype.of = Task.prototype["fantasy-land/of"] = x =>
+  defineDebug (`Task(${serializeFunctionForDebug (x)})`) (Task (_ => Promise.resolve(Either.Right(x))))
 
 Task.prototype.run = async function () {
-  const maybePromise = this.asyncFunction();
 
-  return ((maybePromise instanceof Promise) ? maybePromise : Promise.resolve(maybePromise))
-    .then(
-      maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Right(maybeContainer),
-      maybeContainer => Either.is(maybeContainer) ? maybeContainer : Either.Left(maybeContainer)
-    );
+  return compose2
+    (then
+      (A => Either.is(A) ? A : Either.Right(A))
+      (A => Either.is(A) ? A : Either.Left(A)))
+    ($p => ($p instanceof Promise) ? $p : Promise.resolve($p))
+    (this.asyncFunction());
 };
 
 Task.prototype.toString = Task.prototype[$$inspect] = function () {

@@ -1,5 +1,6 @@
 import { curry2, curry3 } from "./curry.js";
 import { assertIsString } from "./assertions.js";
+import {assertIsFunction} from "./assertions.js";
 
 /**
  * ### `alt`
@@ -155,7 +156,7 @@ export const extend = curry2((f, x) => (x.extend || x["fantasy-land/extend"]).ca
  *
  * const value = extract(Either.Right(42));
  *
- * assertEquals(value, 42);
+ * assertEquivalent(value, 42);
  * ```
  */
 export const extract = x => (x.extract || x["fantasy-land/extract"]).call(x);
@@ -172,12 +173,43 @@ export const extract = x => (x.extract || x["fantasy-land/extract"]).call(x);
  *
  * const value = map(x => x * 2, Either.Right(42));
  *
- * assertEquals(value, 42);
+ * assertEquivalent(value, 42);
  * ```
  */
 export const map = curry2((f, x) => (x.map || x["fantasy-land/map"]).call(x, f));
 
+/**
+ * ### `reduce`
+ * `(a -> b -> c) -> a -> FoldableFunctor b -> FoldableFunctor c`
+ *
+ * This function takes a binary function and, a Foldable Functor. It returns a Foldable Functor of similar shape.
+ * It is a combinator in support of the [Foldable Functor algebra](https://github.com/fantasyland/fantasy-land#foldable).
+ *
+ * ```js
+ * import { reduce } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ *
+ * const value = reduce(ys => x => ys + x, 0, [ 42, 24, 12 ]);
+ *
+ * assertEquals(value, 78);
+ * ```
+ */
 export const reduce = curry3((f, xs, x) =>
   (x.reduce || x["fantasy-land/reduce"]).call(x, (ys, y, ...a) => f.length === 1 ? f(ys)(y) : f(ys, y, ...a), xs));
+
+/**
+ * ### `then`
+ * `(a -> b) -> Promise a -> Promise b`
+ *
+ * This function takes a unary function and, a Promise. It returns a new Promise.
+ *
+ * ```js
+ * import { then } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ *
+ * const value = then(x => x * 2, Promise.resolve(42));
+ *
+ * assertEquals(value, Promise(84));
+ * ```
+ */
+export const then = curry2((f, $p) => assertIsFunction($p) ? $q => $q.then(f, $p) : $p.then(f));
 
 export const toString = x => x && x.toString() || "";

@@ -22,8 +22,19 @@ import { assertIsFunction } from "./assertions.js";
  *
  * #### TypeScript
  *
- * ```ts
+ * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
+ * need to define the generics.
  *
+ * ```ts
+ * const f = ap<number, number, number>(x => y => x + y);
+ * const g = f(x => x * 2);
+ * const x = g(42);
+ * ```
+ *
+ * ```ts
+ * export function ap <X, Y, Z>(f: (x: X) => (y: Y) => Z): (g: (x: X) => Y) => (x: X) => Z;
+ * export function ap <X, Y, Z>(f: (x: X) => (y: Y) => Z, g: (x: X) => Y): (x: X) => Z;
+ * export function ap <X, Y, Z>(f: (x: X) => (y: Y) => Z, g: (x: X) => Y, x: X): Z;
  * ```
  */
 export const starling = curry3( (f, g, x) => f(x)(g(x)));
@@ -37,23 +48,6 @@ export const ap = curry2(
 export const S = starling;
 
 /**
- * #### `apBinary`
- * `(b -> c -> d) -> (a -> b) -> (a -> c) -> a -> d`
- *
- * This combinator takes a binary function, two unary functions and a value. The value is applied to the two unary
- * functions. The resulting values are then applied in order to the binary function.
- * It is known as the "startling_" or, the `S_` combinator.
- *
- * ```js
- * const x = apBinary(x => y => x * y, x => x + 2, x => x * 2, 42);
- * assertEquals(3696);
- * ```
- */
-export const starling_ = curryN(4, (f, g, h, x) => f(g(x))(h(x)));
-export const apBinary = starling_;
-export const S_ = starling_;
-
-/**
  * ### `apply`
  * `(a -> b) -> a -> b`
  *
@@ -65,27 +59,26 @@ export const S_ = starling_;
  * const x = apply(x => x * 2, 42);
  * assertEquals(x, 84);
  * ```
+ *
+ * #### TypeScript
+ *
+ * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
+ * need to define the generics.
+ *
+ * ```ts
+ * const f = apply<number, number> (x => x * 2);
+ * const x = f(42);
+ * ```
+ *
+ * ```ts
+ * export function apply <X, Y>(f: (x: X) => Y): (x: X) => Y;
+ * export function apply <X, Y>(f: (x: X) => Y, x: X): Y;
+ * ```
  */
 export const applicator = curry2( (f, xs) => f.apply(null, (xs instanceof Array) ? xs : [xs]));
 export const idiotStar = applicator;
 export const apply = applicator;
 export const $ = applicator;
-
-/**
- * ### `applyBinary`
- * `(a -> b -> c) -> a -> b -> c`
- *
- * This combinator takes a binary function and two values of any type. It applies the values to the function.
- * It is known as the "idiotstarstar" or, the `I$$` combinator.
- *
- * ```js
- * const x = applyBinary(x => y => x + y, 42, 24);
- * assertEquals(x, 66);
- * ```
- */
-export const idiotStarStar = curry3((f, x, y) => f(x)(y));
-export const applyBinary = idiotStarStar;
-export const I$$ = idiotStarStar;
 
 /**
  * ### `applyTo`
@@ -100,28 +93,26 @@ export const I$$ = idiotStarStar;
  * const x = applyTo(42, x => x * 2);
  * assertEquals(84);
  * ```
+ *
+ * #### TypeScript
+ *
+ * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
+ * need to define the generics.
+ *
+ * ```ts
+ * const f = applyTo<number, number> (42);
+ * const x = f(x => x * 2);
+ * ```
+ *
+ * ```ts
+ * export function applyTo <X, Y>(x: X): (f: (x: X) => Y) => Y;
+ * export function applyTo <X, Y>(x: X, f: (x: X) => Y): Y;
+ * ```
  */
 export const thrush = curry2( (x, f) => f(x));
 export const applyTo = thrush;
 export const T = thrush;
 export const CI = thrush;
-
-/**
- * ### `constant`
- * `a -> b -> a`
- *
- * This combinator takes two values and returns the first.
- * It is also known as the `kestrel` or, the `K` combinator.
- *
- * ```js
- * const x = constant(42, 24);
- * assertEquals(x, 42);
- * ```
- */
-export const kestrel = curry2( (x, _) => x);
-export const constant = kestrel;
-export const first = kestrel;
-export const K = kestrel;
 
 /**
  * ### `compose2`
@@ -137,6 +128,23 @@ export const K = kestrel;
  * const x = compose2(x => x * 2, x => x + 2, 42);
  * assertEquals(x, 88);
  * ```
+ *
+ * #### TypeScript
+ *
+ * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
+ * need to define the generics.
+ *
+ * ```ts
+ * const f = compose2<number, number, number> (x => x * 2);
+ * const g = f(x => x + 2);
+ * const x = g(42);
+ * ```
+ *
+ * ```ts
+ * export function compose2 <X, Y, Z>(f: (y: Y) => Z): (g: (x: X) => Y) => (x: X) => Z;
+ * export function compose2 <X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y): (x: X) => Z;
+ * export function compose2 <X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y, x: X): Z;
+ * ```
  */
 export const bluebird = curry3( (f, g, x) => f(g(x)));
 export const compose2 = bluebird;
@@ -149,16 +157,58 @@ export const B = bluebird;
  *
  * This combinator takes three unary functions and a value of any type. The value will be executed from right to left,
  * passing the resulting value from one function to the next.
- * It is also known as the `bluebird` or, the `B` combinator.
+ * It is also known as the `becard` or, the `B3` combinator.
  *
  * ```js
  * const x = compose3(x => x - 2, x => x * 2, x => x + 2, 42);
  * assertEquals(x, 86);
  * ```
+ *
+ * #### TypeScript
+ *
+ * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
+ * need to define the generics.
+ *
+ * ```ts
+ * const f = compose2<number, number, number> (x => x - 2);
+ * const g = f(x => x * 2);
+ * const h = g(x => x + 2);
+ * const x = h(42);
+ * ```
+ *
+ * ```ts
+ * export function compose3 <W, X, Y, Z>(f: (y: Y) => Z): (g: (x: X) => Y) => (h: (w: W) => X) => (w: W) => Z;
+ * export function compose3 <W, X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y): (h: (w: W) => X) => (w: W) => Z;
+ * export function compose3 <W, X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y, h: (w: W) => X, w: W): Z;
+ * ```
  */
 export const becard = curryN(4, (f, g, h, x) => f(g(h(x))));
 export const compose3 = becard;
 export const B3 = becard;
+
+/**
+ * ### `constant`
+ * `a -> b -> a`
+ *
+ * This combinator takes two values and returns the first.
+ * It is also known as the `kestrel` or, the `K` combinator.
+ *
+ * ```js
+ * const x = constant(42, 24);
+ * assertEquals(x, 42);
+ * ```
+ *
+ * #### TypeScript
+ *
+ * ```ts
+ * export function constant <X, Y>(x: X): (y: Y) => X;
+ * export function constant <X, Y>(x: X, y: Y): X;
+ * ```
+ */
+export const kestrel = curry2( (x, _) => x);
+export const constant = kestrel;
+export const first = kestrel;
+export const K = kestrel;
 
 /**
  * ### `composeBinary`
@@ -210,69 +260,29 @@ export const B2 = bunting;
  * const x => flip(x => y => x - y, 5, 10);
  * assertEquals(x, 5);
  * ```
+ *
+ * #### TypeScript
+ *
+ * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
+ * need to define the generics.
+ *
+ * ```ts
+ * const f = flip<number, number, number> (x => y => x - y);
+ * const g = f(24);
+ * const x = g(42);
+ * ```
+ *
+ * ```ts
+ * export function flip <X, Y, Z>(f: (x: X) => (y: Y) => Z): (x: X) => (y: Y) => Z;
+ * export function flip <X, Y, Z>(f: (x: X) => (y: Y) => Z, x: X, y: Y): Z;
+ * ```
  */
 export const cardinal = curry3( (f, x, y) => f(y)(x));
 export const flip = cardinal;
 export const C = cardinal;
 
-/**
- * ### `flipAp`
- * `(c -> a -> d) -> (b -> c) -> a -> b -> d`
- *
- * This combinator takes a binary function, an unary function and, two values of any type.
- * Like compose, it should be read from right to left; the last value is applied to the last function. Then, the
- * resulting value is passed to the remaining function with the remaining value but unlike `ap`, the arguments are
- * flipped.
- * It is known as the "cardinal prime", `cardinal_` or, the `C_` combinator; I call it `flipAp` because it's similar to
- * `ap` and is related to `flip`...
- *
- * ```js
- * const x = flipAp(x => y => x * y, x => x + 2, 42, 24);
- * assertEquals(x, 1092);
- * ```
- */
-export const cardinal_ = curryN(4, (f, g, x, y) => f(g(y))(x));
-export const flipAp = cardinal_;
-export const C_ = cardinal_;
-
-/**
- * ### `flipTernary`
- * `(a -> c -> b -> d) -> a -> b -> c -> d`
- *
- * This combinator takes a ternary function, and three values of any type.
- * The first value is applied to the ternary function and, the two other values are flipped than passed to the partially
- * applied function.
- * It is known as the "cardinal once removed", the "cardinal star" (cardinal*) or, the `C*` combinator.
- *
- * Other known alias is `BC`; because it can also be expressed as `compose2(flip)`.
- *
- * ```js
- * const x = flipTernary(x => y => z => x + y - z, 42, 12, 24);
- * assertEquals(x, 54);
- * ```
- */
-export const cardinalStar = curryN(4, (f, x, y, z) => f(x)(z)(y));
-export const flipTernary = cardinalStar;
-export const C$ = cardinalStar;
-export const BC = cardinalStar;
-
-/**
- * ### `flipQuaternary`
- * `(a -> b -> d -> c -> e) -> a -> b -> c -> d -> e`
- *
- * This combinator takes a quaternary function, and four values of any type.
- * The first two values are applied to the quaternary function and, the two other values are flipped than passed to the
- * partially applied function.
- * It is known as the "cardinal twice removed", the "cardinal star star" (cardinal**) or, the `C**` combinator.
- *
- * ```js
- * const x = flipQuaternary(w => x => y => z => w * x + y - z, 42, 24, 2, 12);
- * assertEquals(x, 1018);
- * ```
- */
-export const cardinalStarStar = curryN(5, (f, w, x, y, z) => f(w)(x)(z)(y));
-export const flipQuaternary = cardinalStarStar;
-export const C$$ = cardinalStarStar;
+export const kite = curry2((x, y) => y);
+export const second = kite;
 
 /**
  * ### `identity`
@@ -284,6 +294,12 @@ export const C$$ = cardinalStarStar;
  * ```js
  * const x = identity(42);
  * assertEquals(x, 42);
+ * ```
+ *
+ * #### TypeScript
+ *
+ * ```ts
+ * export function identity <X>(x: X): X;
  * ```
  */
 export const idiot = x => x;
@@ -297,6 +313,39 @@ export const I = idiot;
  * What follow is a list of combinators that are derivation of the more common ones. They are often obscure and less
  * known. I took the liberty to name some of them.
  */
+
+/**
+ * #### `apBinary`
+ * `(b -> c -> d) -> (a -> b) -> (a -> c) -> a -> d`
+ *
+ * This combinator takes a binary function, two unary functions and a value. The value is applied to the two unary
+ * functions. The resulting values are then applied in order to the binary function.
+ * It is known as the "startling_" or, the `S_` combinator.
+ *
+ * ```js
+ * const x = apBinary(x => y => x * y, x => x + 2, x => x * 2, 42);
+ * assertEquals(3696);
+ * ```
+ */
+export const starling_ = curryN(4, (f, g, h, x) => f(g(x))(h(x)));
+export const apBinary = starling_;
+export const S_ = starling_;
+
+/**
+ * ### `applyBinary`
+ * `(a -> b -> c) -> a -> b -> c`
+ *
+ * This combinator takes a binary function and two values of any type. It applies the values to the function.
+ * It is known as the "idiotstarstar" or, the `I$$` combinator.
+ *
+ * ```js
+ * const x = applyBinary(x => y => x + y, 42, 24);
+ * assertEquals(x, 66);
+ * ```
+ */
+export const idiotStarStar = curry3((f, x, y) => f(x)(y));
+export const applyBinary = idiotStarStar;
+export const I$$ = idiotStarStar;
 
 /**
  * #### `applyBinaryCompose`
@@ -475,6 +524,66 @@ export const G = goldfinch;
 export const hummingbird = curry3( (f, x, y) => f(x)(y)(x));
 export const H = hummingbird;
 
+
+/**
+ * ### `flipAp`
+ * `(c -> a -> d) -> (b -> c) -> a -> b -> d`
+ *
+ * This combinator takes a binary function, an unary function and, two values of any type.
+ * Like compose, it should be read from right to left; the last value is applied to the last function. Then, the
+ * resulting value is passed to the remaining function with the remaining value but unlike `ap`, the arguments are
+ * flipped.
+ * It is known as the "cardinal prime", `cardinal_` or, the `C_` combinator; I call it `flipAp` because it's similar to
+ * `ap` and is related to `flip`...
+ *
+ * ```js
+ * const x = flipAp(x => y => x * y, x => x + 2, 42, 24);
+ * assertEquals(x, 1092);
+ * ```
+ */
+export const cardinal_ = curryN(4, (f, g, x, y) => f(g(y))(x));
+export const flipAp = cardinal_;
+export const C_ = cardinal_;
+
+/**
+ * ### `flipTernary`
+ * `(a -> c -> b -> d) -> a -> b -> c -> d`
+ *
+ * This combinator takes a ternary function, and three values of any type.
+ * The first value is applied to the ternary function and, the two other values are flipped than passed to the partially
+ * applied function.
+ * It is known as the "cardinal once removed", the "cardinal star" (cardinal*) or, the `C*` combinator.
+ *
+ * Other known alias is `BC`; because it can also be expressed as `compose2(flip)`.
+ *
+ * ```js
+ * const x = flipTernary(x => y => z => x + y - z, 42, 12, 24);
+ * assertEquals(x, 54);
+ * ```
+ */
+export const cardinalStar = curryN(4, (f, x, y, z) => f(x)(z)(y));
+export const flipTernary = cardinalStar;
+export const C$ = cardinalStar;
+export const BC = cardinalStar;
+
+/**
+ * ### `flipQuaternary`
+ * `(a -> b -> d -> c -> e) -> a -> b -> c -> d -> e`
+ *
+ * This combinator takes a quaternary function, and four values of any type.
+ * The first two values are applied to the quaternary function and, the two other values are flipped than passed to the
+ * partially applied function.
+ * It is known as the "cardinal twice removed", the "cardinal star star" (cardinal**) or, the `C**` combinator.
+ *
+ * ```js
+ * const x = flipQuaternary(w => x => y => z => w * x + y - z, 42, 24, 2, 12);
+ * assertEquals(x, 1018);
+ * ```
+ */
+export const cardinalStarStar = curryN(5, (f, w, x, y, z) => f(w)(x)(z)(y));
+export const flipQuaternary = cardinalStarStar;
+export const C$$ = cardinalStarStar;
+
 /**
  * #### `thunk`
  * `(a -> c) -> a -> b -> c`
@@ -494,9 +603,6 @@ export const jalt_ = curryN(4, (f, x, y, _) => f(x)(y));
  *
  */
 export const jay = curryN(4, (f, x, y, z) => f(x)(f(z)(y)));
-
-export const kite = curry2((x, y) => y);
-export const second = kite;
 
 // I'm not good enough at meta mathematics to give a good use case for that one...
 export const owl = curry2((f, g) => g(f(g)));

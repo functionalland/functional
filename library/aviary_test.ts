@@ -61,6 +61,15 @@ test ("Aviary: apply")
     assertEquals ("Curried unary.") (apply<number, number> (x => x * 2) (42)) (84);
   });
 
+test ("Aviary: applyTo")
+  (() => {
+    assertEquals (applyTo (42, x => x * 2)) (84);
+    assertEquals ("Curried unary.") (applyTo<number, number> (42) (x => x * 2)) (84);
+    assertEquals
+      ("Derivation.")
+      (flip<number, (x: number) => number, number> (identity) (42) ((x: number) => x * 2)) (84);
+  });
+
 // test ("Aviary: apply2Compose")
 //   (() => {
 //     assertEquals
@@ -123,6 +132,12 @@ test ("Aviary: compose3")
       (compose3<number, number, number, number> (x => x - 2,x => x * 2) (x => x + 2) (42)) (86);
   });
 
+test ("Aviary: constant")
+  (() => {
+    assertEquals (constant (42, 24)) (42);
+    assertEquals ("Curried.") (constant (42) (24)) (42);
+  });
+
 // test ("Aviary: applyCompose")
 //   (() =>
 //     assertEquals (applyCompose (x => y => x + y, 42, x => x * 2, 24)) (90) ||
@@ -145,15 +160,6 @@ test ("Aviary: compose3")
 //     assertEquals (applyTernaryFlip (x => y => z => x - y - z, 12, 24, 42)) (6) ||
 //     assertEquals ("Curried.") (applyTernaryFlip (x => y => z => x - y - z) (12) (24) (42)) (6)
 //   );
-
-test ("Aviary: applyTo")
-  (() => {
-    assertEquals (applyTo (42, x => x * 2)) (84);
-    assertEquals ("Curried unary.") (applyTo<number, number> (42) (x => x * 2)) (84);
-    assertEquals
-      ("Derivation.")
-      (flip<number, (x: number) => number, number> (identity) (42) ((x: number) => x * 2)) (84);
-  });
 
 // test ("Aviary: applyToBinary")
 //   (() =>
@@ -213,11 +219,6 @@ test ("Aviary: applyTo")
 //       (156)
 //   );
 
-test ("Aviary: constant")
-  (() => {
-    assertEquals (constant (42, 24)) (42);
-    assertEquals ("Curried.") (constant (42) (24)) (42);
-  });
 
 // test ("Aviary: duplicate")
 // (() =>

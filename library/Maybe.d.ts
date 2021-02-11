@@ -1,39 +1,42 @@
-export interface MaybePrototype<Z> {
-  alt<T extends MaybePrototype<Z>>(container: T): this;
-  ap<T extends MaybePrototype<K>, K>(container: T): this;
-  chain<T extends MaybePrototype<K>, K>(unaryFunction: (value: Z) => T): this;
-  extend<T extends MaybePrototype<Z>, K>(unaryFunction: (container: T) => K): this;
-  extract(): Z;
-  map<K>(unaryFunction: (value: Z) => K): this;
-  of<T extends MaybePrototype<Z>>(value: Z): this;
+import { $$value } from "./Symbols.js";
+import Nothing = Maybe.Nothing;
+import Nothing = Maybe.Nothing;
+import Nothing = Maybe.Nothing;
+import Nothing = Maybe.Nothing;
+
+export interface MaybePrototype<X> {
+  alt<A>(C: A): this;
+  ap<Y>(A: MaybePrototype<(x: X) => Y>): MaybePrototype<Y>;
+  chain<Y>(f: (x: X) => MaybePrototype<Y>): MaybePrototype<Y>;
+  extend<Y>(f: (x: MaybePrototype<X>) => Y): MaybePrototype<Y>;
+  extract(): X;
+  map<Y>(f: (x: X) => Y): MaybePrototype<Y>;
+  of<Y>(value: Y): MaybePrototype<Y>;
   toString(): string;
   zero(): typeof Maybe.Nothing;
+  [$$value]: X;
 }
 
 declare namespace Maybe {
-  export function Just<T extends MaybePrototype<Z>, Z>(value: Z): T;
-  export function Just<T extends MaybePrototype<Z>, Z, K>(unaryFunction: (value: K) => Z): T;
+  export function Just<X>(x: X): MaybePrototype<X>;
   export namespace Just {
-    export function is<Z>(container: Z): boolean;
+    export function is<A>(C: A): boolean;
+    export function of<X>(x: X): MaybePrototype<X>;
   }
   export namespace Nothing {
-    export function is<Z>(container: Z): boolean;
-    export function alt<T extends MaybePrototype<Z>, Z>(container: T): T;
-    export function ap<T extends MaybePrototype<Z>, Z>(container: T): typeof Nothing;
-    export function chain<T extends MaybePrototype<Z>, Z, K>(
-      unaryFunction: (value: K) => T
-    ): typeof Nothing;
-    export function extend<T extends MaybePrototype<Z>, Z, K>(
-      unaryFunction: (container: T) => K
-    ): typeof Nothing;
-    export function map<Z, K>(unaryFunction: (value: Z) => K): typeof Nothing;
+    export function is<A>(C: A): boolean;
+    export function alt<A>(C: A): A;
+    export function ap<Y>(A: MaybePrototype<(x: any) => Y>): typeof Nothing;
+    export function chain<Y>(f: (x: any) => MaybePrototype<Y>): typeof Nothing;
+    export function extend<Y>(f: (x: MaybePrototype<any>) => Y): typeof Nothing;
+    export function map<Y>(f: (x: any) => Y): typeof Nothing;
   }
-  export function fromNullable<T extends MaybePrototype<Z>, Z>(value: Z): T;
-  export function just<T extends MaybePrototype<Z>, Z>(value: Z): T;
-  export function nothing<T extends MaybePrototype<Z>, Z = any>(): T;
-  export function of<T extends MaybePrototype<Z>, Z>(value: Z): T;
-  export function of<T extends MaybePrototype<Z>, Z>(unaryFunction: (value: Z) => Z): T;
+  export function of<X>(x: X): MaybePrototype<X>;
   export function zero(): typeof Nothing;
 }
+
+export function factorizeMaybeFromNullable <X>(x: X): MaybePrototype<X>|Nothing;
+export function factorizeMaybeJust <X>(x: X): MaybePrototype<X>;
+export function factorizeMaybeNothing (): Nothing;
 
 export default Maybe;

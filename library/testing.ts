@@ -5,9 +5,11 @@ import equals from "https://deno.land/x/ramda@v0.27.2/source/equals.js";
 import { identity } from "./aviary.js";
 // @deno-types="./curry.d.ts"
 import { curry2, curryN } from "./curry.js";
+// @deno-types="./other.d.ts"
 import { find, zipWith } from "./other.js";
 import { $$tag, $$type, $$valueList } from "./Symbols.js";
 import { assertIsString } from "./assertions.js";
+import type from "../functional";
 
 interface Container {
   [$$type]: string;
@@ -23,20 +25,20 @@ interface Container {
 const __executeAssertEquivalent = (A: Container, B: Container) =>
   A[$$type] === B[$$type]
     && A[$$tag] === B[$$tag]
-    && A[$$valueList] && B[$$valueList]
+    && (A[$$valueList] && B[$$valueList]
       ? zipWith(equals, A[$$valueList], B[$$valueList]).every(identity)
-      : equals(A, B)
+      : equals(A, B))
 
 export const assert = <X>(message: String|X) =>
   assertIsString(message) ? (x: X) => _assert(x, message as string) : _assert(message);
 
 export const assertEquals = curry2(
-  <X, Y>(x: string|X, y: X|Y, ...a: X[]|Y[]) =>
+  <X, Y>(x: string|X, y: X|Y, ...a: (X|Y)[]) =>
     assertIsString(x) && (!assertIsString(y)  || x !== y)
       ? a.length === 1
-        ? _assertEquals(y, a[0], x as string)
-        : (z: Y) => _assertEquals(y, z, x as string)
-      : _assertEquals(x, y)
+        ? _assertEquals(y as X, a[0] as Y, x as string)
+        : (z: Y) => _assertEquals(y as X, z as Y, x as string)
+      : _assertEquals(x as X, y as Y)
 );
 
 export const assertEquivalent = curry2(

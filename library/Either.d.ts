@@ -1,44 +1,47 @@
-export interface EitherRightPrototype<Z> {
-  alt<Y>(container: Y): this;
-  ap<T extends EitherRightPrototype<K>, K>(container: T): this;
-  chain<T extends EitherRightPrototype<K>, K>(unaryFunction: (value: Z) => T): this;
-  extend<T extends EitherRightPrototype<Z>, K>(unaryFunction: (container: T) => K): this;
-  extract(): Z;
-  map<K>(unaryFunction: (value: Z) => K): this;
-  of<T extends EitherRightPrototype<Z>>(value: Z): this;
+import { $$value } from "./Symbols.js";
+
+export interface EitherRightPrototype<X> {
+  alt<A>(C: A): this;
+  ap<Y>(A: EitherRightPrototype<(x: X) => Y>): EitherRightPrototype<Y>;
+  chain<Y>(f: (x: X) => EitherRightPrototype<Y>): EitherRightPrototype<Y>;
+  extend<Y>(f: (x: EitherRightPrototype<X>) => Y): EitherRightPrototype<Y>;
+  extract(): X;
+  map<Y>(f: (x: X) => Y): EitherRightPrototype<Y>;
+  of<Y>(value: Y): EitherRightPrototype<Y>;
   toString(): string;
   zero(): typeof Either.Left;
+  [$$value]: X;
 }
 
-export interface EitherLeftPrototype<Z> {
-  alt<T extends EitherRightPrototype<K>, K, Y>(container: Y): T;
-  ap<T extends EitherRightPrototype<K>, K>(container: T): this;
-  chain<T extends EitherRightPrototype<Y>, K, Y>(unaryFunction: (value: K) => T): this;
-  extend<T extends EitherRightPrototype<Y>, K, Y>(unaryFunction: (container: T) => K): this;
-  map<K, Y>(unaryFunction: (value: Y) => K): this;
-  of<T extends EitherLeftPrototype<Z>>(value: Z): T;
+export interface EitherLeftPrototype<X> {
+  alt<A>(C: A): A;
+  ap<Y>(A: EitherRightPrototype<(x: X) => Y>): this;
+  chain<Y>(f: (x: X) => EitherRightPrototype<Y>): this;
+  extend<Y>(f: (x: EitherRightPrototype<X>) => Y): this;
+  map<Y>(f: (x: X) => Y): this;
+  of<Y>(value: Y): EitherLeftPrototype<Y>;
   toString(): string;
   zero(): typeof Either.Left;
+  [$$value]: X;
 }
 
 declare namespace Either {
-  export function Right<T extends EitherRightPrototype<Z>, Z>(value: Z): T;
-  export function Right<T extends EitherRightPrototype<Z>, Z, K>(unaryFunction: (value: K) => Z): T;
+  export function Right<X>(x: X): EitherRightPrototype<X>;
   export namespace Right {
-    export function is<Z>(container: Z): boolean;
-    export function of<T extends EitherRightPrototype<Z>, Z>(value: Z): T;
-    export function of<T extends EitherRightPrototype<Z>, Z, K>(unaryFunction: (value: K) => Z): T;
+    export function is<A>(C: A): boolean;
+    export function of<X>(x: X): EitherRightPrototype<X>;
   }
-  export function Left<T extends EitherLeftPrototype<E>, E>(value: E): T;
-  export function Left<T extends EitherLeftPrototype<E>, E, Z>(unaryFunction: (value: Z) => E): T;
+  export function Left<X>(x: X): EitherLeftPrototype<X>;
   export namespace Left {
-    export function is<Z>(container: Z): boolean;
-    export function of<T extends EitherLeftPrototype<E>, E>(value: E): T;
-    export function of<T extends EitherLeftPrototype<E>, E, Z>(unaryFunction: (value: Z) => E): T;
+    export function is<A>(C: A): boolean;
+    export function of<X>(x: X): EitherLeftPrototype<X>;
   }
-  export function of<T extends EitherRightPrototype<Z>, Z>(value: Z): T;
-  export function of<T extends EitherRightPrototype<Z>, Z, K>(unaryFunction: (value: K) => Z): T;
+  export function of<X>(x: X): EitherRightPrototype<X>;
   export function zero(): typeof Left;
 }
+
+export function factorizeEitherFromNullable <X>(x: X): EitherRightPrototype<X>|EitherLeftPrototype<X>;
+export function factorizeEitherRight <X>(x: X): EitherRightPrototype<X>;
+export function factorizeEitherLeft <X>(x: X): EitherLeftPrototype<X>;
 
 export default Either;

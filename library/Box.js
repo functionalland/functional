@@ -60,7 +60,7 @@ Box.prototype.chain = Box.prototype["fantasy-land/chain"] = function (f) {
 
 /**
  * ### Box `.extend`
- * `Box a ~> (Box a -> b) -> Box b`
+ * `Box a ~> ((Box a) -> b) -> Box b`
  *
  * This method takes a unary function that accepts a container of similar shape and return a value. The returned
  * container will be of the same type.

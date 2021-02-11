@@ -30,27 +30,90 @@ import { factorizeType } from "./factories.js";
 
 export const IO = factorizeType("IO", [ "asyncFunction" ]);
 
-IO.prototype.ap = IO.prototype["fantasy-land/ap"] = function (container) {
+/**
+ * ### IO `.ap`
+ * `IO (() -> a) ~> (IO a -> b) -> IO (() -> b)`
+ *
+ * This method takes a container of similar shape of a unary function and, applies it to its own value. The returned
+ * container will be of the same type.
+ *
+ * ```js
+ * const container = IO(_ => 42).ap(IO(x => x * 2));
+ *
+ * assertEquivalent(container.run(), IO(_ => 84).run());
+ * ```
+ */
+IO.prototype.ap = IO.prototype["fantasy-land/ap"] = function (C) {
 
   //   return IO.is(container) ? IO(_ => container.asyncFunction(this.asyncFunction())) : container
-  return container.map(unaryFunction => unaryFunction(this.asyncFunction()));
+  return C.map(f => f (this.asyncFunction()));
 };
 
-IO.prototype.chain = IO.prototype["fantasy-land/chain"] = function (unaryFunction) {
+/**
+ * ### IO `.chain`
+ * `IO (() -> a) ~> (a -> IO (() -> b)) -> IO (() -> b)`
+ *
+ * This method takes a unary function that returns a container of similar shape.
+ *
+ * ```js
+ * const container = IO(_ => 42).chain(x => IO(_ => x * 2));
+ *
+ * assertEquivalent(container.run(), IO(_ => 84).run());
+ * ```
+ */
+IO.prototype.chain = IO.prototype["fantasy-land/chain"] = function (f) {
 
-  return IO(_ => unaryFunction(this.asyncFunction())).run();
+  return IO (_ => f (this.asyncFunction())).run();
 };
 
-IO.prototype.map = IO.prototype["fantasy-land/map"] = function (unaryFunction) {
+/**
+ * ### IO `.map`
+ * `IO (() -> a) ~> (a -> b) -> IO (() -> b)`
+ *
+ * This method takes a unary function that returns a value. The returned container will be of the same type.
+ *
+ * ```js
+ * const container = IO(_ => 42).map(x => x * 2);
+ *
+ * assertEquivalent(container.run(), IO(_ => 84).run());
+ * ```
+ */
+IO.prototype.map = IO.prototype["fantasy-land/map"] = function (f) {
 
-  return IO(_ => unaryFunction(this.asyncFunction()));
+  return IO (_ => f (this.asyncFunction()));
 };
 
+/**
+ * ### IO `.run`
+ * `IO (() -> a) ~> () -> a`
+ *
+ * This method takes a value and, returns container of a unit function.
+ *
+ * ```js
+ * const container = IO.of(42);
+ *
+ * assertEquals(container.run(), IO(_ => 42));
+ * ```
+ */
 IO.prototype.run = function () {
 
   return this.asyncFunction();
 };
 
-IO.of = IO.prototype.of = IO.prototype["fantasy-land/of"] = value => IO(_ => value);
+/**
+ * ### IO `.of`
+ * `a -> IO (() -> a)`
+ *
+ * This method takes a value and, returns container of a unit function.
+ *
+ * ```js
+ * const container = IO.of(42);
+ *
+ * assertEquals(container.run(), IO(_ => 42));
+ * ```
+ */
+IO.of = IO.prototype.of = IO.prototype["fantasy-land/of"] = x => IO (_ => x);
+
+export const factorizeIO = f => IO(f);
 
 export default IO;

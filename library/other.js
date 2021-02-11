@@ -6,8 +6,7 @@ export const append = curry2((x, xs) => [ ...xs, x ]);
 export const not = x => !x;
 export const complement = compose2(not);
 
-export const find = curry2((x, xs) => xs.find(x));
-
+export const find = curry2((f, xs) => xs.find(f));
 
 export const has = curry2((x, y) => assertIsObject(x) ? y.has(x) : !!y[x]);
 export const join = curry2((x, y) => y.join(x));

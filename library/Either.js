@@ -1,6 +1,6 @@
-import { factorizeSumType } from "./factories.js";
-
 import { $$value } from "./Symbols.js";
+import { assertIsNull, assertIsObject, assertIsUndefined } from "./assertions.js";
+import { factorizeSumType } from "./factories.js";
 
 /**
  * ## Either
@@ -23,7 +23,6 @@ import { $$value } from "./Symbols.js";
  * const containerC = containerB.alt(containerA);
  *
  * assert(Either.Right.is(containerA));
- * assert(containerA.extract() === 44);
  * assert(Either.Left.is(containerB));
  * assert(Either.Right.is(containerC));
  * ```
@@ -37,62 +36,221 @@ export const Either = factorizeSumType(
   }
 );
 
-Either.fromNullable = value => !(typeof value  !== "undefined") || !value && typeof value === "object"
-    ? Either.Left(value)
-  : Either.Right(value);
-Either.left = value => Either.Left(value);
-Either.right = value => Either.Right(value);
-
-Either.of = Either.prototype.of = Either.prototype["fantasy-land/of"] = value => Either.Right(value);
-
-Either.prototype.alt = Either.prototype["fantasy-land/alt"] = function (container) {
+/**
+ * ### Either `.alt`
+ * `Either.Right a ~> Either.Right b -> Either.Right a`
+ * `Either.Left a ~> Either.Right b -> Either.Right b`
+ *
+ * This method takes a container of similar shape that will be returned if the context is of type `Either.Left`.
+ * It is interoperable with `Box` and, `Maybe`.
+ *
+ * ```js
+ * const containerA = Either.Right(24).alt(Either.Right(42));
+ * const containerB = Either.Left("not 42").alt(Either.Right(42));
+ *
+ * assertEquivalent(containerA, Either.Right(24));
+ * assertEquivalent(containerB, Either.Right(42));
+ * ```
+ */
+Either.prototype.alt = Either.prototype["fantasy-land/alt"] = function (A) {
 
   return this.fold({
-    Left: _ => container,
+    Left: _ => A,
     Right: _ => this
   });
 };
 
-Either.prototype.ap = Either.prototype["fantasy-land/ap"] = function (container) {
+/**
+ * ### Either `.ap`
+ * `Either.Right a ~> (Either.Right a -> b) -> Either.Right b`
+ * `Either.Left a ~> (Either.Right a -> b) -> Either.Left a`
+ *
+ * This method takes a container of similar shape of a unary function and, applies it to its own value. The returned
+ * container will be of the same type.
+ * If the container is of type `Either.Left`, nothing happens.
+ * It is interoperable with `Box` and, `Maybe`.
+ *
+ * ```js
+ * const container = Either.Right(42).ap(Either.Right(x => x * 2));
+ *
+ * assertEquivalent(container, Either.Right(84));
+ * ```
+ */
+Either.prototype.ap = Either.prototype["fantasy-land/ap"] = function (A) {
 
   return this.fold({
     Left: _ => this,
-    Right: value => Either.Right.is(container) ? Either.Right(container[$$value](value)) : container
+    Right: x => Either.Right.is(A) ? Either.Right(A[$$value] (x)) : A
   });
 };
 
-Either.prototype.chain = Either.prototype["fantasy-land/chain"] = function (unaryFunction) {
+/**
+ * ### Either `.chain`
+ * `Either.Right a ~> (a -> Either.Right b) -> Either.Right b`
+ * `Either.Left a ~> (a -> Either.Right b) -> Either.Left a`
+ *
+ * This method takes a unary function that returns a container of similar shape.
+ * If the container is of type `Either.Left`, nothing happens.
+ * It is interoperable with `Box` and, `Maybe`.
+ *
+ * ```js
+ * const container = Either.Right(42).chain(x => Either.Right(x * 2));
+ *
+ * assertEquivalent(container, Either.Right(84));
+ * ```
+ */
+Either.prototype.chain = Either.prototype["fantasy-land/chain"] = function (f) {
 
   return this.fold({
     Left: _ => this,
-    Right: value => unaryFunction(value)
+    Right: x => f (x)
   });
 };
 
-Either.prototype.extend = Either.prototype["fantasy-land/extend"] = function (unaryFunction) {
+/**
+ * ### Either `.extend`
+ * `Either.Right a ~> ((Either.Right a) -> b) -> Either.Right b`
+ * `Either.Left a ~> ((Either.Right a) -> b) -> Either.Left a`
+ *
+ * This method takes a unary function that accepts a container of similar shape and return a value. The returned
+ * container will be of the same type.
+ * If the container is of type `Either.Left`, nothing happens.
+ * It is interoperable with `Box` and, `Maybe`.
+ *
+ * ```js
+ * const container = Either.Right(42).extend(x => x[$$value] * 2);
+ *
+ * assertEquivalent(container, Box(84));
+ * ```
+ */
+Either.prototype.extend = Either.prototype["fantasy-land/extend"] = function (f) {
 
   return this.fold({
     Left: _ => this,
-    Right: _ => Either.of(unaryFunction(this))
+    Right: _ => Either.of(f (this))
   });
 };
 
+/**
+ * ### Either `.extract`
+ * `Either.Right a ~> () -> a`
+ *
+ * This method takes no argument and, return its own value.
+ *
+ * ```js
+ * const value = Either.Right(42).extract();
+ *
+ * assertEquals(value, 42);
+ * ```
+ */
 Either.prototype.extract = Either.prototype["fantasy-land/extract"] = function () {
 
   return this.fold({
     Left: _ => this,
-    Right: value => value
+    Right: x => x
   });
 };
 
-Either.prototype.map = Either.prototype["fantasy-land/map"] = function (unaryFunction) {
+/**
+ * ### Either `.map`
+ * `Either.Right a ~> (a -> b) -> Either.Right b`
+ * `Either.Left a ~> (a -> b) -> Either.Left a`
+ *
+ * This method takes a unary function that returns a value. The returned container will be of the same type.
+ * If the container is of type `Either.Left`, nothing happens.
+ * It is interoperable with `Box` and, `Maybe`.
+ *
+ * ```js
+ * const container = Either.Right(42).map(x => x * 2);
+ *
+ * assertEquivalent(container, Either.Right(84));
+ * ```
+ */
+Either.prototype.map = Either.prototype["fantasy-land/map"] = function (f) {
 
   return this.fold({
     Left: _ => this,
-    Right: value => Either.of(unaryFunction(value))
+    Right: x => Either.Right(f (x))
   });
 };
 
+/**
+ * ### Either `.of`
+ * `a -> Either.Right a`
+ *
+ * This method takes a value and, returns a container.
+ *
+ * ```js
+ * const container = Either.of(42);
+ *
+ * assertEquals(container, Either.Right(42));
+ * ```
+ */
+Either.of = Either.prototype.of = Either.prototype["fantasy-land/of"] = x => Either.Right(x);
+
+/**
+ * ### Either `.zero`
+ * `() -> Either.Left null`
+ *
+ * This method takes a value and, returns a container.
+ *
+ * ```js
+ * const container = Either.zero();
+ *
+ * assertEquals(container, Either.Left(null));
+ * ```
+ */
 Either.zero = Either.prototype.zero = Either.prototype["fantasy-land/zero"] = () => Either.Left(null);
+
+/**
+ * ### `factorizeEitherFromNullable`
+ * `a -> Either a`
+ *
+ * This method takes a value and, returns a container.
+ *
+ * ```js
+ * const containerA = factorizeEitherFromNullable(42);
+ * const containerB = factorizeEitherFromNullable(null);
+ *
+ * assertEquals(containerA, Either.Right(42));
+ * assertEquals(containerB, Either.Left(null));
+ * ```
+ */
+export const factorizeEitherFromNullable = x =>
+  assertIsNull (x) || assertIsUndefined (x) || !x && assertIsObject (x)
+    ? Either.Left(x)
+    : Either.Right(x);
+
+/**
+ * ### `factorizeEitherRight`
+ * `a -> Either.Right a`
+ *
+ * This method takes a value and, returns a container.
+ *
+ * ```js
+ * const container = factorizeEitherRight(42);
+ *
+ * assertEquals(container, Either.Right(42));
+ * ```
+ */
+export const factorizeEitherRight = x => Either.Right(x);
+
+/**
+ * ### `factorizeEitherLeft`
+ * `a -> Either.Left a`
+ *
+ * This method takes a value and, returns a container.
+ *
+ * ```js
+ * const container = factorizeEitherLeft(42);
+ *
+ * assertEquals(container, Either.Left(42));
+ * ```
+ */
+export const factorizeEitherLeft = x => Either.Left(x);
+
+Either.fromNullable = factorizeEitherFromNullable;
+Either.left = factorizeEitherLeft;
+Either.right = factorizeEitherRight;
 
 export default Either;

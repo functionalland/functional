@@ -1,8 +1,4 @@
 import { $$value } from "./Symbols.js";
-import Nothing = Maybe.Nothing;
-import Nothing = Maybe.Nothing;
-import Nothing = Maybe.Nothing;
-import Nothing = Maybe.Nothing;
 
 export interface MaybePrototype<X> {
   alt<A>(C: A): this;
@@ -30,13 +26,14 @@ declare namespace Maybe {
     export function chain<Y>(f: (x: any) => MaybePrototype<Y>): typeof Nothing;
     export function extend<Y>(f: (x: MaybePrototype<any>) => Y): typeof Nothing;
     export function map<Y>(f: (x: any) => Y): typeof Nothing;
+    export function toString(): string;
   }
   export function of<X>(x: X): MaybePrototype<X>;
   export function zero(): typeof Nothing;
 }
 
-export function factorizeMaybeFromNullable <X>(x: X): MaybePrototype<X>|Nothing;
+export function factorizeMaybeFromNullable <X>(x: X): MaybePrototype<X>|typeof Maybe.Nothing;
 export function factorizeMaybeJust <X>(x: X): MaybePrototype<X>;
-export function factorizeMaybeNothing (): Nothing;
+export function factorizeMaybeNothing (): typeof Maybe.Nothing;
 
 export default Maybe;

@@ -15,10 +15,11 @@ export interface EitherRightPrototype<X> {
 
 export interface EitherLeftPrototype<X> {
   alt<A>(C: A): A;
-  ap<Y>(A: EitherRightPrototype<(x: X) => Y>): this;
-  chain<Y>(f: (x: X) => EitherRightPrototype<Y>): this;
-  extend<Y>(f: (x: EitherRightPrototype<X>) => Y): this;
-  map<Y>(f: (x: X) => Y): this;
+  ap<Y>(A: EitherRightPrototype<(x: any) => Y>): this;
+  chain<Y>(f: (x: any) => EitherRightPrototype<Y>): this;
+  extend<Y>(f: (x: EitherRightPrototype<any>) => Y): this;
+  extract(): X;
+  map<Y>(f: (x: any) => Y): this;
   of<Y>(value: Y): EitherLeftPrototype<Y>;
   toString(): string;
   zero(): typeof Either.Left;

@@ -9,12 +9,11 @@ import { curry2, curryN } from "./curry.js";
 import { find, zipWith } from "./other.js";
 import { $$tag, $$type, $$valueList } from "./Symbols.js";
 import { assertIsString } from "./assertions.js";
-import type from "../functional";
 
 interface Container {
   [$$type]: string;
   [$$tag]: string;
-  [$$valueList]: any[]
+  [$$valueList]: any[];
 }
 
 /**

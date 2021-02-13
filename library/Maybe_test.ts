@@ -1,370 +1,133 @@
-import { assertEquals } from "https://deno.land/std@0.83.0/testing/asserts.ts";
-import { factorizeType } from "./factories.js";
-import Maybe from "./Maybe.js";
+// @deno-types="./Maybe.d.ts"
+import Maybe, { factorizeMaybeFromNullable, factorizeMaybeJust, factorizeMaybeNothing } from "./Maybe.js";
+import type { MaybePrototype } from "./Maybe.d.ts";
 import { $$value } from "./Symbols.js";
+// @deno-types="./aviary.d.ts"
+import { compose2, identity } from "./aviary.js";
+import { lift3 } from "./other.js";
+import { assert, assertEquivalent, test } from "./testing.ts";
 
-Deno.test(
-  "Maybe: #just",
-  () =>
-    assertEquals(Maybe.just(42).toString(), Maybe.Just(42).toString())
-);
+test ("Maybe: initialize")
+  (() => {
+    assert (Maybe.Just(42));
+    assert (Maybe.Just((x: number) => x * 2));
+    assert (Maybe.Nothing);
+  });
 
-Deno.test(
-  "Maybe: (Just) #alt",
-  () =>
-    assertEquals(
-      Maybe.Just(42).alt(Maybe.Just(24)).toString(),
-      Maybe.Just(42).toString()
-    )
-);
+test ("Maybe: #ap")
+  (() => {
+    assertEquivalent
+      ("The Maybe's value is multiplied by two.")
+      (Maybe.Just(42).ap(Maybe.Just((x: number) => x * 2)))
+      (Maybe.Just(84));
+    assertEquivalent
+      ("The container is not affected.")
+      (Maybe.Nothing.ap(Maybe.Just((x: number) => x * 2)))
+      (Maybe.Nothing);
+    assertEquivalent
+      ("Composition law.")
+      (Maybe.Just(42).ap(Maybe.Just((x: number) => x * 2).ap(Maybe.Just((x: number) => x + 2).map(compose2))))
+      (Maybe.Just(42).ap(Maybe.Just((x: number) => x * 2)).ap(Maybe.Just((x: number) => x + 2)));
+    assertEquivalent
+      ("With lift3.")
+      (lift3 (compose2) (Maybe.Just((x: number) => x + 2)) (Maybe.Just((x: number) => x * 2)) (Maybe.Just(42)))
+      (Maybe.Just(42).ap(Maybe.Just((x: number) => x * 2)).ap(Maybe.Just((x: number) => x + 2)));
+  });
 
-Deno.test(
-  "Maybe: (Just) #ap - Composition",
-  () => {
-    const containerA = Maybe.Just(42);
-    const containerB = Maybe.Just(x => x + 2);
-    const containerC = Maybe.Just(x => x * 2);
+test ("Maybe: #chain")
+  (() => {
+    assertEquivalent
+      ("The Maybe's value is multiplied by two.")
+      (Maybe.Just(42).chain((x: number) => Maybe.Just(x * 2)))
+      (Maybe.Just(84));
+    assertEquivalent
+      ("The container is not affected.")
+      (Maybe.Nothing.chain((x: number) => Maybe.Just(x * 2)))
+      (Maybe.Nothing);
+    assertEquivalent
+      ("Associativity law.")
+      (Maybe.Just(42).chain((x: number) => Maybe.Just(x * 2).chain((x: number) => Maybe.Just(x + 2))))
+      (Maybe.Just(42).chain((x: number) => Maybe.Just(x * 2)).chain((x: number) => Maybe.Just(x + 2)));
+  });
 
-    assertEquals(
-      containerA.ap(containerB.ap(containerC.map(a => b => c => a(b(c))))).toString(),
-      containerA.ap(containerB).ap(containerC).toString()
-    );
-  }
-);
+test ("Maybe: #extend")
+  (() => {
+    assertEquivalent
+      ("The Maybe's value is multiplied by two.")
+      (Maybe.Just(42).extend((A: MaybePrototype<number>) => A[$$value] * 2))
+      (Maybe.Just(84));
+    assertEquivalent
+      ("The container is not affected.")
+      (Maybe.Nothing.extend((A: MaybePrototype<number>) => A[$$value] * 2))
+      (Maybe.Nothing);
+  });
 
-Deno.test(
-  "Maybe: (Just) #ap with either",
-  () => {
-    const lift2 = (f, a, b) => b.ap(a.map(f));
-    const either = (x, y) => lift2(a => b => a || b, x, y);
 
-    assertEquals(
-      either(
-        Maybe.Just(false),
-        Maybe.Just(82)
-      ).toString(),
-      Maybe.Just(82).toString()
-    );
-  }
-);
+test ("Maybe: #extract")
+  (() =>
+    assertEquivalent
+      ("The value is extracted from the container.")
+      (Maybe.Just(42).extract())
+      (42)
+  );
 
-Deno.test(
-  "Maybe: (Just) #ap with lift",
-  () => {
-    const lift2 = (f, a, b) => b.ap(a.map(f));
+test ("Maybe: #map")
+  (() => {
+    assertEquivalent
+      ("The Maybe's value is multiplied by two.")
+      (Maybe.Just(42).map((x: number) => x * 2))
+      (Maybe.Just(84));
+    assertEquivalent
+      ("The container is not affected.")
+      (Maybe.Nothing.map((x: number) => x * 2))
+      (Maybe.Nothing);
+    assertEquivalent
+      ("Identity law.")
+      (Maybe.Just(42).map(identity))
+      (Maybe.Just(42));
+    assertEquivalent
+      ("Composition law.")
+      (Maybe.Just(42).map
+        ((x: number) => compose2<number, number, number> ((x: number) => x + 2) ((x: number) => x * 2) (x)))
+      (Maybe.Just(42).map((x: number) => x * 2).map((x: number) => x + 2));
+  });
 
-    const containerA = Maybe.Just(42);
-    const containerB = Maybe.Just(32);
+test ("Maybe: #of")
+  (() =>
+    assertEquivalent
+      ("A Maybe is factorized with the value.")
+      (Maybe.of(42))
+      (Maybe.Just(42))
+  );
 
-    assertEquals(
-      lift2(x => y => x * y, containerA, containerB).toString(),
-      Maybe.Just(1344).toString()
-    );
-  }
-);
+test ("Maybe: factorizeMaybeFromNullable")
+  (() => {
+    assertEquivalent
+      ("A Maybe is factorized with the value.")
+      (factorizeMaybeFromNullable (42))
+      (Maybe.Just(42));
+    assertEquivalent
+      ("A Maybe is factorized with the object.")
+      (factorizeMaybeFromNullable ({ "hoge": "piyo" }))
+      (Maybe.Just({ "hoge": "piyo" }));
+    assertEquivalent
+      ("A Maybe.Nothing is factorized with `null`.")
+      (factorizeMaybeFromNullable (null))
+      (Maybe.Nothing);
+  });
 
-Deno.test(
-  "Maybe: (Just) #ap with merge",
-  () => {
-    const append = y => xs => xs.concat([y]);
-    const lift2 = (f, a, b) => b.ap(a.map(f));
-    const merge = (T, xs) => xs.reduce(
-      (acc, x) => lift2(append, x, acc),
-      T.of([])
-    );
+test ("Maybe: factorizeMaybeJust")
+  (() =>
+    assertEquivalent
+      ("A Maybe is factorized with the value.")
+      (factorizeMaybeJust (42))
+      (Maybe.Just(42))
+  );
 
-    assertEquals(
-      merge(
-        Maybe,
-        [
-          Maybe.Just(2),
-          Maybe.Just(10),
-          Maybe.Just(3)
-        ]
-      ).toString(),
-      Maybe.Just([ 2, 10, 3 ]).toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: (Just) #chain - Associativity",
-  async () => {
-    const container = Maybe.Just(42);
-    const f = x => Maybe.Just(x + 2);
-    const g = x => Maybe.Just(x * 2);
-
-    assertEquals(
-      container.chain(f).chain(g).toString(),
-      container.chain(value => f(value).chain(g)).toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: (Just) #extend - Associativity",
-  async () => {
-    const container = Maybe.Just(42);
-    const f = container => container[$$value] + 2;
-    const g = container => container[$$value] * 2;
-
-    assertEquals(
-      container.extend(f).extend(g).toString(),
-      container.extend(value => g(value.extend(f))).toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: (Just) #extract - Right identity",
-  () => {
-    const container = Maybe.Just(42);
-    const f = container => container[$$value] + 2;
-
-    assertEquals(
-      container.extend(f).extract().toString(),
-      f(container).toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: (Just) #filter (even)",
-  () =>
-    assertEquals(
-      Maybe.Just(42).filter(x => x % 2 === 0).toString(),
-      Maybe.Just(42).toString()
-    )
-);
-
-Deno.test(
-  "Maybe: (Just) #filter (odd)",
-  () =>
-    assertEquals(
-      Maybe.Just(23).filter(x => x % 2 === 0).toString(),
-      Maybe.Nothing.toString()
-    )
-);
-
-Deno.test(
-  "Maybe: (Just) #map",
-  () =>
-    assertEquals(
-      Maybe.Just(42).map(x => x * 2).toString(),
-      Maybe.Just(84).toString()
-    )
-);
-
-Deno.test(
-  "Maybe: (Just) #map - Identity",
-  () => {
-    const container = Maybe.Just(42);
-
-    assertEquals(
-      container.map(x => x).toString(),
-      container.toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: (Just) #map - Composition",
-  () => {
-    const container = Maybe.Just(42);
-    const f = x => x + 2;
-    const g = x => x * 2;
-
-    assertEquals(
-      container.map(f).map(g).toString(),
-      container.map(x => g(f(x))).toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: (Just) #of - Identity (Applicative)",
-  () => {
-    const container = Maybe.Just(42);
-
-    assertEquals(
-      container.ap(Maybe.of(x => x)).toString(),
-      container.toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: (Just) #of - Left identity (Chainable)",
-  async () => {
-    const container = Maybe.Just(42);
-    const f = x => Maybe.Just(x + 2);
-
-    assertEquals(
-      container.chain(Maybe.of).chain(f).toString(),
-      container.chain(f).toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: (Just) #of - Right identity (Chainable)",
-  async () => {
-    const container = Maybe.Just(42);
-    const f = x => Maybe.Just(x + 2);
-
-    assertEquals(
-      container.chain(f).chain(Maybe.of).toString(),
-      container.chain(f).toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: (Just) #of - Homomorphism",
-  () =>
-    assertEquals(
-      Maybe.of(42).ap(Maybe.of(x => x + 2)),
-      Maybe.of((x => x + 2)(42))
-    )
-);
-
-Deno.test(
-  "Maybe: (Just) #of - Interchange",
-  () =>
-    assertEquals(
-      Maybe.of(42)
-        .ap(Maybe.Just(x => x + 2)).toString(),
-      Maybe.Just(x => x + 2)
-        .ap(Maybe.of(f => f(42))).toString()
-    )
-);
-
-Deno.test(
-  "Maybe: (Just) #traverse - Identity",
-  () => {
-    const Dummy = factorizeType("Dummy", [ "x" ]);
-    Dummy.of = x => Dummy(x);
-    Dummy.prototype.map = function (unaryFunction) {
-
-      return Dummy(unaryFunction(this.x));
-    };
-    const container = Maybe.Just([ 42, 32, 23 ]);
-
-    assertEquals(
-      container.traverse(Dummy, Dummy.of).toString(),
-      Dummy.of(container).toString()
-    );
-  }
-);
-
-/*
- * Traverse is an experimental feature; The Naturility law test is failing.
- */
-// Deno.test(
-//   "Maybe: (Just) #traverse - Naturality",
-//   () => {
-//     const Dummy = factorizeType("Dummy", [ "x" ]);
-//     Dummy.of = x => Dummy(x);
-//     Dummy.prototype.chain = function (unaryFunction) {
-//
-//       return unaryFunction(this.x);
-//     };
-//     Dummy.prototype.map = function (unaryFunction) {
-//
-//       return Dummy(unaryFunction(this.x));
-//     };
-//     const container = Maybe.Just([ 42, 32, 23 ]);
-//     const f = x => Dummy.of(x);
-//
-//     assertEquals(
-//       f(container.sequence(Dummy)).toString(),
-//       container.traverse(Maybe, f).toString()
-//     );
-//   }
-// );
-
-Deno.test(
-  "Maybe: #zero - Right identity",
-  () => {
-    const container = Maybe.Just(42);
-
-    assertEquals(
-      container.alt(Maybe.zero()).toString(),
-      container.toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: #zero - Left identity",
-  () => {
-    const container = Maybe.Just(42);
-
-    assertEquals(
-      Maybe.zero().alt(container).toString(),
-      container.toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: #zero - Annihilation",
-  () =>
-    assertEquals(
-      Maybe.zero().map(x => x + 2).toString(),
-      Maybe.zero().toString()
-    )
-);
-
-Deno.test(
-  "Maybe: (Nothing) #alt",
-  () =>
-    assertEquals(
-      Maybe.Nothing.alt(Maybe.Just(42)).toString(),
-      Maybe.Just(42).toString()
-    )
-);
-
-Deno.test(
-  "Maybe: (Nothing) #filter",
-  () =>
-    assertEquals(
-      Maybe.Nothing.filter(x => x % 2 === 0).toString(),
-      Maybe.Nothing.toString()
-    )
-);
-
-Deno.test(
-  "Maybe: (Nothing) #map",
-  () =>
-    assertEquals(
-      Maybe.Nothing.map(x => x * 2).toString(),
-      Maybe.Nothing.toString()
-    )
-);
-
-Deno.test(
-  "Maybe: (Nothing) #map - Identity",
-  () => {
-    const container = Maybe.Nothing;
-
-    assertEquals(
-      container.map(x => x).toString(),
-      container.toString()
-    );
-  }
-);
-
-Deno.test(
-  "Maybe: (Nothing) #map - Composition",
-  () => {
-    const container = Maybe.Nothing;
-    const f = x => x + 2;
-    const g = x => x * 2;
-
-    assertEquals(
-      container.map(f).map(g).toString(),
-      container.map(x => g(f(x))).toString()
-    );
-  }
-);
+test ("Maybe: factorizeMaybeNothing")
+  (() =>
+    assertEquivalent
+      ("A Maybe is factorized with the value.")
+      (factorizeMaybeNothing ())
+      (Maybe.Nothing)
+  );

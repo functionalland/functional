@@ -2,7 +2,7 @@ export interface IOPrototype<F extends () => any> {
   ap<H extends () => any>(C: IOPrototype<() => (x: ReturnType<F>) => ReturnType<H>>): IOPrototype<H>;
   chain<H extends () => any>(f: (x: ReturnType<F>) => IOPrototype<H>): IOPrototype<H>;
   map<Y>(f: (x: ReturnType<F>) => Y): IOPrototype<() => Y>;
-  of<Y>(x: Y): IOPrototype<() => Y>;
+  of<X>(x: X): IOPrototype<() => X>;
   run(): ReturnType<F>;
   toString(): string;
 }

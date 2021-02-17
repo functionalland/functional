@@ -10,13 +10,12 @@ export const encodeText = $$encoder.encode.bind($$encoder);
 
 /**
  * ### `evert`
- * `Applicative a => a -> a[] -> a`
+ * `Applicative F => F -> F[] -> F`
  *
  * This function takes a type constructor and, a list of Applicative functor and evert it; effectively making an Applicative
  * functor of a list of value.
  *
  * ```js
- * import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
  * import { evert } from "https://deno.land/x/functional@v1.3.4/library/utilities.js";
  *
  * const container = await evert(Task, [ Task.of(42), Task.of(32), Task.of(24) ]).run();
@@ -27,10 +26,24 @@ export const encodeText = $$encoder.encode.bind($$encoder);
  * ```
  */
 export const evert = curry2((T, xs) => xs.reduce((ys, x) => lift2(append)(x, ys), T.of([])));
-
-export const fold = curry2((o, A) => A.fold(o));
-
 export const insideOut = evert;
+
+/**
+ * ### `fold`
+ * `{ k: a => F } -> F a -> F`
+ *
+ * This function takes a type constructor and, a list of Applicative functor and evert it; effectively making an Applicative
+ * functor of a list of value.
+ *
+ * ```js
+ * import { fold } from "https://deno.land/x/functional@v1.3.4/library/utilities.js";
+ *
+ * const container = await fold({ Left: () => this, Right: x => x * 2 }, Either.Right(42));
+ *
+ * assertEquivalent(container, Either.Right(84));
+ * ```
+ */
+export const fold = curry2((o, A) => A.fold(o));
 
 /**
  * ### `log`

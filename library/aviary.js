@@ -26,6 +26,9 @@ import { assertIsFunction } from "./assertions.js";
  * need to define the generics.
  *
  * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
+ * import { ap } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
+ *
  * const f = ap<number, number, number>(x => y => x + y);
  * const g = f(x => x * 2);
  * const x = g(42);
@@ -66,6 +69,9 @@ export const S = starling;
  * need to define the generics.
  *
  * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
+ * import { apply } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
+ *
  * const f = apply<number, number> (x => x * 2);
  * const x = f(42);
  * ```
@@ -100,6 +106,9 @@ export const $ = applicator;
  * need to define the generics.
  *
  * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
+ * import { applyTo } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
+ *
  * const f = applyTo<number, number> (42);
  * const x = f(x => x * 2);
  * ```
@@ -135,6 +144,9 @@ export const CI = thrush;
  * need to define the generics.
  *
  * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
+ * import { compose2 } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
+ *
  * const f = compose2<number, number, number> (x => x * 2);
  * const g = f(x => x + 2);
  * const x = g(42);
@@ -170,7 +182,10 @@ export const B = bluebird;
  * need to define the generics.
  *
  * ```ts
- * const f = compose2<number, number, number> (x => x - 2);
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
+ * import { compose3 } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
+ *
+ * const f = compose3<number, number, number> (x => x - 2);
  * const g = f(x => x * 2);
  * const h = g(x => x + 2);
  * const x = h(42);
@@ -199,6 +214,14 @@ export const B3 = becard;
  * ```
  *
  * #### TypeScript
+ *
+ * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
+ * import { constant } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
+ *
+ * const f = constant<number, number> (42);
+ * const x = f(24);
+ * ```
  *
  * ```ts
  * export function constant <X, Y>(x: X): (y: Y) => X;
@@ -267,6 +290,9 @@ export const B2 = bunting;
  * need to define the generics.
  *
  * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
+ * import { flip } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
+ *
  * const f = flip<number, number, number> (x => y => x - y);
  * const g = f(24);
  * const x = g(42);
@@ -292,6 +318,9 @@ export const second = kite;
  * It is also known as the `idiot` or, the `I` combinator.
  *
  * ```js
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
+ * import { identity } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
+ *
  * const x = identity(42);
  * assertEquals(x, 42);
  * ```

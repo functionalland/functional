@@ -1,5 +1,6 @@
 import { $$value } from "./Symbols.js";
 import { assertIsNull, assertIsObject, assertIsUndefined } from "./assertions.js";
+import { identity } from "./aviary.js";
 import { factorizeSumType } from "./factories.js";
 
 /**
@@ -146,8 +147,8 @@ Either.prototype.extend = Either.prototype["fantasy-land/extend"] = function (f)
 Either.prototype.extract = Either.prototype["fantasy-land/extract"] = function () {
 
   return this.fold({
-    Left: _ => this,
-    Right: x => x
+    Left: identity,
+    Right: identity
   });
 };
 

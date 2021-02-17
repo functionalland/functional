@@ -9,12 +9,11 @@ import { curry2, curryN } from "./curry.js";
 import { find, zipWith } from "./other.js";
 import { $$tag, $$type, $$valueList } from "./Symbols.js";
 import { assertIsString } from "./assertions.js";
-import type from "../functional";
 
 interface Container {
   [$$type]: string;
   [$$tag]: string;
-  [$$valueList]: any[]
+  [$$valueList]: any[];
 }
 
 /**
@@ -33,7 +32,7 @@ export const assert = <X>(message: String|X) =>
   assertIsString(message) ? (x: X) => _assert(x, message as string) : _assert(message);
 
 export const assertEquals = curry2(
-  <X, Y>(x: string|X, y: X|Y, ...a: (X|Y)[]) =>
+  <X, Y>(x: string|X, y?: X|Y, ...a: (X|Y)[]) =>
     assertIsString(x) && (!assertIsString(y)  || x !== y)
       ? a.length === 1
         ? _assertEquals(y as X, a[0] as Y, x as string)
@@ -75,8 +74,9 @@ export const factorizeSpy = () => {
 };
 
 export const test = curry2(
-  <X>(message: string, f: () => Promise<X|void>|X) => Deno.test(message, () => {
+  (message: string, f: () => Promise<any>|any) => Deno.test(message, () => {
     const x = f();
     if (x instanceof Promise) return x.then(_ => {});
   })
 );
+

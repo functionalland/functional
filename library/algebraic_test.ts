@@ -12,40 +12,52 @@ import { $$value } from "./Symbols.js";
 // const accumulate = applyToFlip(append);
 
 test ("Algebraic: alt")
-  (() =>
+  (() => {
+    assertEquivalent
+      (alt (Either.Right(42), Either.Left("Not the meaning of life.")))
+      (Either.Right(42));
     assertEquivalent
       ("The Right type is returned; target container is Left.")
       (alt (Either.Right(42)) (Either.Left("Not the meaning of life.")))
-      (Either.Right(42)) ||
+      (Either.Right(42));
     assertEquivalent
       ("The Right type is returned; target container is Right")
       (alt (Either.Right(24)) (Either.Right(42)))
-      (Either.Right(42))
-  );
+      (Either.Right(42));
+  });
 
 test ("Algebraic: ap")
-  (() =>
+  (() => {
+    assertEquivalent
+      (ap (Box ((x: number) => x * 2), Box (42)))
+      (Box (84));
     assertEquivalent
       ("The container's value is multiplied by two.")
       (ap (Box ((x: number) => x * 2)) (Box (42)))
-      (Box (84))
-  );
+      (Box (84));
+  });
 
 test ("Algebraic: bimap")
-  (() =>
+  (() => {
+    assertEquivalent
+      (bimap ((x: number) => x * 2, (x: number) => x + 2, Pair (42, 24)))
+      (Pair (84, 26));
     assertEquivalent
       ("The container's values are morphed.")
       (bimap ((x: number) => x * 2, (x: number) => x + 2) (Pair (42, 24)))
-      (Pair (84, 26))
-  );
+      (Pair (84, 26));
+  });
 
 test ("Algebraic: chain")
-  (() =>
+  (() => {
+    assertEquivalent
+      (chain ((x: number) => Box (x * 2), Box (42)))
+      (Box (84));
     assertEquivalent
       ("The container's value is multiplied by two.")
       (chain ((x: number) => Box (x * 2)) (Box (42)))
-      (Box (84))
-  );
+      (Box (84));
+  });
 
 // test ("Algebraic: concat")
 //   (() =>
@@ -56,12 +68,15 @@ test ("Algebraic: chain")
 //   );
 
 test ("Algebraic: extend")
-  (() =>
+  (() => {
+    assertEquivalent
+      (extend ((A: BoxPrototype<number>) => A[$$value] * 2, Box (42)))
+      (Box (84));
     assertEquivalent
       ("The container's value is multiplied by two.")
       (extend ((A: BoxPrototype<number>) => A[$$value] * 2) (Box (42)))
-      (Box (84))
-  );
+      (Box (84));
+  });
 
 test ("Algebraic: extract")
   (() =>
@@ -72,9 +87,12 @@ test ("Algebraic: extract")
   );
 
 test ("Algebraic: map")
-  (() =>
+  (() => {
+    assertEquivalent
+      (map ((x: number) => x * 2, Box (42)))
+      (Box (84));
     assertEquivalent
       ("The container's value is multiplied by two.")
       (map ((x: number) => x * 2) (Box (42)))
-      (Box (84))
-  );
+      (Box (84));
+  });

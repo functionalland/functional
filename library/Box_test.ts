@@ -5,6 +5,7 @@ import { $$value } from "./Symbols.js";
 import { assert, assertEquivalent, test } from "./testing.ts";
 // @deno-types="./aviary.d.ts"
 import { compose2, identity } from "./aviary.js";
+// @deno-types="./other.d.ts"
 import { lift3 } from "./other.js";
 
 test ("Box: initialize")

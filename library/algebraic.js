@@ -17,6 +17,21 @@ import {assertIsFunction} from "./assertions.js";
  *
  * assertEquivalent(container, Either.Right(42));
  * ```
+ *
+ * #### TypeScript
+ *
+ * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
+ * import { alt } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ *
+ * const f = alt(Either.Right(42));
+ * const x = f(Either.Left("Not the meaning of life."));
+ * ```
+ *
+ * ```ts
+ * export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A): (M: B) => A|B;
+ * export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A, M: B): A|B;
+ * ```
  */
 export const alt = curry2((x, y) => (y.alt || y["fantasy-land/alt"]).call(y, x));
 
@@ -32,9 +47,28 @@ export const alt = curry2((x, y) => (y.alt || y["fantasy-land/alt"]).call(y, x))
  * ```js
  * import { ap } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const container = ap(Either.Right(x => x * 2), Either.Right(42));
+ * const container = ap(Box(x => x * 2), Box (42));
  *
  * assertEquivalent(container, Either.Right(84));
+ * ```
+ *
+ * #### TypeScript
+ *
+ * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
+ * import { ap } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ *
+ * const f = ap(Box((x: number) => x * 2));
+ * const x = f(Box(42)));
+ * ```
+ *
+ * ```ts
+ * export function ap
+ *   <A extends ApplicativeFunctor<X>, B extends ApplicativeFunctor<(x: X) => Y>, C extends ApplicativeFunctor<Y>, X, Y>
+ *   (C: B): (C: A) => C;
+ * export function ap
+ *   <A extends ApplicativeFunctor<X>, B extends ApplicativeFunctor<(x: X) => Y>, C extends ApplicativeFunctor<Y>, X, Y>
+ *   (C: B, D: A): C;
  * ```
  */
 export { ap } from "./aviary.js";
@@ -53,6 +87,25 @@ export { ap } from "./aviary.js";
  *
  * assertEquivalent(container, Pair(84, 26));
  * ```
+ *
+ * #### TypeScript
+ *
+ * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
+ * import { bimap } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ *
+ * const f = bimap((x: number) => x * 2, (x: number) => x + 2);
+ * const x = f(Pair(42, 24));
+ * ```
+ *
+ * ```ts
+ * export function bimap
+ *   <A extends BiFunctor<W, X>, B extends BiFunctor<Y, Z>, W, X, Y, Z>
+ *   (f: (w: W) => Y, g: (x: X) => Z): (C: A) => B;
+ * export function bimap
+ *   <A extends BiFunctor<W, X>, B extends BiFunctor<Y, Z>, W, X, Y, Z>
+ *   (f: (w: W) => Y, g: (x: X) => Z, C: A): B;
+ * ```
  */
 export const bimap = curry3((f, g, x) => (x.bimap || x["fantasy-land/bimap"]).call(x, f, g));
 
@@ -66,9 +119,24 @@ export const bimap = curry3((f, g, x) => (x.bimap || x["fantasy-land/bimap"]).ca
  * ```js
  * import { chain } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const container = chain(x => Either.Right(x * 2), Either.Right(42));
+ * const container = chain((x: number) => Box (x * 2), Box(42));
  *
- * assertEquivalent(container, Either.Right(84));
+ * assertEquivalent(container, Box(84));
+ * ```
+ *
+ * #### TypeScript
+ *
+ * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
+ * import { chain } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ *
+ * const f = chain((x: number) => Box(x * 2));
+ * const x = f(Box(42));
+ * ```
+ *
+ * ```ts
+ * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B, C: A): B;
+ * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B): (C: A) => B;
  * ```
  */
 export const chain = curry2((f, x) => (x.chain || x["fantasy-land/chain"]).call(x, f));
@@ -137,9 +205,26 @@ export const concat = curry2((x, y) =>
  * ```js
  * import { extend } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const container = extend(x => x[$$value] * 2, Either.Right(42));
+ * const container = extend((A: BoxPrototype<number>) => A[$$value] * 2, Box(42));
  *
- * assertEquivalent(container, Either.Right(84));
+ * assertEquivalent(container, Box(84));
+ * ```
+ *
+ * #### TypeScript
+ *
+ * ```ts
+ * import { BoxPrototype } from "https://deno.land/x/functional@v1.3.4/library/Box.d.ts";
+ * import { $$value } from "https://deno.land/x/functional@v1.3.4/library/Symbols.js";
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
+ * import { extend } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ *
+ * const f = extend((A: BoxPrototype<number>) => A[$$value] * 2);
+ * const x = f(Box(42));
+ * ```
+ *
+ * ```ts
+ * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B, C: A): B;
+ * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B): (C: A) => B;
  * ```
  */
 export const extend = curry2((f, x) => (x.extend || x["fantasy-land/extend"]).call(x, f));
@@ -154,9 +239,22 @@ export const extend = curry2((f, x) => (x.extend || x["fantasy-land/extend"]).ca
  * ```js
  * import { extract } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const value = extract(Either.Right(42));
+ * const value = extract(Box(42));
  *
  * assertEquivalent(value, 42);
+ * ```
+ *
+ * #### TypeScript
+ *
+ * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
+ * import { extract } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ *
+ * const x = extract(Box(x * 2));
+ * ```
+ *
+ * ```ts
+ * export function extract <A extends ExtractableFunctor<X>, X>(C: A): X;
  * ```
  */
 export const extract = x => (x.extract || x["fantasy-land/extract"]).call(x);
@@ -171,9 +269,24 @@ export const extract = x => (x.extract || x["fantasy-land/extract"]).call(x);
  * ```js
  * import { map } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const value = map(x => x * 2, Either.Right(42));
+ * const value = map(x => x * 2, Box(42));
  *
  * assertEquivalent(value, 42);
+ * ```
+ *
+ * #### TypeScript
+ *
+ * ```ts
+ * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
+ * import { map } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ *
+ * const f = map((x: number) => x * 2);
+ * const x = f(Box(42));
+ * ```
+ *
+ * ```ts
+ * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B, C: A): B;
+ * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B): (C: A) => B;
  * ```
  */
 export const map = curry2((f, x) => (x.map || x["fantasy-land/map"]).call(x, f));

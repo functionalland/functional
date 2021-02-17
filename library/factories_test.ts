@@ -98,9 +98,9 @@ Deno.test(
 
     for (const [ instanceName, $$instance ] of instanceCollection) {
       assertEquals
+        (`${instanceName}: An instance can be serialized.`)
         ($$instance.toString())
-        (`List.Cons(42, List.Nil)`)
-        (`${instanceName}: An instance can be serialized.`);
+        (`List.Cons(42, List.Nil)`);
       assertEquals ($$instance.x) (42);
       assertEquals ($$instance.xs) (List.Nil);
       assertEquals ($$instance.xs.constructor) (List);

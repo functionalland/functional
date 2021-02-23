@@ -56,7 +56,7 @@ test ("Task: #map")
     assertEquivalent
       ("Composition law.")
       (await Task.of(42).map
-        ((x: number) => compose2<number, number, number> ((x: number) => x + 2) ((x: number) => x * 2) (x)).run())
+        ((x: number) => compose2 ((x: number) => x + 2) ((x: number) => x * 2) (x)).run())
       (await Task.of(42).map((x: number) => x * 2).map((x: number) => x + 2).run());
   });
 

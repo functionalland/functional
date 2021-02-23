@@ -1,7 +1,8 @@
-import { $$value } from "./Symbols.js";
+import { AlternativeFunctor } from "./algebraic.d.ts";
+import { $$tag, $$type, $$value, $$valueList } from "./Symbols.js";
 
 export interface MaybePrototype<X> {
-  alt<A>(C: A): this;
+  alt<A extends AlternativeFunctor<any>>(C: A): MaybePrototype<X>;
   ap<Y>(A: MaybePrototype<(x: X) => Y>): MaybePrototype<Y>;
   chain<Y>(f: (x: X) => MaybePrototype<Y>): MaybePrototype<Y>;
   extend<Y>(f: (x: MaybePrototype<X>) => Y): MaybePrototype<Y>;
@@ -10,7 +11,10 @@ export interface MaybePrototype<X> {
   of<Y>(value: Y): MaybePrototype<Y>;
   toString(): string;
   zero(): typeof Maybe.Nothing;
+  [$$tag]: "Just";
+  [$$type]: "Maybe";
   [$$value]: X;
+  [$$valueList]: unknown[];
 }
 
 declare namespace Maybe {
@@ -21,7 +25,7 @@ declare namespace Maybe {
   }
   export namespace Nothing {
     export function is<A>(C: A): boolean;
-    export function alt<A>(C: A): A;
+    export function alt<A extends MaybePrototype<any>>(C: A): MaybePrototype<any>;
     export function ap<Y>(A: MaybePrototype<(x: any) => Y>): typeof Nothing;
     export function chain<Y>(f: (x: any) => MaybePrototype<Y>): typeof Nothing;
     export function extend<Y>(f: (x: MaybePrototype<any>) => Y): typeof Nothing;

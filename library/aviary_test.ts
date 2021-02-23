@@ -37,8 +37,8 @@ import { assertEquals, test } from "./testing.ts";
 test ("Aviary: ap")
   (() => {
     assertEquals (ap ((x: number) => (y: number) => x + y, (x: number) => x * 2, 42)) (126);
-    assertEquals ("Curried unary.") (ap<number, number, number> (x => y => x + y) (x => x * 2) (42)) (126);
-    assertEquals ("Curried binary.") (ap<number, number, number> (x => y => x + y, x => x * 2) (42)) (126);
+    assertEquals ("Curried unary.") (ap ((x: number) => (y: number) => x + y) ((x: number) => x * 2) (42)) (126);
+    assertEquals ("Curried binary.") (ap ((x: number) => (y: number) => x + y, (x: number) => x * 2) (42)) (126);
   });
 
 // const f = (x: number) => true;
@@ -58,16 +58,16 @@ test ("Aviary: ap")
 test ("Aviary: apply")
   (() => {
     assertEquals (apply ((x: number) => x * 2, 42)) (84);
-    assertEquals ("Curried unary.") (apply<number, number> (x => x * 2) (42)) (84);
+    assertEquals ("Curried unary.") (apply ((x: number) => x * 2) (42)) (84);
   });
 
 test ("Aviary: applyTo")
   (() => {
     assertEquals (applyTo (42, x => x * 2)) (84);
-    assertEquals ("Curried unary.") (applyTo<number, number> (42) (x => x * 2)) (84);
+    assertEquals ("Curried unary.") (applyTo (42) (x => x * 2)) (84);
     assertEquals
       ("Derivation.")
-      (flip<number, (x: number) => number, number> (identity) (42) ((x: number) => x * 2)) (84);
+      (flip (identity) (42) ((x: number) => x * 2)) (84);
   });
 
 // test ("Aviary: apply2Compose")
@@ -117,8 +117,8 @@ test ("Aviary: applyTo")
 test ("Aviary: compose2")
   (() => {
     assertEquals (compose2 ((x: number) => x * 2, (x: number) => x + 2, 42)) (88);
-    assertEquals ("Curried unary.") (compose2<number, number, number> (x => x * 2) (x => x + 2) (42)) (88);
-    assertEquals ("Curried binary.") (compose2<number, number, number> (x => x * 2, x => x + 2) (42)) (88);
+    assertEquals ("Curried unary.") (compose2 ((x: number) => x * 2) ((x: number) => x + 2) (42)) (88);
+    assertEquals ("Curried binary.") (compose2 ((x: number) => x * 2, (x: number) => x + 2) (42)) (88);
   });
 
 test ("Aviary: compose3")
@@ -126,10 +126,10 @@ test ("Aviary: compose3")
     assertEquals (compose3 ((x: number) => x - 2, (x: number) => x * 2, (x: number) => x + 2, 42)) (86);
     assertEquals
       ("Curried unary.")
-      (compose3<number, number, number, number> (x => x - 2) (x => x * 2) (x => x + 2) (42)) (86);
+      (compose3 ((x: number) => x - 2) ((x: number) => x * 2) ((x: number) => x + 2) (42)) (86);
     assertEquals
       ("Curried binary.")
-      (compose3<number, number, number, number> (x => x - 2,x => x * 2) (x => x + 2) (42)) (86);
+      (compose3 ((x: number) => x - 2,(x: number) => x * 2) ((x: number) => x + 2) (42)) (86);
   });
 
 test ("Aviary: constant")
@@ -227,11 +227,11 @@ test ("Aviary: constant")
 // );
 
 test ("Aviary: flip")
-  (() =>
-    assertEquals (flip ((x: number) => (y: number) => x - y, 24, 42)) (18) ||
-    assertEquals ("Curried unary.") (flip<number, number, number> (x => y => x - y) (24) (42)) (18) ||
-    assertEquals (flip (curryN (2) ((x: number, y: number) => x - y)) (24) (42)) (18)
-  );
+  (() => {
+    assertEquals (flip ((x: number) => (y: number) => x - y, 24, 42)) (18);
+    assertEquals ("Curried unary.") (flip ((x: number) => (y: number) => x - y) (24) (42)) (18);
+    assertEquals (flip (curryN (2) ((x: number, y: number) => x - y)) (24) (42)) (18);
+  });
 
 // test ("Aviary: flipAp")
 //   (() =>

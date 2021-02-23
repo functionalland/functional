@@ -1,4 +1,4 @@
-import { $$value } from "./Symbols.js";
+import { $$type, $$value, $$valueList } from "./Symbols.js";
 
 export interface BoxPrototype<X> {
   ap<Y>(C: BoxPrototype<(x: X) => Y>): BoxPrototype<Y>;
@@ -8,7 +8,9 @@ export interface BoxPrototype<X> {
   map<Y>(f: (x: X) => Y): BoxPrototype<Y>;
   of<Y>(x: Y): BoxPrototype<Y>;
   toString(): string;
+  [$$type]: "Box";
   [$$value]: X;
+  [$$valueList]: unknown[];
 }
 
 declare function Box<X>(x: X): BoxPrototype<X>;

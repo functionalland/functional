@@ -5,7 +5,9 @@ import { assertEquals, assertEquivalent, test } from "./testing.ts";
 // @deno-types="./Box.d.ts"
 import Box from "./Box.js";
 import { BoxPrototype } from "./Box.d.ts";
+// @deno-types="./Either.d.ts"
 import Either from "./Either.js";
+// @deno-types="./Pair.d.ts"
 import Pair from "./Pair.js";
 import { $$value } from "./Symbols.js";
 

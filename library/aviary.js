@@ -7,7 +7,23 @@ import { curry2, curry3, curryN } from "./curry.js";
 import { assertIsFunction } from "./assertions.js";
 
 /**
- * ### `ap`
+ * ## Aviary
+ *
+ * The Aviary is a collection of Higher Order Functions also known as combinators.
+ * The name "Aviary" is a nod to the fact that most combinators were given bird's names in honour of one of its
+ * inventor, who was an avid bird watcher.
+ *
+ * These functions are an essential part of Functional Programming and the tacit style of programming.
+ */
+
+/**
+ * ### Essentials
+ *
+ * The "essential" combinators were, for most part, invented early on and can be used to derived all of the other combinators.
+ */
+
+/**
+ * #### `ap`
  * `(a -> b -> c) -> (a -> b) -> a -> c`
  *
  * This combinator takes a binary function, a unary function and a value of any type. Like compose, it should be read
@@ -20,16 +36,15 @@ import { assertIsFunction } from "./assertions.js";
  * assertEquals(x, 126);
  * ```
  *
- * #### TypeScript
+ * The function also has overload to serve as the Applicative Functor combinator.
  *
- * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
- * need to define the generics.
+ * ##### TypeScript
  *
  * ```ts
  * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
  * import { ap } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
  *
- * const f = ap<number, number, number>(x => y => x + y);
+ * const f = ap(x => y => x + y);
  * const g = f(x => x * 2);
  * const x = g(42);
  * ```
@@ -40,18 +55,18 @@ import { assertIsFunction } from "./assertions.js";
  * export function ap <X, Y, Z>(f: (x: X) => (y: Y) => Z, g: (x: X) => Y, x: X): Z;
  * ```
  */
-export const starling = curry3( (f, g, x) => f(x)(g(x)));
+export const starling = curry3((f, g, x) => f(x)(g(x)));
 export const ap = curry2(
   (f, g, ...a) =>
     (assertIsFunction(f["fantasy-land/ap"]) && assertIsFunction(g["fantasy-land/ap"]))
-  || (assertIsFunction(f.ap) && assertIsFunction(g.ap))
-    ? (g.ap || g["fantasy-land/ap"]).call(g, f)
-    : a.length === 1 ? starling(f, g, a[0]) : x => starling(f, g, x)
+    || (assertIsFunction(f.ap) && assertIsFunction(g.ap))
+      ? (g.ap || g["fantasy-land/ap"]).call(g, f)
+      : a.length === 1 ? starling(f, g, a[0]) : x => starling(f, g, x)
 );
 export const S = starling;
 
 /**
- * ### `apply`
+ * #### `apply`
  * `(a -> b) -> a -> b`
  *
  * This combinator takes an unary function and a value of any type. It simply applies the value to the function.
@@ -63,16 +78,13 @@ export const S = starling;
  * assertEquals(x, 84);
  * ```
  *
- * #### TypeScript
- *
- * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
- * need to define the generics.
+ * ##### TypeScript
  *
  * ```ts
  * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
  * import { apply } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
  *
- * const f = apply<number, number> (x => x * 2);
+ * const f = apply(x => x * 2);
  * const x = f(42);
  * ```
  *
@@ -87,7 +99,7 @@ export const apply = applicator;
 export const $ = applicator;
 
 /**
- * ### `applyTo`
+ * #### `applyTo`
  * `a -> (a -> b) -> b`
  *
  * This combinator is the reverse `apply`. It takes a value of any type and a function and returns the resulting value.
@@ -100,21 +112,18 @@ export const $ = applicator;
  * assertEquals(84);
  * ```
  *
- * #### TypeScript
- *
- * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
- * need to define the generics.
+ * ##### TypeScript
  *
  * ```ts
  * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
  * import { applyTo } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
  *
- * const f = applyTo<number, number> (42);
+ * const f = applyTo(42);
  * const x = f(x => x * 2);
  * ```
  *
  * ```ts
- * export function applyTo <X, Y>(x: X): (f: (x: X) => Y) => Y;
+ * export function applyTo <X>(x: X): <Y>(f: (x: X) => Y) => Y;
  * export function applyTo <X, Y>(x: X, f: (x: X) => Y): Y;
  * ```
  */
@@ -124,7 +133,7 @@ export const T = thrush;
 export const CI = thrush;
 
 /**
- * ### `compose2`
+ * #### `compose2`
  * `(b -> c) -> (a -> b) -> a -> c`
  *
  * This combinator takes two unary functions and a value of any type. The value will be executed from right to left,
@@ -138,22 +147,19 @@ export const CI = thrush;
  * assertEquals(x, 88);
  * ```
  *
- * #### TypeScript
- *
- * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
- * need to define the generics.
+ * ##### TypeScript
  *
  * ```ts
  * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
  * import { compose2 } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
  *
- * const f = compose2<number, number, number> (x => x * 2);
+ * const f = compose2(x => x * 2);
  * const g = f(x => x + 2);
  * const x = g(42);
  * ```
  *
  * ```ts
- * export function compose2 <X, Y, Z>(f: (y: Y) => Z): (g: (x: X) => Y) => (x: X) => Z;
+ * export function compose2 <Y, Z>(f: (y: Y) => Z): <X>(g: (x: X) => Y) => (x: X) => Z;
  * export function compose2 <X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y): (x: X) => Z;
  * export function compose2 <X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y, x: X): Z;
  * ```
@@ -164,7 +170,7 @@ export const o = bluebird;
 export const B = bluebird;
 
 /**
- * ### `compose3`
+ * #### `compose3`
  * `(c -> d) -> (b -> c) -> (a -> b) -> a -> d`
  *
  * This combinator takes three unary functions and a value of any type. The value will be executed from right to left,
@@ -176,24 +182,21 @@ export const B = bluebird;
  * assertEquals(x, 86);
  * ```
  *
- * #### TypeScript
- *
- * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
- * need to define the generics.
+ * ##### TypeScript
  *
  * ```ts
  * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
  * import { compose3 } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
  *
- * const f = compose3<number, number, number> (x => x - 2);
+ * const f = compose3(x => x - 2);
  * const g = f(x => x * 2);
  * const h = g(x => x + 2);
  * const x = h(42);
  * ```
  *
  * ```ts
- * export function compose3 <W, X, Y, Z>(f: (y: Y) => Z): (g: (x: X) => Y) => (h: (w: W) => X) => (w: W) => Z;
- * export function compose3 <W, X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y): (h: (w: W) => X) => (w: W) => Z;
+ * export function compose3 <Y, Z>(f: (y: Y) => Z): <X>(g: (x: X) => Y) => <W>(h: (w: W) => X) => (w: W) => Z;
+ * export function compose3 <X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y): <W>(h: (w: W) => X) => (w: W) => Z;
  * export function compose3 <W, X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y, h: (w: W) => X, w: W): Z;
  * ```
  */
@@ -202,7 +205,7 @@ export const compose3 = becard;
 export const B3 = becard;
 
 /**
- * ### `constant`
+ * #### `constant`
  * `a -> b -> a`
  *
  * This combinator takes two values and returns the first.
@@ -213,13 +216,13 @@ export const B3 = becard;
  * assertEquals(x, 42);
  * ```
  *
- * #### TypeScript
+ * ##### TypeScript
  *
  * ```ts
  * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
  * import { constant } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
  *
- * const f = constant<number, number> (42);
+ * const f = constant(42);
  * const x = f(24);
  * ```
  *
@@ -234,45 +237,7 @@ export const first = kestrel;
 export const K = kestrel;
 
 /**
- * ### `composeBinary`
- * `(c -> d) -> (a -> b -> c) -> a -> b -> d`
- *
- * This combinator is similar to `compose2`, the difference being that the second argument should be a binary function.
- * It is also known as the `blackbird` or, the `B1` combinator.
- *
- * Other known alias is `oo`; because `composeBinary` is also `compose2(compose2, compose2)`.
- *
- * ```js
- * const x = composeBinary(x => x * 2, x => y => x + y, 42, 24);
- * assertEquals(x, 132);
- * ```
- */
-export const blackbird = curryN(4, (f, g, x, y) => f(g(x)(y)));
-export const composeBinary = blackbird;
-export const oo = blackbird;
-export const B1 = blackbird;
-
-/**
- * ### `composeTernary`
- * `(d -> e) -> (a -> b -> c -> d) -> a -> b -> c -> e`
- * 
- * This combinator is similar to `compose2`, the difference being that the second argument should be a ternary function.
- * It is also known as the `bunting` or, the `B2` combinator.
- *
- * Other known alias is `ooo`; because the `composeTernary` is also `compose2(compose2, compose2, compose2)(compose2)`.
- *
- * ```js
- * const x => composeTernary(x => x * 2, x => y => z => x + y + z, 42, 24, 12);
- * assertEquals(x, 156);
- * ```
- */
-export const bunting = curryN(5, (f, g, x, y, z) => f(g(x)(y)(z)));
-export const composeTernary = bunting;
-export const ooo = bunting;
-export const B2 = bunting;
-
-/**
- * ### `flip`
+ * #### `flip`
  * `(a -> b -> c) -> b -> a -> c`
  *
  * This combinator takes a binary function and two values of any type. The values order will be flipped when calling the
@@ -284,16 +249,13 @@ export const B2 = bunting;
  * assertEquals(x, 5);
  * ```
  *
- * #### TypeScript
- *
- * There is a limitation of using a curried combinator with TypeScript. Because they are read from right to left, you
- * need to define the generics.
+ * ##### TypeScript
  *
  * ```ts
  * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
  * import { flip } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
  *
- * const f = flip<number, number, number> (x => y => x - y);
+ * const f = flip(x => y => x - y);
  * const g = f(24);
  * const x = g(42);
  * ```
@@ -311,7 +273,7 @@ export const kite = curry2((x, y) => y);
 export const second = kite;
 
 /**
- * ### `identity`
+ * #### `identity`
  * `a -> a`
  *
  * The simplest combinator, it takes a value and return it.
@@ -325,7 +287,7 @@ export const second = kite;
  * assertEquals(x, 42);
  * ```
  *
- * #### TypeScript
+ * ##### TypeScript
  *
  * ```ts
  * export function identity <X>(x: X): X;
@@ -337,7 +299,7 @@ export const id = idiot;
 export const I = idiot;
 
 /**
- * ### `Derivations`
+ * #### `Derivations`
  *
  * What follow is a list of combinators that are derivation of the more common ones. They are often obscure and less
  * known. I took the liberty to name some of them.
@@ -361,7 +323,7 @@ export const apBinary = starling_;
 export const S_ = starling_;
 
 /**
- * ### `applyBinary`
+ * #### `applyBinary`
  * `(a -> b -> c) -> a -> b -> c`
  *
  * This combinator takes a binary function and two values of any type. It applies the values to the function.
@@ -461,28 +423,6 @@ export const applyComposeBinary = eagle;
 export const E = eagle;
 
 /**
- * #### `composeBinaryApBinary`
- * `(e -> f -> g) -> (a -> b -> e) -> a -> b -> (c -> d -> f) -> c -> d -> g`
- *
- * This combinator takes two binary functions, two values of any type, a second binary function and, two more values of
- * any type. The first two values are passed to the second binary function and, the last two values are then passed to
- * the third binary function. Finally, the two resulting values are applied to the first binary function.
- * It is known as the "eaglebald" or, the "Ê" combinator.
- *
- * I have named it "composeBinaryApBinary" because it is related to `compose` reminds me of `ap` in a way.
- * It can also be expressed as
- * `compose2 (compose2 (compose2) (compose2)) (compose2 (compose2 (compose2) (compose2))`... Yeah...
- *
- * ```js
- * const x = composeBinaryApBinary(x => y => x + y, x => y => x * y, 42, 24, x => y => x * y, 12, 4);
- * assertEquals(x, 1056);
- * ```
- */
-export const eaglebald = curryN(7, (f, g, w, x, h, y, z) => f(g(w)(x))(h(y)(z)));
-export const composeBinaryApBinary = eaglebald;
-export const E_ = eaglebald;
-
-/**
  * #### `applyToFlip`
  * `a -> b -> (b -> a -> c) -> c`
  *
@@ -538,6 +478,66 @@ export const applyQuaternaryFlip = finchStarStar;
 export const F$$ = finchStarStar;
 
 /**
+ * #### `composeBinary`
+ * `(c -> d) -> (a -> b -> c) -> a -> b -> d`
+ *
+ * This combinator is similar to `compose2`, the difference being that the second argument should be a binary function.
+ * It is also known as the `blackbird` or, the `B1` combinator.
+ *
+ * Other known alias is `oo`; because `composeBinary` is also `compose2(compose2, compose2)`.
+ *
+ * ```js
+ * const x = composeBinary(x => x * 2, x => y => x + y, 42, 24);
+ * assertEquals(x, 132);
+ * ```
+ */
+export const blackbird = curryN(4, (f, g, x, y) => f(g(x)(y)));
+export const composeBinary = blackbird;
+export const oo = blackbird;
+export const B1 = blackbird;
+
+/**
+ * #### `composeBinaryApBinary`
+ * `(e -> f -> g) -> (a -> b -> e) -> a -> b -> (c -> d -> f) -> c -> d -> g`
+ *
+ * This combinator takes two binary functions, two values of any type, a second binary function and, two more values of
+ * any type. The first two values are passed to the second binary function and, the last two values are then passed to
+ * the third binary function. Finally, the two resulting values are applied to the first binary function.
+ * It is known as the "eaglebald" or, the "Ê" combinator.
+ *
+ * I have named it "composeBinaryApBinary" because it is related to `compose` reminds me of `ap` in a way.
+ * It can also be expressed as
+ * `compose2 (compose2 (compose2) (compose2)) (compose2 (compose2 (compose2) (compose2))`... Yeah...
+ *
+ * ```js
+ * const x = composeBinaryApBinary(x => y => x + y, x => y => x * y, 42, 24, x => y => x * y, 12, 4);
+ * assertEquals(x, 1056);
+ * ```
+ */
+export const eaglebald = curryN(7, (f, g, w, x, h, y, z) => f(g(w)(x))(h(y)(z)));
+export const composeBinaryApBinary = eaglebald;
+export const E_ = eaglebald;
+
+/**
+ * #### `composeTernary`
+ * `(d -> e) -> (a -> b -> c -> d) -> a -> b -> c -> e`
+ *
+ * This combinator is similar to `compose2`, the difference being that the second argument should be a ternary function.
+ * It is also known as the `bunting` or, the `B2` combinator.
+ *
+ * Other known alias is `ooo`; because the `composeTernary` is also `compose2(compose2, compose2, compose2)(compose2)`.
+ *
+ * ```js
+ * const x => composeTernary(x => x * 2, x => y => z => x + y + z, 42, 24, 12);
+ * assertEquals(x, 156);
+ * ```
+ */
+export const bunting = curryN(5, (f, g, x, y, z) => f(g(x)(y)(z)));
+export const composeTernary = bunting;
+export const ooo = bunting;
+export const B2 = bunting;
+
+/**
  * #### `composeFlip`
  * `(b -> c -> d) -> (a -> c) -> a -> b -> d`
  *
@@ -555,7 +555,7 @@ export const H = hummingbird;
 
 
 /**
- * ### `flipAp`
+ * #### `flipAp`
  * `(c -> a -> d) -> (b -> c) -> a -> b -> d`
  *
  * This combinator takes a binary function, an unary function and, two values of any type.
@@ -575,7 +575,7 @@ export const flipAp = cardinal_;
 export const C_ = cardinal_;
 
 /**
- * ### `flipTernary`
+ * #### `flipTernary`
  * `(a -> c -> b -> d) -> a -> b -> c -> d`
  *
  * This combinator takes a ternary function, and three values of any type.
@@ -596,7 +596,7 @@ export const C$ = cardinalStar;
 export const BC = cardinalStar;
 
 /**
- * ### `flipQuaternary`
+ * #### `flipQuaternary`
  * `(a -> b -> d -> c -> e) -> a -> b -> c -> d -> e`
  *
  * This combinator takes a quaternary function, and four values of any type.

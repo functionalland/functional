@@ -1,3 +1,5 @@
+import { $$type, $$valueList } from "./Symbols.js";
+
 export interface PairPrototype<W, X> {
   map<Y>(f: (x: W) => Y): PairPrototype<Y, null>;
   bimap<Y, Z>(
@@ -5,6 +7,8 @@ export interface PairPrototype<W, X> {
     h: (x: X) => Z
   ): PairPrototype<Y, Z>;
   toString(): string;
+  [$$type]: "Pair";
+  [$$valueList]: unknown[];
 }
 
 declare function Pair<A extends PairPrototype<W, X>, W, X>(w: W, x: X): A;

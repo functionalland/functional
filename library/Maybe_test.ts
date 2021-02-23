@@ -89,7 +89,7 @@ test ("Maybe: #map")
     assertEquivalent
       ("Composition law.")
       (Maybe.Just(42).map
-        ((x: number) => compose2<number, number, number> ((x: number) => x + 2) ((x: number) => x * 2) (x)))
+        ((x: number) => compose2 ((x: number) => x + 2) ((x: number) => x * 2) (x)))
       (Maybe.Just(42).map((x: number) => x * 2).map((x: number) => x + 2));
   });
 

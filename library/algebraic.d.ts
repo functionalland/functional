@@ -1,41 +1,52 @@
-import { $$value } from "./Symbols.js";
+import { $$tag, $$type, $$value, $$valueList } from "./Symbols.js";
 
-interface AlternativeFunctor<X> {
-  alt<A>(C: A): AlternativeFunctor<X>|A;
-  zero(): AlternativeFunctor<any>;
+interface TypeContainer {
+  [$$type]: string;
+  [$$valueList]: unknown[];
 }
 
-interface ApplicativeFunctor<X> {
+interface SumTypeContainer {
+  [$$tag]: string;
+  [$$type]: string;
+  [$$valueList]: unknown[];
+}
+
+interface Functor<X> extends TypeContainer {
+  map<Y>(f: (x: X) => Y): Functor<Y>;
+}
+
+interface AlternativeFunctor<X> extends SumTypeContainer {
+  alt<A extends AlternativeFunctor<any>>(C: A): AlternativeFunctor<unknown>;
+  zero(): AlternativeFunctor<unknown>;
+}
+
+interface ApplicativeFunctor<X> extends TypeContainer {
   ap<Y>(C: ApplicativeFunctor<(x: X) => Y>): ApplicativeFunctor<Y>;
   of<Y>(x: Y): ApplicativeFunctor<Y>;
 }
 
-interface BiFunctor<W, X> {
+interface BiFunctor<W, X> extends TypeContainer {
   bimap<Y, Z>(
     unaryFunctionA: (value: W) => Y,
     unaryFunctionB: (value: X) => Z,
   ): BiFunctor<Y, Z>;
 }
 
-interface ChainableFunctor<X> {
+interface ChainableFunctor<X> extends Functor<X> {
   chain<Y>(f: (x: X) => ChainableFunctor<Y>): ChainableFunctor<Y>;
 }
 
-interface Functor<X> {
-  map<Y>(f: (x: X) => Y): Functor<Y>;
-}
-
-interface ExtendableFunctor<X> {
+interface ExtendableFunctor<X> extends Functor<X> {
   extend<Y>(f: (x: ExtendableFunctor<X>) => Y): ExtendableFunctor<Y>;
   [$$value]: X;
 }
 
-interface ExtractableFunctor<X> {
+interface ExtractableFunctor<X> extends Functor<X> {
   extract(): X;
 }
 
-export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A): (M: B) => A|B;
-export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A, M: B): A|B;
+export function alt <A extends AlternativeFunctor<any>>(C: A): <B extends AlternativeFunctor<any>>(M: B) => A & B;
+export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A, M: B): A & B;
 export function ap
   <A extends ApplicativeFunctor<X>, B extends ApplicativeFunctor<(x: X) => Y>, C extends ApplicativeFunctor<Y>, X, Y>
   (C: B): (C: A) => C;

@@ -3,6 +3,20 @@ import { assertIsString } from "./assertions.js";
 import {assertIsFunction} from "./assertions.js";
 
 /**
+ * ## Algebraic
+ *
+ * The Algebraic module is a collection of Higher Order Functions for various algebras.
+ * 
+ * ```js
+ * import { map } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ *
+ * const container = map(x => x * 2, Box(42));
+ *
+ * assertEquivalent(container, 42);
+ * ```
+ */
+
+/**
  * ### `alt`
  * `Alt a -> Alt b -> Alt a|b`
  *
@@ -29,8 +43,8 @@ import {assertIsFunction} from "./assertions.js";
  * ```
  *
  * ```ts
- * export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A): (M: B) => A|B;
- * export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A, M: B): A|B;
+ * export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A): (M: B) => A & B;
+ * export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A, M: B): A B;
  * ```
  */
 export const alt = curry2((x, y) => (y.alt || y["fantasy-land/alt"]).call(y, x));
@@ -150,7 +164,7 @@ export const chainLift = curry2(
  * `ChainRec r => ((a -> c, b -> c, a) -> r c) -> a -> r b`
  *
  * This function is a combinator for the [`chainRec` algebra](https://github.com/fantasyland/fantasy-land#chainrec).
- * It takes a ternary function, an initial value and, a chainable recursive functor.
+ * It takes a ternary function, an initial container and, a chainable recursive functor.
  *
  * ```js
  * import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
@@ -164,9 +178,9 @@ export const chainLift = curry2(
  *
  * const container = await multiplyAll(42, 10)(Task.of([ 0 ])).run();
  *
- * const value = safeExtract("Failed.", container);
+ * const container = safeExtract("Failed.", container);
  *
- * assertEquals(value, [ 0, 42, 84, 126, 168, 210, 252, 294, 336, 378, 420 ]);
+ * assertEquals(container, [ 0, 42, 84, 126, 168, 210, 252, 294, 336, 378, 420 ]);
  * ```
  */
 export const chainRec = curry2(
@@ -205,7 +219,7 @@ export const concat = curry2((x, y) =>
  * ```js
  * import { extend } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const container = extend((A: BoxPrototype<number>) => A[$$value] * 2, Box(42));
+ * const container = extend((A: BoxPrototype<number>) => A[$$container] * 2, Box(42));
  *
  * assertEquivalent(container, Box(84));
  * ```
@@ -214,11 +228,11 @@ export const concat = curry2((x, y) =>
  *
  * ```ts
  * import { BoxPrototype } from "https://deno.land/x/functional@v1.3.4/library/Box.d.ts";
- * import { $$value } from "https://deno.land/x/functional@v1.3.4/library/Symbols.js";
+ * import { $$container } from "https://deno.land/x/functional@v1.3.4/library/Symbols.js";
  * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
  * import { extend } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const f = extend((A: BoxPrototype<number>) => A[$$value] * 2);
+ * const f = extend((A: BoxPrototype<number>) => A[$$container] * 2);
  * const x = f(Box(42));
  * ```
  *
@@ -233,15 +247,15 @@ export const extend = curry2((f, x) => (x.extend || x["fantasy-land/extend"]).ca
  * ### `extract`
  * `Extractable a -> a`
  *
- * This function takes an Extractable Functor and, it returns the value.
+ * This function takes an Extractable Functor and, it returns the container.
  * It is a combinator in support of the [Comonad algebra](https://github.com/fantasyland/fantasy-land#comonad).
  *
  * ```js
  * import { extract } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const value = extract(Box(42));
+ * const container = extract(Box(42));
  *
- * assertEquivalent(value, 42);
+ * assertEquivalent(container, 42);
  * ```
  *
  * #### TypeScript
@@ -269,9 +283,9 @@ export const extract = x => (x.extract || x["fantasy-land/extract"]).call(x);
  * ```js
  * import { map } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const value = map(x => x * 2, Box(42));
+ * const container = map(x => x * 2, Box(42));
  *
- * assertEquivalent(value, 42);
+ * assertEquivalent(container, 42);
  * ```
  *
  * #### TypeScript
@@ -301,9 +315,9 @@ export const map = curry2((f, x) => (x.map || x["fantasy-land/map"]).call(x, f))
  * ```js
  * import { reduce } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const value = reduce(ys => x => ys + x, 0, [ 42, 24, 12 ]);
+ * const container = reduce(ys => x => ys + x, 0, [ 42, 24, 12 ]);
  *
- * assertEquals(value, 78);
+ * assertEquals(container, 78);
  * ```
  */
 export const reduce = curry3((f, xs, x) =>
@@ -318,9 +332,9 @@ export const reduce = curry3((f, xs, x) =>
  * ```js
  * import { then } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
  *
- * const value = then(x => x * 2, Promise.resolve(42));
+ * const container = then(x => x * 2, Promise.resolve(42));
  *
- * assertEquals(value, Promise(84));
+ * assertEquals(container, Promise(84));
  * ```
  */
 export const then = curry2((f, $p) => assertIsFunction($p) ? $q => $q.then(f, $p) : $p.then(f));

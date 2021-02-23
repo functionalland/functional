@@ -1,4 +1,5 @@
 import { EitherRightPrototype, EitherLeftPrototype } from "./Either.d.ts";
+import { $$type, $$value, $$valueList } from "./Symbols.js";
 
 type extractPromise<T> = T extends Promise<infer X> ? X : never|T;
 type extractEither<T> = T extends EitherRightPrototype<infer X> ? X : never|T;
@@ -14,6 +15,8 @@ export interface TaskPrototype<F extends () => any> {
   of<X>(value: X): TaskPrototype<() => Promise<EitherRightPrototype<X>>>;
   run(): Promise<EitherRightPrototype<ReturnType<F>>|EitherLeftPrototype<ReturnType<F>>>;
   toString(): string;
+  [$$type]: "Task";
+  [$$valueList]: unknown[];
 }
 
 declare function Task<X>(f: () => Promise<X>|X): TaskPrototype<() => Promise<X>|X>;

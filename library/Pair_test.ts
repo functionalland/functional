@@ -29,7 +29,7 @@ test ("Pair: #map")
     assertEquivalent
       ("Composition law.")
       (Pair (42, 24).map
-        ((x: number) => compose2<number, number, number> ((x: number) => x + 2) ((x: number) => x * 2) (x)))
+        ((x: number) => compose2 ((x: number) => x + 2) ((x: number) => x * 2) (x)))
       (Pair (42, 24).map((x: number) => x * 2).map((x: number) => x + 2));
   });
 

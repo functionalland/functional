@@ -48,7 +48,7 @@ test ("IO: #map")
     assertEquals
       ("Composition law.")
       (IO.of(42).map
-        ((x: number) => compose2<number, number, number> ((x: number) => x + 2) ((x: number) => x * 2) (x)).run())
+        ((x: number) => compose2 ((x: number) => x + 2) ((x: number) => x * 2) (x)).run())
       (IO.of(42).map((x: number) => x * 2).map((x: number) => x + 2).run());
   });
 

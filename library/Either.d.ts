@@ -1,7 +1,8 @@
-import { $$value } from "./Symbols.js";
+import { AlternativeFunctor } from "./algebraic.d.ts";
+import { $$tag, $$type, $$value, $$valueList } from "./Symbols.js";
 
 export interface EitherRightPrototype<X> {
-  alt<A>(C: A): this;
+  alt<A extends AlternativeFunctor<any>>(C: A): EitherRightPrototype<X>;
   ap<Y>(A: EitherRightPrototype<(x: X) => Y>): EitherRightPrototype<Y>;
   chain<Y>(f: (x: X) => EitherRightPrototype<Y>): EitherRightPrototype<Y>;
   extend<Y>(f: (x: EitherRightPrototype<X>) => Y): EitherRightPrototype<Y>;
@@ -9,21 +10,27 @@ export interface EitherRightPrototype<X> {
   map<Y>(f: (x: X) => Y): EitherRightPrototype<Y>;
   of<Y>(value: Y): EitherRightPrototype<Y>;
   toString(): string;
-  zero(): typeof Either.Left;
+  zero(): EitherLeftPrototype<null>;
+  [$$tag]: "Right";
+  [$$type]: "Either";
   [$$value]: X;
+  [$$valueList]: unknown[];
 }
 
 export interface EitherLeftPrototype<X> {
-  alt<A>(C: A): A;
-  ap<Y>(A: EitherRightPrototype<(x: any) => Y>): this;
-  chain<Y>(f: (x: any) => EitherRightPrototype<Y>): this;
-  extend<Y>(f: (x: EitherRightPrototype<any>) => Y): this;
+  alt<A extends AlternativeFunctor<unknown>>(C: A): A;
+  ap<Y>(A: EitherRightPrototype<(x: any) => Y>): EitherLeftPrototype<Y>;
+  chain<Y>(f: (x: any) => EitherRightPrototype<Y>): EitherLeftPrototype<Y>;
+  extend<Y>(f: (x: EitherRightPrototype<any>) => Y): EitherLeftPrototype<Y>;
   extract(): X;
-  map<Y>(f: (x: any) => Y): this;
+  map<Y>(f: (x: any) => Y): EitherLeftPrototype<Y>;
   of<Y>(value: Y): EitherLeftPrototype<Y>;
   toString(): string;
-  zero(): typeof Either.Left;
+  zero(): EitherLeftPrototype<null>;
+  [$$tag]: "Left";
+  [$$type]: "Either";
   [$$value]: X;
+  [$$valueList]: unknown[];
 }
 
 declare namespace Either {

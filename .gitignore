@@ -19,6 +19,4 @@ scratch/
 
 .todo.md
 
-dmfx
-.dmfx
-*.dmfx.js
+tsconfig.json

@@ -17,7 +17,7 @@ export interface MaybePrototype<X> {
   [$$valueList]: unknown[];
 }
 
-declare namespace Maybe {
+export declare namespace Maybe {
   export function Just<X>(x: X): MaybePrototype<X>;
   export namespace Just {
     export function is<A>(C: A): boolean;

@@ -12,7 +12,7 @@ import { factorizeType } from "./factories.js";
  *
  * ### Example
  *
- * ```js
+ * ```ts
  * import IO from "https://deno.land/x/functional@v1.3.2/library/IO.js";
  *
  * const container = IO.of(readFile(`${Deno.cwd()}/dump/hoge`))
@@ -36,8 +36,8 @@ export const IO = factorizeType("IO", [ "asyncFunction" ]);
  * This method takes a container of similar shape of a unary function and, applies it to its own value. The returned
  * container will be of the same type.
  *
- * ```js
- * const container = IO.of(42).ap(IO.of(x => x * 2));
+ * ```ts
+ * const container = IO.of(42).ap(IO.of((x: number) => x * 2));
  *
  * assertEquivalent(container.run(), IO.of(84).run());
  * ```
@@ -54,8 +54,8 @@ IO.prototype.ap = IO.prototype["fantasy-land/ap"] = function (C) {
  *
  * This method takes a unary function that returns a container of similar shape.
  *
- * ```js
- * const container = IO.of(42).chain(x => IO.of(x * 2));
+ * ```ts
+ * const container = IO.of(42).chain((x: number) => IO.of(x * 2));
  *
  * assertEquivalent(container.run(), IO.of(84).run());
  * ```
@@ -71,8 +71,8 @@ IO.prototype.chain = IO.prototype["fantasy-land/chain"] = function (f) {
  *
  * This method takes a unary function that returns a value. The returned container will be of the same type.
  *
- * ```js
- * const container = IO.of(42).map(x => x * 2);
+ * ```ts
+ * const container = IO.of(42).map((x: number) => x * 2);
  *
  * assertEquivalent(container.run(), IO.of(84).run());
  * ```
@@ -88,7 +88,7 @@ IO.prototype.map = IO.prototype["fantasy-land/map"] = function (f) {
  *
  * This method will run the accumulated *unpure* function.
  *
- * ```js
+ * ```ts
  * const container = IO(_ => console.log(42));
  *
  * container.run();
@@ -106,7 +106,7 @@ IO.prototype.run = function () {
  *
  * This method takes a value and, returns container of a unit function.
  *
- * ```js
+ * ```ts
  * const container = IO.of(42);
  *
  * assertEquals(container.run(), IO.of(42));
@@ -120,7 +120,7 @@ IO.of = IO.prototype.of = IO.prototype["fantasy-land/of"] = x => IO (_ => x);
  *
  * This method takes a value and, returns a container. It is in effect, an alias to `IO.of`.
  *
- * ```js
+ * ```ts
  * const container = factorizeIO(42);
  *
  * assertEquals(container, IO.of(42));

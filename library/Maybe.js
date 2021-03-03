@@ -15,11 +15,11 @@ import { factorizeSumType } from "./factories.js";
  *
  * ### Example
  *
- * ```js
+ * ```ts
  * import Maybe from "https://deno.land/x/functional@v1.3.2/library/Maybe.js";
  *
- * const containerA = Maybe.Just(42).map(x => x + 2);
- * const containerB = Maybe.Nothing.map(x => x + 2);
+ * const containerA = Maybe.Just(42).map((x: number) => x + 2);
+ * const containerB = Maybe.Nothing.map((x: number) => x + 2);
  *
  * assert(Maybe.Just.is(containerA));
  * assert(containerA.extract() === 44);
@@ -42,7 +42,7 @@ export const Maybe = factorizeSumType(
  * This method takes a container of similar shape that will be returned if the context is of type `Maybe.Nothing`.
  * It is interoperable with `Box` and, `Either`.
  *
- * ```js
+ * ```ts
  * const containerA = Maybe.Just(24).alt(Maybe.Just(42));
  * const containerB = Maybe.Nothing.alt(Maybe.Just(42));
  *
@@ -68,8 +68,8 @@ Maybe.prototype.alt = Maybe.prototype["fantasy-land/alt"] = function (A) {
  * If the container is of type `Maybe.Nothing`, nothing happens.
  * It is interoperable with `Box` and, `Either`.
  *
- * ```js
- * const container = Maybe.Just(42).ap(Maybe.Just(x => x * 2));
+ * ```ts
+ * const container = Maybe.Just(42).ap(Maybe.Just((x: number) => x * 2));
  *
  * assertEquivalent(container, Maybe.Just(84));
  * ```
@@ -89,8 +89,8 @@ Maybe.prototype.ap = Maybe.prototype["fantasy-land/ap"] = function (A) {
  * If the container is of type `Maybe.Nothing`, nothing happens.
  * It is interoperable with `Box` and, `Either`.
  *
- * ```js
- * const container = Maybe.Just(42).chain(x => Maybe.Just(x * 2));
+ * ```ts
+ * const container = Maybe.Just(42).chain((x: number) => Maybe.Just(x * 2));
  *
  * assertEquivalent(container, Maybe.Just(84));
  * ```
@@ -113,8 +113,8 @@ Maybe.prototype.chain = Maybe.prototype["fantasy-land/chain"] = function (f) {
  * If the container is of type `Maybe.Nothing`, nothing happens.
  * It is interoperable with `Box` and, `Maybe`.
  *
- * ```js
- * const container = Maybe.Just(42).extend(x => x[$$value] * 2);
+ * ```ts
+ * const container = Maybe.Just(42).extend((x: number) => x[$$value] * 2);
  *
  * assertEquivalent(container, Box(84));
  * ```
@@ -133,7 +133,7 @@ Maybe.prototype.extend = Maybe.prototype["fantasy-land/extend"] = function (f) {
  *
  * This method takes no argument and, return its own value.
  *
- * ```js
+ * ```ts
  * const value = Maybe.Just(42).extract();
  *
  * assertEquals(value, 42);
@@ -156,8 +156,8 @@ Maybe.prototype.extract = Maybe.prototype["fantasy-land/extract"] = function () 
  * If the container is of type `Maybe.Nothing`, nothing happens.
  * It is interoperable with `Box` and, `Maybe`.
  *
- * ```js
- * const container = Maybe.Just(42).map(x => x * 2);
+ * ```ts
+ * const container = Maybe.Just(42).map((x: number) => x * 2);
  *
  * assertEquivalent(container, Maybe.Just(84));
  * ```
@@ -176,7 +176,7 @@ Maybe.prototype.map = Maybe.prototype["fantasy-land/map"] = function (f) {
  *
  * This method takes a value and, returns a container.
  *
- * ```js
+ * ```ts
  * const container = Maybe.of(42);
  *
  * assertEquals(container, Maybe.Just(42));
@@ -190,7 +190,7 @@ Maybe.of = Maybe.prototype.of = Maybe.prototype["fantasy-land/of"] = x => Maybe.
  *
  * This method takes a value and, returns a container.
  *
- * ```js
+ * ```ts
  * const container = Maybe.zero();
  *
  * assertEquals(container, Maybe.Nothing);
@@ -204,7 +204,7 @@ Maybe.zero = Maybe.prototype.zero = Maybe.prototype["fantasy-land/zero"] = () =>
  *
  * This method takes a value and, returns a container.
  *
- * ```js
+ * ```ts
  * const containerA = factorizeMaybeFromNullable(42);
  * const containerB = factorizeMaybeFromNullable(null);
  *
@@ -223,7 +223,7 @@ export const factorizeMaybeFromNullable = x =>
  *
  * This method takes a value and, returns a container.
  *
- * ```js
+ * ```ts
  * const container = factorizeMaybeJust(42);
  *
  * assertEquals(container, Maybe.Just(42));
@@ -237,7 +237,7 @@ export const factorizeMaybeJust = x => Maybe.Just(x);
  *
  * This method takes a value and, returns a container.
  *
- * ```js
+ * ```ts
  * const container = factorizeMaybeNothing(42);
  *
  * assertEquals(container, Maybe.Nothing);

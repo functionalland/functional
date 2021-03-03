@@ -11,8 +11,8 @@ export interface PairPrototype<W, X> {
   [$$valueList]: unknown[];
 }
 
-declare function Pair<A extends PairPrototype<W, X>, W, X>(w: W, x: X): A;
-declare namespace Pair {
+export declare function Pair<A extends PairPrototype<W, X>, W, X>(w: W, x: X): A;
+export declare namespace Pair {
   export function is<A>(C: A): boolean;
 }
 

@@ -7,10 +7,10 @@ import {assertIsFunction} from "./assertions.js";
  *
  * The Algebraic module is a collection of Higher Order Functions for various algebras.
  * 
- * ```js
- * import { map } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ * ```ts
+ * import { map } from "https://deno.land/x/functional@v1.3.4/mod.ts";
  *
- * const container = map(x => x * 2, Box(42));
+ * const container = map((x: number) => x * 2, Box(42));
  *
  * assertEquivalent(container, 42);
  * ```
@@ -24,27 +24,12 @@ import {assertIsFunction} from "./assertions.js";
  * Alternative Functor.
  * It is a combinator in support of the [Alt algebra](https://github.com/fantasyland/fantasy-land#alt).
  *
- * ```js
- * import { alt } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ * ```ts
+ * import { alt } from "https://deno.land/x/functional@v1.3.4/mod.ts";
  *
  * const container = alt(Either.Right(42), Either.Left("Not the meaning of life"));
  *
  * assertEquivalent(container, Either.Right(42));
- * ```
- *
- * #### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
- * import { alt } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
- *
- * const f = alt(Either.Right(42));
- * const x = f(Either.Left("Not the meaning of life."));
- * ```
- *
- * ```ts
- * export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A): (M: B) => A & B;
- * export function alt <A extends AlternativeFunctor<any>, B extends AlternativeFunctor<any>>(C: A, M: B): A B;
  * ```
  */
 export const alt = curry2((x, y) => (y.alt || y["fantasy-land/alt"]).call(y, x));
@@ -58,31 +43,12 @@ export const alt = curry2((x, y) => (y.alt || y["fantasy-land/alt"]).call(y, x))
  * It is a combinator in support of the [Apply algebra](https://github.com/fantasyland/fantasy-land#ap).
  * This function also serves as the [S combinator](https://functional.land/core/aviary#ap) when overloaded.
  *
- * ```js
- * import { ap } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ * ```ts
+ * import { ap } from "https://deno.land/x/functional@v1.3.4/mod.ts";
  *
- * const container = ap(Box(x => x * 2), Box (42));
+ * const container = ap(Box((x: number) => x * 2), Box (42));
  *
  * assertEquivalent(container, Either.Right(84));
- * ```
- *
- * #### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
- * import { ap } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
- *
- * const f = ap(Box((x: number) => x * 2));
- * const x = f(Box(42)));
- * ```
- *
- * ```ts
- * export function ap
- *   <A extends ApplicativeFunctor<X>, B extends ApplicativeFunctor<(x: X) => Y>, C extends ApplicativeFunctor<Y>, X, Y>
- *   (C: B): (C: A) => C;
- * export function ap
- *   <A extends ApplicativeFunctor<X>, B extends ApplicativeFunctor<(x: X) => Y>, C extends ApplicativeFunctor<Y>, X, Y>
- *   (C: B, D: A): C;
  * ```
  */
 export { ap } from "./aviary.js";
@@ -94,31 +60,12 @@ export { ap } from "./aviary.js";
  * This function takes two unary functions and a Bifunctor. It returns a Bifunctor of a similar shape.
  * It is a combinator in support of the [Bifunctor algebra](https://github.com/fantasyland/fantasy-land#bifunctor).
  *
- * ```js
- * import { bimap } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ * ```ts
+ * import { bimap } from "https://deno.land/x/functional@v1.3.4/mod.ts";
  *
- * const container = bimap(x => x * 2, x => x + 2, Pair(42, 24));
+ * const container = bimap((x: number) => x * 2, (x: number) => x + 2, Pair(42, 24));
  *
  * assertEquivalent(container, Pair(84, 26));
- * ```
- *
- * #### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
- * import { bimap } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
- *
- * const f = bimap((x: number) => x * 2, (x: number) => x + 2);
- * const x = f(Pair(42, 24));
- * ```
- *
- * ```ts
- * export function bimap
- *   <A extends BiFunctor<W, X>, B extends BiFunctor<Y, Z>, W, X, Y, Z>
- *   (f: (w: W) => Y, g: (x: X) => Z): (C: A) => B;
- * export function bimap
- *   <A extends BiFunctor<W, X>, B extends BiFunctor<Y, Z>, W, X, Y, Z>
- *   (f: (w: W) => Y, g: (x: X) => Z, C: A): B;
  * ```
  */
 export const bimap = curry3((f, g, x) => (x.bimap || x["fantasy-land/bimap"]).call(x, f, g));
@@ -130,27 +77,12 @@ export const bimap = curry3((f, g, x) => (x.bimap || x["fantasy-land/bimap"]).ca
  * This function takes a unary function and a Chainable Functor. It returns a Chainable Functor of a similar shape.
  * It is a combinator in support of the [Chain algebra](https://github.com/fantasyland/fantasy-land#chain).
  *
- * ```js
- * import { chain } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ * ```ts
+ * import { chain } from "https://deno.land/x/functional@v1.3.4/mod.ts";
  *
  * const container = chain((x: number) => Box (x * 2), Box(42));
  *
  * assertEquivalent(container, Box(84));
- * ```
- *
- * #### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
- * import { chain } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
- *
- * const f = chain((x: number) => Box(x * 2));
- * const x = f(Box(42));
- * ```
- *
- * ```ts
- * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B, C: A): B;
- * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B): (C: A) => B;
  * ```
  */
 export const chain = curry2((f, x) => (x.chain || x["fantasy-land/chain"]).call(x, f));
@@ -216,29 +148,13 @@ export const concat = curry2((x, y) =>
  * This function takes a unary function and an Extendable Functor. It returns a Extendable Functor of a similar shape.
  * It is a combinator in support of the [Monad algebra](https://github.com/fantasyland/fantasy-land#monad).
  *
- * ```js
- * import { extend } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ * ```ts
+ * import { extend, $$value } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ * import { BoxPrototype } from "https://deno.land/x/functional@v1.3.4/library/Box.d.ts";
  *
- * const container = extend((A: BoxPrototype<number>) => A[$$container] * 2, Box(42));
+ * const container = extend((A: BoxPrototype<number>) => A[$$value] * 2, Box(42));
  *
  * assertEquivalent(container, Box(84));
- * ```
- *
- * #### TypeScript
- *
- * ```ts
- * import { BoxPrototype } from "https://deno.land/x/functional@v1.3.4/library/Box.d.ts";
- * import { $$container } from "https://deno.land/x/functional@v1.3.4/library/Symbols.js";
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
- * import { extend } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
- *
- * const f = extend((A: BoxPrototype<number>) => A[$$container] * 2);
- * const x = f(Box(42));
- * ```
- *
- * ```ts
- * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B, C: A): B;
- * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B): (C: A) => B;
  * ```
  */
 export const extend = curry2((f, x) => (x.extend || x["fantasy-land/extend"]).call(x, f));
@@ -250,25 +166,12 @@ export const extend = curry2((f, x) => (x.extend || x["fantasy-land/extend"]).ca
  * This function takes an Extractable Functor and, it returns the container.
  * It is a combinator in support of the [Comonad algebra](https://github.com/fantasyland/fantasy-land#comonad).
  *
- * ```js
- * import { extract } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ * ```ts
+ * import { extract } from "https://deno.land/x/functional@v1.3.4/mod.ts";
  *
  * const container = extract(Box(42));
  *
  * assertEquivalent(container, 42);
- * ```
- *
- * #### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
- * import { extract } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
- *
- * const x = extract(Box(x * 2));
- * ```
- *
- * ```ts
- * export function extract <A extends ExtractableFunctor<X>, X>(C: A): X;
  * ```
  */
 export const extract = x => (x.extract || x["fantasy-land/extract"]).call(x);
@@ -280,27 +183,12 @@ export const extract = x => (x.extract || x["fantasy-land/extract"]).call(x);
  * This function takes a unary function and, a Functor. It returns a Functor of similar shape.
  * It is a combinator in support of the [Functor algebra](https://github.com/fantasyland/fantasy-land#functor).
  *
- * ```js
- * import { map } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+ * ```ts
+ * import { map } from "https://deno.land/x/functional@v1.3.4/mod.ts";
  *
- * const container = map(x => x * 2, Box(42));
+ * const container = map((x: number) => x * 2, Box(42));
  *
  * assertEquivalent(container, 42);
- * ```
- *
- * #### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/algebraic.d.ts"
- * import { map } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
- *
- * const f = map((x: number) => x * 2);
- * const x = f(Box(42));
- * ```
- *
- * ```ts
- * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B, C: A): B;
- * export function chain <A extends ChainableFunctor<X>, B extends ChainableFunctor<any>, X>(f: (x: X) => B): (C: A) => B;
  * ```
  */
 export const map = curry2((f, x) => (x.map || x["fantasy-land/map"]).call(x, f));

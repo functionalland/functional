@@ -19,8 +19,8 @@ export interface TaskPrototype<F extends () => any> {
   [$$valueList]: unknown[];
 }
 
-declare function Task<X>(f: () => Promise<X>|X): TaskPrototype<() => Promise<X>|X>;
-declare namespace Task {
+export declare function Task<X>(f: () => Promise<X>|X): TaskPrototype<() => Promise<X>|X>;
+export declare namespace Task {
   export function is<A>(C: A): boolean;
   export function of<X>(x: X): TaskPrototype<() => Promise<EitherRightPrototype<X>>>;
   export function wrap<F extends () => any>(f: F): TaskPrototype<F>;

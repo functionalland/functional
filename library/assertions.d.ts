@@ -1,0 +1,11 @@
+export function assertIsArray <X>(x: X): boolean;
+export function assertIsBoolean <X>(x: X): boolean;
+export function assertIsFunction <X>(x: X): boolean;
+export function assertIsInstance <T, X>(A: T, x: X): boolean;
+export function assertIsInstance <T>(A: T): <X>(x: X) => boolean;
+export function assertIsNull <X>(x: X): boolean;
+export function assertIsNumber <X>(x: X): boolean;
+export function assertIsObject <X>(x: X): boolean;
+export function assertIsRegex <X>(x: X): boolean;
+export function assertIsString <X>(x: X): boolean;
+export function assertIsUndefined <X>(x: X): boolean;

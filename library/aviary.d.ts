@@ -3,7 +3,14 @@ import { ApplicativeFunctor } from "./algebraic.d.ts";
 export function ap <X, Y, Z>(f: (x: X) => (y: Y) => Z): (g: (x: X) => Y) => (x: X) => Z;
 export function ap <X, Y, Z>(f: (x: X) => (y: Y) => Z, g: (x: X) => Y): (x: X) => Z;
 export function ap <X, Y, Z>(f: (x: X) => (y: Y) => Z, g: (x: X) => Y, x: X): Z;
-export function ap <A extends ApplicativeFunctor<X>, B extends ApplicativeFunctor<(x: X) => Y>, C extends ApplicativeFunctor<Y>, X, Y>(C: B): (C: A) => C;
+export function ap
+  <A extends ApplicativeFunctor<X>, B extends ApplicativeFunctor<(x: X) => Y>, C extends ApplicativeFunctor<Y>, X, Y>
+  (C: B): (C: A) => C;
+
+export function apBinary <W, X, Y, Z>(f: (x: X) => (y: Y) => Z, g: (w: W) => X, h: (w: W) => Y, w: W): Z;
+export function apBinary <W, X, Y, Z>(f: (x: X) => (y: Y) => Z, g: (w: W) => X, h: (w: W) => Y): (w: W) => Z;
+export function apBinary <W, X, Y, Z>(f: (x: X) => (y: Y) => Z, g: (w: W) => X): (h: (w: W) => Y) => (w: W) => Z;
+export function apBinary <X, Y, Z>(f: (x: X) => (y: Y) => Z): <W>(g: (w: W) => X) => (h: (w: W) => Y) => (w: W) => Z;
 
 export function apply <X, Y>(f: (x: X) => Y): (x: X) => Y;
 export function apply <X, Y>(f: (x: X) => Y, x: X): Y;

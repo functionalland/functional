@@ -1,6 +1,6 @@
 NAME="functional"
 TITLE="Functional"
-DESCRIPTION="Common Functional Programming Algebraic data types for JavaScript that is compatible with most \
-modern browsers and Deno."
-GITHUB_URL="https://github.com/sebastienfilion/functional"
+DESCRIPTION="A large collection of Algebraic data-types, combinators and utility functions to build expressive Functional Programming \
+software in JavaScript for modern browsers and the Deno runtime."
+GITHUB_URL="https://github.com/functionalland/functional"
 DENO_URL="https://deno.land/x/functional"

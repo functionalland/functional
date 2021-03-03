@@ -49,6 +49,59 @@ const _curryN = (n, xs, f) =>
     return l <= 0 ? f.apply(this, ys) : _arity(l, _curryN(n, ys, f));
   }
 
+/**
+ * ## Curry
+ *
+ * Currying is the process of making a function of any arity (the number of argument) to a unary (one argument) function.
+ * Curried functions are essentials to write combinatory logic and to write in the tacit style of programming.
+ * The following utility functions can make a function of any arity a curried function.
+ *
+ * ### `curryN`
+ *
+ * This utility function takes a number, a function of any arity and, returns a curried function.
+ *
+ * ⚠️ This utility function's type are currently limited at 5 arguments. If this causes any issue; maybe break down your functions.
+ * Joking aside, please submit an [issue on Github](https://github.com/functionalland/functional/issues).
+ *
+ * ```ts
+ * import { curryN } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
+ * const f = curryN(2, (x, y) => x + y);
+ * const g = f(42);
+ * const x = g(24);
+ *
+ * assertEquals(x, 66);
+ * ```
+ *
+ * ### `curry2`
+ *
+ * This utility function takes a binary function and, returns a curried function.
+ *
+ * ```ts
+ * import { curry2 } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
+ * const f = curry2((x, y) => x + y);
+ * const g = f(42);
+ * const x = g(24);
+ *
+ * assertEquals(x, 66);
+ * ```
+ *
+ * ### `curry3`
+ *
+ * This utility function takes a ternary function and, returns a curried function.
+ *
+ * ```ts
+ * import { curry3 } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
+ * const f = curry3((x, y, z) => x + y + z);
+ * const g = f(42);
+ * const h = g(24);
+ * const x = h(12);
+ *
+ * assertEquals(x, 78);
+ * ```
+ */
 export const curryN = _curry2((n, f) => n === 1 ? _curry1(f) : _arity(n, _curryN(n, [], f)));
 export const curry2 = curryN(2);
 export const curry3 = curryN(3);

@@ -33,7 +33,7 @@ export interface EitherLeftPrototype<X> {
   [$$valueList]: unknown[];
 }
 
-declare namespace Either {
+export declare namespace Either {
   export function Right<X>(x: X): EitherRightPrototype<X>;
   export namespace Right {
     export function is<A>(C: A): boolean;

@@ -13,8 +13,8 @@ export interface BoxPrototype<X> {
   [$$valueList]: unknown[];
 }
 
-declare function Box<X>(x: X): BoxPrototype<X>;
-declare namespace Box {
+export declare function Box<X>(x: X): BoxPrototype<X>;
+export declare namespace Box {
   export function is<A>(C: A): boolean;
   export function of<X>(x: X):  BoxPrototype<X>;
 }

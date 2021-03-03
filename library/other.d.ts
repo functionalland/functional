@@ -1,7 +1,21 @@
 import { ApplicativeFunctor } from "./algebraic.d.ts";
 
+export function append <X>(x: X): (xs: Array<X>) => Array<X>;
+export function append <X>(x: X, xs: Array<X>): Array<X>;
+
+export function not <X>(x: X): boolean;
+
+export function complement <X>(f: (x: X) => boolean, x: X): boolean;
+export function complement <X>(f: (x: X) => boolean): (x: X) => boolean;
+
 export function find <X>(f: (x: X) => boolean): (xs: Array<X>) => X;
 export function find <X>(f: (x: X) => boolean, xs: Array<X>): X;
+
+export function has <K>(k: K, o: object): boolean;
+export function has <K>(k: K): (o: object) => boolean;
+
+export function join (x: string, ys: Array<unknown>): string;
+export function join (x: string): (ys: Array<unknown>) => string;
 
 export function lift2
   <A extends ApplicativeFunctor<X>, B extends ApplicativeFunctor<Y>, X, Y, Z>

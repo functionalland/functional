@@ -7,8 +7,8 @@ export interface IOPrototype<F extends () => any> {
   toString(): string;
 }
 
-declare function IO<X>(f: () => X): IOPrototype<() => X>;
-declare namespace IO {
+export declare function IO<X>(f: () => X): IOPrototype<() => X>;
+export declare namespace IO {
   export function is<A>(C: A): boolean;
   export function of<X>(x: X): IOPrototype<() => X>;
 }

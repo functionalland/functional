@@ -16,11 +16,11 @@ import { factorizeSumType } from "./factories.js";
  *
  * ### Example
  *
- * ```js
- * import Either from "https://deno.land/x/functional@v1.3.4/library/Either.js";
+ * ```ts
+ * import { Either } from "https://deno.land/x/functional@v1.3.4/mod.ts";
  *
- * const containerA = Either.Right(42).map(x => x + 2);
- * const containerB = Either.Left(new Error("The value is not 42.")).map(x => x + 2);
+ * const containerA = Either.Right(42).map((x: number) => x + 2);
+ * const containerB = Either.Left(new Error("The value is not 42.")).map((x: number) => x + 2);
  * const containerC = containerB.alt(containerA);
  *
  * assert(Either.Right.is(containerA));
@@ -45,7 +45,7 @@ export const Either = factorizeSumType(
  * This method takes a container of similar shape that will be returned if the context is of type `Either.Left`.
  * It is interoperable with `Box` and, `Maybe`.
  *
- * ```js
+ * ```ts
  * const containerA = Either.Right(24).alt(Either.Right(42));
  * const containerB = Either.Left("not 42").alt(Either.Right(42));
  *
@@ -71,8 +71,8 @@ Either.prototype.alt = Either.prototype["fantasy-land/alt"] = function (A) {
  * If the container is of type `Either.Left`, nothing happens.
  * It is interoperable with `Box` and, `Maybe`.
  *
- * ```js
- * const container = Either.Right(42).ap(Either.Right(x => x * 2));
+ * ```ts
+ * const container = Either.Right(42).ap(Either.Right((x: number) => x * 2));
  *
  * assertEquivalent(container, Either.Right(84));
  * ```
@@ -94,8 +94,8 @@ Either.prototype.ap = Either.prototype["fantasy-land/ap"] = function (A) {
  * If the container is of type `Either.Left`, nothing happens.
  * It is interoperable with `Box` and, `Maybe`.
  *
- * ```js
- * const container = Either.Right(42).chain(x => Either.Right(x * 2));
+ * ```ts
+ * const container = Either.Right(42).chain((x: number) => Either.Right(x * 2));
  *
  * assertEquivalent(container, Either.Right(84));
  * ```
@@ -118,8 +118,8 @@ Either.prototype.chain = Either.prototype["fantasy-land/chain"] = function (f) {
  * If the container is of type `Either.Left`, nothing happens.
  * It is interoperable with `Box` and, `Maybe`.
  *
- * ```js
- * const container = Either.Right(42).extend(x => x[$$value] * 2);
+ * ```ts
+ * const container = Either.Right(42).extend((x: number) => x[$$value] * 2);
  *
  * assertEquivalent(container, Box(84));
  * ```
@@ -138,7 +138,7 @@ Either.prototype.extend = Either.prototype["fantasy-land/extend"] = function (f)
  *
  * This method takes no argument and, return its own value.
  *
- * ```js
+ * ```ts
  * const value = Either.Right(42).extract();
  *
  * assertEquals(value, 42);
@@ -161,8 +161,8 @@ Either.prototype.extract = Either.prototype["fantasy-land/extract"] = function (
  * If the container is of type `Either.Left`, nothing happens.
  * It is interoperable with `Box` and, `Maybe`.
  *
- * ```js
- * const container = Either.Right(42).map(x => x * 2);
+ * ```ts
+ * const container = Either.Right(42).map((x: number) => x * 2);
  *
  * assertEquivalent(container, Either.Right(84));
  * ```
@@ -181,7 +181,7 @@ Either.prototype.map = Either.prototype["fantasy-land/map"] = function (f) {
  *
  * This method takes a value and, returns a container.
  *
- * ```js
+ * ```ts
  * const container = Either.of(42);
  *
  * assertEquals(container, Either.Right(42));
@@ -195,7 +195,7 @@ Either.of = Either.prototype.of = Either.prototype["fantasy-land/of"] = x => Eit
  *
  * This method takes a value and, returns a container.
  *
- * ```js
+ * ```ts
  * const container = Either.zero();
  *
  * assertEquals(container, Either.Left(null));
@@ -209,7 +209,7 @@ Either.zero = Either.prototype.zero = Either.prototype["fantasy-land/zero"] = ()
  *
  * This method takes a value and, returns a container.
  *
- * ```js
+ * ```ts
  * const containerA = factorizeEitherFromNullable(42);
  * const containerB = factorizeEitherFromNullable(null);
  *
@@ -228,7 +228,7 @@ export const factorizeEitherFromNullable = x =>
  *
  * This method takes a value and, returns a container.
  *
- * ```js
+ * ```ts
  * const container = factorizeEitherRight(42);
  *
  * assertEquals(container, Either.Right(42));
@@ -242,7 +242,7 @@ export const factorizeEitherRight = x => Either.Right(x);
  *
  * This method takes a value and, returns a container.
  *
- * ```js
+ * ```ts
  * const container = factorizeEitherLeft(42);
  *
  * assertEquals(container, Either.Left(42));

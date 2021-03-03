@@ -19,7 +19,7 @@ import { assertIsFunction } from "./assertions.js";
 /**
  * ### Essentials
  *
- * The "essential" combinators were, for most part, invented early on and can be used to derived all of the other combinators.
+ * The "essential" combinators were, for most part, invented 60 to a hundred years ago. They are used to derive all of the other combinators.
  */
 
 /**
@@ -31,29 +31,14 @@ import { assertIsFunction } from "./assertions.js";
  * value is passed to the remaining function.
  * It is known as the "starling" or, the `S` combinator.
  *
- * ```js
- * const x = ap(x => y => x + y, x => x * 2, 42);
+ * ```ts
+ * import { ap } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
+ * const x = ap((x: number) => (y: number) => x + y, (x: number) => x * 2, 42);
  * assertEquals(x, 126);
  * ```
  *
  * The function also has overload to serve as the Applicative Functor combinator.
- *
- * ##### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
- * import { ap } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
- *
- * const f = ap(x => y => x + y);
- * const g = f(x => x * 2);
- * const x = g(42);
- * ```
- *
- * ```ts
- * export function ap <X, Y, Z>(f: (x: X) => (y: Y) => Z): (g: (x: X) => Y) => (x: X) => Z;
- * export function ap <X, Y, Z>(f: (x: X) => (y: Y) => Z, g: (x: X) => Y): (x: X) => Z;
- * export function ap <X, Y, Z>(f: (x: X) => (y: Y) => Z, g: (x: X) => Y, x: X): Z;
- * ```
  */
 export const starling = curry3((f, g, x) => f(x)(g(x)));
 export const ap = curry2(
@@ -73,24 +58,11 @@ export const S = starling;
  * It doesn't have a fun bird name but is also known as the applicator or, `$`.
  * You might also find it as "idotstar".
  *
- * ```js
- * const x = apply(x => x * 2, 42);
+ * ```ts
+ * import { apply } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
+ * const x = apply((x: number) => x * 2, 42);
  * assertEquals(x, 84);
- * ```
- *
- * ##### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
- * import { apply } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
- *
- * const f = apply(x => x * 2);
- * const x = f(42);
- * ```
- *
- * ```ts
- * export function apply <X, Y>(f: (x: X) => Y): (x: X) => Y;
- * export function apply <X, Y>(f: (x: X) => Y, x: X): Y;
  * ```
  */
 export const applicator = curry2( (f, xs) => f.apply(null, (xs instanceof Array) ? xs : [xs]));
@@ -107,24 +79,11 @@ export const $ = applicator;
  *
  * Other known alias is `CI`; because it can also be expressed as `flip(identity)`.
  *
- * ```js
- * const x = applyTo(42, x => x * 2);
+ * ```ts
+ * import { applyTo } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
+ * const x = applyTo(42, (x: number) => x * 2);
  * assertEquals(84);
- * ```
- *
- * ##### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
- * import { applyTo } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
- *
- * const f = applyTo(42);
- * const x = f(x => x * 2);
- * ```
- *
- * ```ts
- * export function applyTo <X>(x: X): <Y>(f: (x: X) => Y) => Y;
- * export function applyTo <X, Y>(x: X, f: (x: X) => Y): Y;
  * ```
  */
 export const thrush = curry2( (x, f) => f(x));
@@ -142,26 +101,11 @@ export const CI = thrush;
  *
  * Other known alias is `o`; inspired by the character used to express composition in other languages like Haskell.
  *
- * ```js
- * const x = compose2(x => x * 2, x => x + 2, 42);
+ * ```ts
+ * import { compose2 } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
+ * const x = compose2((x: number) => x * 2, (x: number) => x + 2, 42);
  * assertEquals(x, 88);
- * ```
- *
- * ##### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
- * import { compose2 } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
- *
- * const f = compose2(x => x * 2);
- * const g = f(x => x + 2);
- * const x = g(42);
- * ```
- *
- * ```ts
- * export function compose2 <Y, Z>(f: (y: Y) => Z): <X>(g: (x: X) => Y) => (x: X) => Z;
- * export function compose2 <X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y): (x: X) => Z;
- * export function compose2 <X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y, x: X): Z;
  * ```
  */
 export const bluebird = curry3( (f, g, x) => f(g(x)));
@@ -177,27 +121,11 @@ export const B = bluebird;
  * passing the resulting value from one function to the next.
  * It is also known as the `becard` or, the `B3` combinator.
  *
- * ```js
- * const x = compose3(x => x - 2, x => x * 2, x => x + 2, 42);
+ * ```ts
+ * import { compose3 } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
+ * const x = compose3((x: number) => x - 2, (x: number) => x * 2, (x: number) => x + 2, 42);
  * assertEquals(x, 86);
- * ```
- *
- * ##### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
- * import { compose3 } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
- *
- * const f = compose3(x => x - 2);
- * const g = f(x => x * 2);
- * const h = g(x => x + 2);
- * const x = h(42);
- * ```
- *
- * ```ts
- * export function compose3 <Y, Z>(f: (y: Y) => Z): <X>(g: (x: X) => Y) => <W>(h: (w: W) => X) => (w: W) => Z;
- * export function compose3 <X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y): <W>(h: (w: W) => X) => (w: W) => Z;
- * export function compose3 <W, X, Y, Z>(f: (y: Y) => Z, g: (x: X) => Y, h: (w: W) => X, w: W): Z;
  * ```
  */
 export const becard = curryN(4, (f, g, h, x) => f(g(h(x))));
@@ -211,24 +139,11 @@ export const B3 = becard;
  * This combinator takes two values and returns the first.
  * It is also known as the `kestrel` or, the `K` combinator.
  *
- * ```js
+ * ```ts
+ * import { constant } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
  * const x = constant(42, 24);
  * assertEquals(x, 42);
- * ```
- *
- * ##### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
- * import { constant } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
- *
- * const f = constant(42);
- * const x = f(24);
- * ```
- *
- * ```ts
- * export function constant <X, Y>(x: X): (y: Y) => X;
- * export function constant <X, Y>(x: X, y: Y): X;
  * ```
  */
 export const kestrel = curry2( (x, _) => x);
@@ -244,25 +159,11 @@ export const K = kestrel;
  * binary function.
  * It is also known as the `cardinal` or, the `C` combinator.
  *
- * ```js
- * const x => flip(x => y => x - y, 5, 10);
+ * ```ts
+ * import { flip } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
+ * const x => flip((x: number) => (y: number) => x - y, 5, 10);
  * assertEquals(x, 5);
- * ```
- *
- * ##### TypeScript
- *
- * ```ts
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
- * import { flip } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
- *
- * const f = flip(x => y => x - y);
- * const g = f(24);
- * const x = g(42);
- * ```
- *
- * ```ts
- * export function flip <X, Y, Z>(f: (x: X) => (y: Y) => Z): (x: X) => (y: Y) => Z;
- * export function flip <X, Y, Z>(f: (x: X) => (y: Y) => Z, x: X, y: Y): Z;
  * ```
  */
 export const cardinal = curry3( (f, x, y) => f(y)(x));
@@ -279,18 +180,11 @@ export const second = kite;
  * The simplest combinator, it takes a value and return it.
  * It is also known as the `idiot` or, the `I` combinator.
  *
- * ```js
- * // @deno-types="https://deno.land/x/functional@v1.3.4/library/aviary.d.ts"
- * import { identity } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
+ * ```ts
+ * import { identity } from "https://deno.land/x/functional@v1.3.4/mod.ts";
  *
  * const x = identity(42);
  * assertEquals(x, 42);
- * ```
- *
- * ##### TypeScript
- *
- * ```ts
- * export function identity <X>(x: X): X;
  * ```
  */
 export const idiot = x => x;
@@ -313,8 +207,10 @@ export const I = idiot;
  * functions. The resulting values are then applied in order to the binary function.
  * It is known as the "startling_" or, the `S_` combinator.
  *
- * ```js
- * const x = apBinary(x => y => x * y, x => x + 2, x => x * 2, 42);
+ * ```ts
+ * import { apBinary } from "https://deno.land/x/functional@v1.3.4/mod.ts";
+ *
+ * const x = apBinary((x: number) => (y: number) => x * y, (x: number) => x + 2, (x: number) => x * 2, 42);
  * assertEquals(3696);
  * ```
  */

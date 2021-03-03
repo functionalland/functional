@@ -1,63 +1,52 @@
 ## Usage
 
-This example uses the [Ramda library](https://ramdajs.com) - for simplification - but you should be able to use any library that implements
-the [Fantasy-land specifications](https://github.com/fantasyland/fantasy-land).
+The module exports all the algebraic data-types, the aviary and, various utility functions.   
 
-```js
-import { compose, converge, curry, map, prop } from "https://deno.land/x/ramda@v0.27.2/mod.ts";
-import Either from "https://deno.land/x/functional@v1.3.4/library/Either.js";
-import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
+```ts
+import { Task, apBinary, compose2, map } from "https://deno.land/x/functional@v1.3.4/mod.ts";
 
-const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
+interface User {
+  email: string;
+  ID: string;
+  username: string;
+}
 
-const sayHello = compose(
+const fetchUser = (userID: string) => Task.of({ email: "hoge@gmail.com", ID: userID, username: "hoge" });
+
+const sayHello = compose2(
   map(
-    converge(
-      curry((username, email) => `Hello ${username} (${email})!`),
-      [
-        prop("username"),
-        prop("email")
-      ]
+    apBinary(
+      (username: string) => (email: string) => `Hello, ${username} (${email})!`,
+      (user: User) => user.username,
+      (user: User) => user.email
     )
   ),
   fetchUser
 );
 
-// Calling `sayHello` results in an instance of `Task` keeping the function pure.
-assert(Task.is(sayHello(userID)));
-
-// Finally, calling `Task#run` will call `fetch` and return a promise
-sayHello(userID).run()
-  .then(container => {
-    // The returned value should be an instance of `Either.Right` or `Either.Left`
-    assert(Either.Right.is(container));
-    // Forcing to coerce the container to string will show that the final value is our message.
-    assert(container.toString(), `Either.Right("Hello johndoe (johndoe@gmail.com)!")`);
-  });
-
-// await sayHello(userID).run() === Either.Right(String)
+assertEquivalent(
+  await sayHello("e135841d-0a5d-4b72-816f-d84238c3f9c9").run(),
+  await Task.of("Hello, hoge (hoge@gmail.com)!").run()
+);
 ```
 
-### Using the bundle
-
-As a convenience, when using Functional in the browser, you can use the **unminified** bundled copy (18KB gzipped).
+The equivalent functions are also available in pure JavaScript. You can either import the bundle or, the source file.
 
 ```js
-import { compose, converge, lift, map, prop } from "https://deno.land/x/ramda@v0.27.2/mod.ts";
-import { Either, Task } from "https://deno.land/x/functional@v1.3.4/functional.js";
+import { Task, apBinary, compose2, map } from "https://deno.land/x/functional@v1.3.4/functional.js";
+```
+```js
+import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
+import { map } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+import { apBinary, compose2 } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
+```
 
-const fetchUser = userID => Task.wrap(_ => fetch(`${URL}/users/${userID}`).then(response => response.json()));
-
-const sayHello = compose(
-  map(
-    converge(
-      curry((username, email) => `Hello ${username} (${email})!`),
-      [
-        prop("username"),
-        prop("email")
-      ]
-    )
-  ),
-  fetchUser
-);
+Finally, all `.d.ts` files are available at the same level as the source file.
+```js
+// @deno-types="./library/Task.d.ts"
+import Task from "https://deno.land/x/functional@v1.3.4/library/Task.js";
+// @deno-types="./library/algebraic.d.ts"
+import { map } from "https://deno.land/x/functional@v1.3.4/library/algebraic.js";
+// @deno-types="./library/aviary.d.ts"
+import { apBinary, compose2 } from "https://deno.land/x/functional@v1.3.4/library/aviary.js";
 ```
